@@ -1,0 +1,254 @@
+<html>
+  <head>
+    <script src="https://aframe.io/releases/0.5.0/aframe.min.js"></script>
+    <script src="https://rawgit.com/ngokevin/aframe-template-component/master/dist/aframe-template-component.min.js"></script>
+    <script src="https://rawgit.com/mayognaise/aframe-mouse-cursor-component/master/dist/aframe-mouse-cursor-component.min.js"></script>
+    <script src="https://rawgit.com/ngokevin/aframe-layout-component/master/dist/aframe-layout-component.min.js"></script>
+    <style>
+    #canvas_container {
+      position: relative;
+    }
+    #navi {
+      text-align: left;
+      background-color: #bcbcbc;
+      width : 150px;
+      height : 100%;
+      position: inherit;
+      z-index: 1;
+      float : right;
+    }
+    #main_canvas {
+      width: 100%;
+      height: 100%;
+    }
+    #tool_container{
+      height: 60px;
+    }
+    #container{
+      margin-left : auto;
+      margin-right: auto;
+      text-align: center;
+      width: 1200px;
+      height: 100%;
+    }
+    .input_type{
+      width: 100px;
+      height : 50px;
+    }
+    </style>
+  </head>
+  <body>
+    <div id="container">
+      <div id="tool_container">
+        <button id="input_rectangle" name="input_rectangle" class="input_type" onclick="addEntity(this);">rectangle</button>
+        <button id="input_sphere" name="input_sphere" class="input_type" onclick="addEntity(this);">sphere</button>
+        <button id="input_cylinder" name="input_cylinder" class="input_type" onclick="addEntity(this);">cylinder</button>
+        <button id="input_plane" name="input_plane" class="input_type" onclick="addEntity(this);">plane</button>
+        <button id="input_box" name="input_box" class="input_type" onclick="addEntity(this);">box</button>
+        <button id="input_image" name="input_image" class="input_type" onclick="addEntity(this);">image</button>
+        <button id="input_background" name="input_background" class="input_type" onclick="addEntity(this);">background</button>
+      </div>
+      <div id="canvas_container">
+        <div id="navi">
+          <p id="primitive" name="primitive"></p>
+          <p id="width" name="width"></p>
+          <p id="height" name="height"></p>
+          <p id="depth" name="depth"></p>
+          <p id="translate" name="translate"></p>
+          <p id="position" name="position"></p>
+          <p id="color" name="color"></p>
+        </div>
+        <div id="main_canvas">
+          <a-scene>
+            <a-assets>
+              <img id="enemy-sprite" crossorigin="anonymous" src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRvKpOnjxjm9DnVO8wRgo3V_F2rR7EV7JobsdMJuzbEN1nYEvG3">
+            </a-assets>
+
+            <!--<a-image look-at="#player" src="#enemy-sprite" transparent="true" position="1 3.5 -2"></a-image>-->
+
+            <a-sphere position="0 1.25 -1" id="sphere" color="yellow"></a-sphere>
+            <a-cylinder position="1 0.75 1" id="cylinder" color="#FFC65D"></a-cylinder>
+            <a-plane rotation="-90 0 0" id="plane" color="#7BC8A4"></a-plane>
+
+            <a-box id="box" position="0 3.5 -2" rotation="30 30 0" color="skyblue"
+               event-set__enter="_event: mouseenter; material.color: yellowgreen; scale: 3 1 1"
+               event-set__leave="_event: mouseleave; material.color: skyblue; scale: 1 1 1">
+               <a-animation attribute="rotation" begin="click" dur="500" fill="backwards" to="30 30 360"></a-animation>
+             </a-box>
+
+            <a-sky id="sky"></a-sky>
+
+            <a-entity position="0 1.8 4"><!-- 카메라 시점?-->
+              <a-entity camera look-controls mouse-cursor>
+                <!--<a-cursor fuse="true" color="yellow"></a-cursor>-->
+                <a-entity cursor="fuse: true;"
+                    position="0 0 -1"
+                    geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.02"
+                    material="color: black; shader: flat">
+                  </a-entity>
+              </a-entity>
+            </a-entity>
+            <!--카메라 사용법?
+            <a-entity position="0 0 3.8">
+              <a-entity cursor="fuse: true; fuseTimeout: 500"
+                  position="0 0 -1"
+                  geometry="primitive: ring; radiusInner: 0.01; radiusOuter: 0.02"
+                  material="color: black; shader: flat">
+                </a-entity>
+              </a-camera>
+            </a-entity>-->
+
+            </a-entity>
+          </a-scene>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
+
+<script>
+var TYPE_BOX = 1;
+var TYPE_SPHERE = 2;
+var TYPE_CYLINDER = 3;
+var TYPE_RECTANGLE = 4;
+var TYPE_IMAGE = 5;
+var TYPE_PLANE = 6;
+var TYPE_BACKGROUND = 7;
+var isClicked;
+var sceneEl;
+
+function init(){
+  isClicked = 0;
+  sceneEl = document.querySelector('a-scene');
+  var canvas_container = document.getElementById('canvas_container');
+  canvas_container.addEventListener("mousedown", doMouseDown, false);
+
+}
+
+function doMouseDown(event){
+  if(isClicked>0){
+    switch (isClicked) {
+      case TYPE_BOX:
+        var newEl = document.createElement('a-box');
+        newEl.setAttribute('height', 1);
+        newEl.setAttribute('width', 1);
+        //newEl.setAttribute('position', ''+event.pageX + ' ' + event.pageY + ' 0');
+        newEl.setAttribute('position', '-3 4 -2');
+        newEl.setAttribute('material', 'color', 'red');
+        document.querySelector('a-scene').appendChild(newEl);
+        newEl.addEventListener('click', function (evt) {
+          var geometry = this.getAttribute('geometry');
+          var position = this.getAttribute('position');
+          var material = this.getAttribute('material');
+          printDetail(geometry, position, material);
+        });
+        break;
+      case TYPE_SPHERE:
+        var newEl = document.createElement('a-sphere');
+        newEl.setAttribute('radius', 1);
+        //newEl.setAttribute('position', ''+event.pageX + ' ' + event.pageY + ' 0');
+        newEl.setAttribute('position', '-3 1 1');
+        document.querySelector('a-scene').appendChild(newEl);
+        newEl.addEventListener('click', function (evt) {
+          var geometry = this.getAttribute('geometry');
+          var position = this.getAttribute('position');
+          var material = this.getAttribute('material');
+          printDetail(geometry, position, material);
+        });
+        break;
+      case TYPE_CYLINDER:
+        break;
+      case TYPE_RECTANGLE:
+        break;
+      case TYPE_IMAGE:
+        var newEl = document.createElement('a-image');
+        //newEl.setAttribute('position', ''+event.pageX + ' ' + event.pageY + ' 0');
+        newEl.setAttribute('position', '3 3.5 -2');
+        newEl.setAttribute('transparent', 'true');
+        newEl.setAttribute('src', '#enemy-sprite');
+        document.querySelector('a-scene').appendChild(newEl);
+        newEl.addEventListener('click', function (evt) {
+          var geometry = this.getAttribute('geometry');
+          var position = this.getAttribute('position');
+          var material = this.getAttribute('material');
+          printDetail(geometry, position, material);
+        });
+        break;
+      case TYPE_PLANE:
+        break;
+      case TYPE_BACKGROUND:
+        var sky = document.getElementById('sky');
+        sky.setAttribute('src', "http://localhost:8000/example.jpg");
+        break;
+      default:
+        break;
+    }
+    isClicked = 0;
+  }
+}
+
+box.addEventListener('click', function (evt) {
+  var geometry = this.getAttribute('geometry');
+  var position = this.getAttribute('position');
+  var material = this.getAttribute('material');
+  printDetail(geometry, position, material);
+});
+
+sphere.addEventListener('click', function (evt) {
+  var geometry = this.getAttribute('geometry');
+  var position = this.getAttribute('position');
+  var material = this.getAttribute('material');
+  printDetail(geometry, position, material);
+});
+
+cylinder.addEventListener('click', function (evt) {
+  var geometry = this.getAttribute('geometry');
+  var position = this.getAttribute('position');
+  var material = this.getAttribute('material');
+  printDetail(geometry, position, material);
+});
+
+function printDetail(geometry, position, material){
+  console.log(geometry['primitive'] + ' is clicked' );
+  document.getElementById("primitive").innerHTML = "type : " + geometry['primitive'];
+  document.getElementById("width").innerHTML = "w : " + geometry['width'];
+  document.getElementById("height").innerHTML = "h : " + geometry['height'];
+  document.getElementById("depth").innerHTML = "d : " + geometry['depth'];
+  //document.getElementById("translate").innerHTML = "" + geometry['translate'];
+  document.getElementById("position").innerHTML = "pos : (" + position['x'] +", " + position['y'] + ", " + position['z'] + ")";
+  document.getElementById("color").innerHTML = "color : " + material['color'];
+  // light, sound, physics.. etc
+}
+
+function addEntity(type){
+  switch (type['id']) {
+    case 'input_rectangle':
+      isClicked = TYPE_RECTANGLE;
+      break;
+    case 'input_sphere':
+      isClicked = TYPE_SPHERE;
+      break;
+    case 'input_box':
+      isClicked = TYPE_BOX;
+      break;
+    case 'input_image':
+      isClicked = TYPE_IMAGE;
+      break;
+    case 'input_plane':
+      isClicked = TYPE_PLANE;
+      break;
+    case 'input_cylinder':
+      isClicked = TYPE_CYLINDER;
+      break;
+    case 'input_background':
+      isClicked = TYPE_BACKGROUND;
+      break;
+    default:
+      console.log(type['id']);
+      break;
+  }
+}
+
+init();
+
+</script>
