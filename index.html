@@ -1,30 +1,129 @@
+<!DOCTYPE html>
 <html>
-  <head>
-    <style>
-      .container{
-        margin-left : auto;
-        margin-right: auto;
-        text-align: center;
-        width: 1200px;
-        height: 750px;
-      }
-      
-      .main_canvas{
-        height: 100%;
-      }
 
-      .main_scene{
-        border: 0px;
-        width: 100%;
-        height: 100%;
-      }
-    </style>
-  </head>
-  <body>
-    <div id="container" class="container">
-      <div id="main_canvas" class="main_canvas">
-        <iframe id="main_scene" class="main_scene" src="main_canvas.html"></iframe>
-      </div>
+<head>
+    <meta name="google" content="notranslate" />
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="static/js/editor.js"></script>
+    <link rel="stylesheet" type="text/css" href="static/css/editor.css">
+</head>
+
+<body>
+    <div class="navbar navbar-fixed-top navbar-default">
+        <div class="container">
+            <div class="navbar-header"><a class="navbar-brand" href="#">Project name</a>
+                <a class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="glyphicon glyphicon-bar"></span>
+                    <span class="glyphicon glyphicon-bar"></span>
+                    <span class="glyphicon glyphicon-bar"></span>
+                </a>
+            </div>
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="#">Home</a>
+                    </li>
+                    <li><a href="#about">About</a>
+                    </li>
+                    <li><a href="#contact">Contact</a>
+                    </li>
+                </ul>
+            </div>
+            <!--/.navbar-collapse -->
+        </div>
     </div>
-  </body>
+    <div class="container">
+        <div id="wrapper" class="row">
+            <div class="col-md-2">
+                <div class="sidebar-nav-fixed affix">
+                    <div class="well">
+                        <ul class="nav ">
+                            <li class="nav-header">Sidebar</li>
+                            <li class="active"><a href="#">Link</a>
+                            </li>
+                            <li><a href="#">Link</a>
+                            </li>
+                            <li><a href="#">Link</a>
+                            </li>
+                            <li><a href="#">Link</a>
+                            </li>
+                            <li class="nav-header">Sidebar</li>
+                            <li><a href="#">Link</a>
+                            </li>
+                            <li><a href="#">Link</a>
+                            </li>
+                            <li><a href="#">Link</a>
+                            </li>
+                            <li><a href="#">Link</a>
+                            </li>
+                            <li><a href="#">Link</a>
+                            </li>
+                            <li><a href="#">Link</a>
+                            </li>
+                            <li class="nav-header">Sidebar</li>
+                            <li><a href="#">Link</a>
+                            </li>
+                            <li><a href="#">Link</a>
+                            </li>
+                            <li><a href="#">Link</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!--/.well -->
+                </div>
+                <!--/sidebar-nav-fixed -->
+            </div>
+            <!--/span-->
+            <div id="main-canvas" class="col-md-8">
+                <iframe id="main_scene" class="main_scene" width="100%" height="100%" allowfullscreen="yes" scrolling="no" allowvr="yes" src="test.html"></iframe>
+            </div>
+            <!--/span-->
+            <div class="col-md-2">
+                <div class="sidebar-nav-fixed pull-right affix">
+                    <div class="well">
+                        <ul class="nav ">
+                            <li class="nav-header">Sidebar</li>
+                            <li class="active"><a href="#">Link</a>
+                            </li>
+                            <li><a href="#">Link</a>
+                            </li>
+                            <li><a href="#">Link</a>
+                            </li>
+                            <li><a href="#">Link</a>
+                            </li>
+                            <li class="nav-header">Sidebar</li>
+                            <li><a href="#">Link</a>
+                            </li>
+                            <li><a href="#">Link</a>
+                            </li>
+                            <li><a href="#">Link</a>
+                            </li>
+                            <li><a href="#">Link</a>
+                            </li>
+                            <li><a href="#">Link</a>
+                            </li>
+                            <li><a href="#">Link</a>
+                            </li>
+                            <li class="nav-header">Sidebar</li>
+                            <li><a href="#">Link</a>
+                            </li>
+                            <li><a href="#">Link</a>
+                            </li>
+                            <li><a href="#">Link</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <!--/.well -->
+                </div>
+                <!--/sidebar-nav-fixed -->
+            </div>
+            <!--/span-->
+        </div>
+        <!--/row-->
+        <footer>
+        </footer>
+    </div>
+    <!--/.fluid-container-->
+</body>
+
 </html>

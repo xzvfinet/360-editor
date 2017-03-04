@@ -1,0 +1,32 @@
+html {
+    height: 100%;
+}
+
+body {
+    padding-bottom: 0px;
+    padding-top: 60px;
+    height: 100%;
+}
+
+.container {
+    height: 100%;
+}
+
+#wrapper {
+    height: 100%;
+}
+
+#main-canvas {
+    height: 100%;
+    padding: 0;
+}
+
+.sidebar-nav-fixed {
+    border: 0;
+    margin: 0;
+    width: 14%;
+}
+
+iframe {
+    border: 0;
+}
