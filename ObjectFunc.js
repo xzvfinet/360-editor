@@ -116,12 +116,14 @@ function UpdateImageSize(id,width,height){
     });
 }
 
+
 //텍스트 삽입
 function CreateText(transform, fontsize, material, value, font){
     var entityEl = document.createElement('a-text');
     sceneEl.appendChild(entityEl);
 
-    entityEl.setAttribute('id','text'+GetNumOfObject('text'));
+    var id = 'text'+GetNumOfObject('text');
+    entityEl.setAttribute('id',id);
     entityEl.setAttribute('text',{
         width: fontsize,
         value: value,
@@ -130,10 +132,14 @@ function CreateText(transform, fontsize, material, value, font){
     });
     entityEl.setAttribute('position', { x: transform.position.x, y: transform.position.y, z: transform.position.z });
     entityEl.setAttribute('rotation', { x: transform.rotation.x, y: transform.rotation.y, z: transform.rotation.z });
+
+    entityEl.addEventListener('click', function (evt) {
+        console.log(id+"clicked");
+        PrintTransform(id);
+    });
     //entityEl.setAttribute('material', 'src', material['src']);
     //entityEl.setAttribute('material', 'opacity', material['opacity']);
 }
-
 //텍스트 value 수정
 function UpdateTextValue(id, value){
     var entityEl = document.getElementById(id);
