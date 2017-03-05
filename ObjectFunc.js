@@ -19,6 +19,10 @@ function TextButtonDown(){
     var material = { color: 'green' };
     CreateText(transform,20,material,"helloBye",null);
 }
+function SkyButtonDown(){
+    var material = {src: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRympK-JR0fqVYXJuS6eN-ASz-bkr9ZcyF2ySJOFCsDI3sMyPYcU2BWcxQ'};
+    CreateSky(material);
+}
 function GetPrimitive(){
     var entityEl = document.querySelector('a-image');
     console.log(entityEl.getAttribute('geometry').primitive);
@@ -155,6 +159,17 @@ function UpdateTextFontSize(id, size){
     entityEl.setAttribute('text',{
         width: size
     });
+}
+
+
+//sky(background)추가
+function CreateSky(material){
+    var entityEl = document.createElement('a-sky');
+    sceneEl.appendChild(entityEl);
+
+    var id = 'sky'+GetNumOfObject('sky');
+    entityEl.setAttribute('id',id);
+    entityEl.setAttribute('material','src',material['src']);
 }
 
 
