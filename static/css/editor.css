@@ -27,6 +27,34 @@ body {
     width: 14%;
 }
 
+table.object-list {
+    border-bottom: 1px solid #999;
+    display: inline-block;
+    width: 100%;
+    display: table;
+}
+
+table.object-list tbody {
+    /*width: 100%;*/
+}
+
+table.object-list thead {
+    max-width: 100%;
+}
+
+.table-display dt {
+    clear: left;
+    float: left;
+    padding: 5px;
+    border-top: 1px solid #999;
+}
+
+.table-display dd {
+    float: right;
+    padding: 5px;
+    border-top: 1px solid #999;
+}
+
 iframe {
     border: 0;
 }

@@ -3,13 +3,13 @@
 
 <head>
     <meta name="google" content="notranslate" />
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    <script src="https://code.jquery.com/jquery-3.1.1.min.js" integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="static/css/bootstrap.min.css">
+    <script type="text/javascript" src="static/js/jquery-3.1.1.min.js"></script>
     <script type="text/javascript" src="static/js/editor.js"></script>
     <link rel="stylesheet" type="text/css" href="static/css/editor.css">
 </head>
 
-<body>
+<body onload="init();">
     <div class="navbar navbar-fixed-top navbar-default">
         <div class="container">
             <div class="navbar-header"><a class="navbar-brand" href="#">Project name</a>
@@ -37,35 +37,16 @@
             <div class="col-md-2">
                 <div class="sidebar-nav-fixed affix">
                     <div class="well">
-                        <ul class="nav ">
-                            <li class="nav-header">Sidebar</li>
-                            <li class="active"><a href="#">Link</a>
+                        <ul class="nav">
+                            <li class="nav-header">Shape</li>
+                            <li class="active" onclick="createPrimitive(this, 'box')"><a>Box</a></li>
+                            <li onclick="createPrimitive(this, 'sphere')"><a>Sphere</a></li>
+                            <li onclick="createPrimitive(this, 'cylinder')"><a>Cylinder</a></li>
+                            <li onclick="createPrimitive(this, 'plane')"><a>Plane</a></li>
                             </li>
-                            <li><a href="#">Link</a>
-                            </li>
-                            <li><a href="#">Link</a>
-                            </li>
-                            <li><a href="#">Link</a>
-                            </li>
-                            <li class="nav-header">Sidebar</li>
-                            <li><a href="#">Link</a>
-                            </li>
-                            <li><a href="#">Link</a>
-                            </li>
-                            <li><a href="#">Link</a>
-                            </li>
-                            <li><a href="#">Link</a>
-                            </li>
-                            <li><a href="#">Link</a>
-                            </li>
-                            <li><a href="#">Link</a>
-                            </li>
-                            <li class="nav-header">Sidebar</li>
-                            <li><a href="#">Link</a>
-                            </li>
-                            <li><a href="#">Link</a>
-                            </li>
-                            <li><a href="#">Link</a>
+                            <li class="nav-header">Object</li>
+                            <li class="active" onclick="createPrimitive(this, 'image')"><a>Image</a></li>
+                            <li onclick="createObject(this, 'teleport')"><a>Teleport</a></li>
                             </li>
                         </ul>
                     </div>
@@ -75,43 +56,34 @@
             </div>
             <!--/span-->
             <div id="main-canvas" class="col-md-8">
-                <iframe id="main_scene" class="main_scene" width="100%" height="100%" allowfullscreen="yes" scrolling="no" allowvr="yes" src="test.html"></iframe>
+                <iframe id="main_scene" class="main_scene" width="100%" height="100%" allowfullscreen="yes" scrolling="no" allowvr="yes" src="canvas.html"></iframe>
             </div>
             <!--/span-->
             <div class="col-md-2">
                 <div class="sidebar-nav-fixed pull-right affix">
                     <div class="well">
-                        <ul class="nav ">
-                            <li class="nav-header">Sidebar</li>
-                            <li class="active"><a href="#">Link</a>
-                            </li>
-                            <li><a href="#">Link</a>
-                            </li>
-                            <li><a href="#">Link</a>
-                            </li>
-                            <li><a href="#">Link</a>
-                            </li>
-                            <li class="nav-header">Sidebar</li>
-                            <li><a href="#">Link</a>
-                            </li>
-                            <li><a href="#">Link</a>
-                            </li>
-                            <li><a href="#">Link</a>
-                            </li>
-                            <li><a href="#">Link</a>
-                            </li>
-                            <li><a href="#">Link</a>
-                            </li>
-                            <li><a href="#">Link</a>
-                            </li>
-                            <li class="nav-header">Sidebar</li>
-                            <li><a href="#">Link</a>
-                            </li>
-                            <li><a href="#">Link</a>
-                            </li>
-                            <li><a href="#">Link</a>
-                            </li>
-                        </ul>
+                        <table class="nav object-list">
+                            <thead>
+                                <h4>Properties</h4>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><b>Id</b></td>
+                                    <td class='list-value object-id'>none</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Shape</b></td>
+                                    <td class='list-value object-shape'>none</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Position</b></td>
+                                    <td class='list-value object-position'>none</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Scale</b></td>
+                                    <td class='list-value object-scale'>none</td>
+                                </tr>
+                            </tbody>
                     </div>
                     <!--/.well -->
                 </div>
