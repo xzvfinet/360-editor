@@ -1,4 +1,5 @@
 var sceneEl = document.querySelector('a-scene');
+var totalEntities = new Array();
 
 var transform = {
     position: { x: 0, y: 2, z: -3 },
@@ -33,7 +34,7 @@ function CreateObject(primitive, transform, material) {
     var entityEl = document.createElement('a-'+primitive);
     sceneEl.appendChild(entityEl);
 
-    var id = primitive+GetNumOfObject(primitive)
+    var id = AssignId(primitive);
     entityEl.setAttribute('id',id);
     entityEl.setAttribute('geometry', {
         primitive: primitive
@@ -72,6 +73,7 @@ function UpdateObject(id,transform){
 //오브젝트 삭제 
 function DeleteObject(id){
     var entityEl = document.getElementById(id);
+    totalEntities.splice(totalEntities.indexOf(id),1);
     sceneEl.removeChild(entityEl);
 }
 
@@ -81,7 +83,7 @@ function CreateImage(transform, width, height, material){
     var entityEl = document.createElement('a-image');
     sceneEl.appendChild(entityEl);
 
-    var id = 'image'+GetNumOfObject('image')
+    var id = AssignId('image');
     entityEl.setAttribute('id',id);
     entityEl.setAttribute('geometry', {
         primitive: 'plane',
@@ -126,7 +128,7 @@ function CreateText(transform, fontsize, material, value, font){
     var entityEl = document.createElement('a-text');
     sceneEl.appendChild(entityEl);
 
-    var id = 'text'+GetNumOfObject('text');
+    var id = AssignId('text');
     entityEl.setAttribute('id',id);
     entityEl.setAttribute('text',{
         width: fontsize,
@@ -186,4 +188,9 @@ function PrintTransform(id){
 function GetNumOfObject(object){
     var entityEls = document.querySelectorAll('a-'+object);
     return entityEls.length-1;
+}
+function AssignId(primitive){
+    var id = primitive+GetNumOfObject(primitive);
+    totalEntities.push(id)
+    return id;
 }
