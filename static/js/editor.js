@@ -8,10 +8,18 @@ var idEl;
 var shapeEl;
 var positionEl;
 var scaleEl;
+var deleteBtn;
 
 // State Variables
 var cnt = 0;
 var objectMap = new Map();
+
+var currentSelectedObject = null;
+
+
+PRIMITIVE_DEFINITIONS.forEach(function(element, index, array) {
+    objectMap.set(element, new Array());
+});
 var shapeCount = {};
 
 function init() {
@@ -19,6 +27,16 @@ function init() {
     shapeEl = document.getElementsByClassName('object-shape')[0];
     positionEl = document.getElementsByClassName('object-position')[0];
     scaleEl = document.getElementsByClassName('object-scale')[0];
+    deleteBtn = document.getElementById('delete-btn');
+    deleteBtn.addEventListener('click', function(evt) {
+        console.log(this);
+        if (currentSelectedObject == null)
+            console.log('Not selected');
+        else {
+            currentSelectedObject.parentNode.removeChild(currentSelectedObject);
+            console.log('removed: ' + currentSelectedObject);
+        }
+    });
 }
 
 function setUpFrame() {
@@ -35,26 +53,14 @@ function getShapeOfObject(object) {
 
 }
 
-function countShape(shape) {
-    if (PRIMITIVE_DEFINITIONS.includes(shape)) {
-        if (shapeCount[shape] == undefined) {
-            shapeCount[shape] = 0;
-        }
-        shapeCount[shape]++;
-    } else if (OBJECT_DEFINITIONS.includes(shape)) {
-
-
-    } else {
-        console.log("Wrong shape: " + shape);
-    }
-}
-
 function createPrimitive(evt, shape) {
     if (!PRIMITIVE_DEFINITIONS.includes(shape)) {
         console.log('Not valid shape:' + shape);
         return;
     }
-    mainCanvas.addEntity(shape = shape);
+    var el = mainCanvas.addEntity(shape = shape);
+    var num = objectMap.get(shape).push(el);
+    console.log('number of ' + shape + ' is ' + num);
 }
 
 function createObject(evt, type) {
@@ -86,6 +92,7 @@ function onObjectEditor() {
     var data = this.data;
     var el = this.el;
     this.el.addEventListener('click', function(evt) {
+        currentSelectedObject = this;
         shapeEl.innerHTML = this.getAttribute('geometry').primitive;
         positionEl.innerHTML = makeViewString(position = this.getAttribute('position'));
         scaleEl.innerHTML = makeViewString(scale = this.getAttribute('scale'));

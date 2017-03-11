@@ -78,4 +78,6 @@ function addEntity(shape, position, scale) {
 
     scene.appendChild(newEl);
     console.log('shape(' + shape + '), position(' + position + ') is created');
+
+    return newEl;
 }
