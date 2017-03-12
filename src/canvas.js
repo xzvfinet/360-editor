@@ -1,29 +1,7 @@
-var editorMode = false;
-var scene = null;
-var camera = null;
+window.onload = function() {
+    console.log("On load canvas");
 
-function init() {
-    window.parent.setUpFrame();
 
-    editorMode = window.parent.isEditorMode();
-    scene = document.querySelector('a-scene');
-    camera = document.querySelector('[camera]');
-
-    AFRAME.registerComponent('object-listener', {
-        schema: {
-            id: {
-                default: "shape"
-            }
-        },
-        init: (editorMode) ? onObjectEditor : onObjectViewer,
-        tick: function(time, timeDelta) {
-            // console.log(time + ', ' + timeDelta);
-            // console.log(camera.getAttribute('rotation'));
-        }
-
-    });
-
-    return true;
 }
 
 function getRandomIntRange(min, max) {
@@ -60,7 +38,7 @@ function getForwardPostion() {
     return x + ' ' + y + ' ' + z;
 }
 
-function addEntity(shape, position, scale) {
+module.exports.addEntity = function(shape, position, scale) {
     var tag = 'a-' + shape;
     var newEl = document.createElement(tag);
 

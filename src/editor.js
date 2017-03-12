@@ -2,7 +2,7 @@
 var PRIMITIVE_DEFINITIONS = ['box', 'sphere', 'cylinder', 'plane', 'image'];
 var OBJECT_DEFINITIONS = ['teleport'];
 
-// Dom Elements
+// Editor Dom Elements
 var mainCanvas;
 var idEl;
 var shapeEl;
@@ -10,19 +10,26 @@ var positionEl;
 var scaleEl;
 var deleteBtn;
 
+// Aframe Dom Elements
+var mainFrame;
+var scene = null;
+var camera = null;
+
 // State Variables
-var cnt = 0;
-var objectMap = new Map();
-
+var editorMode = false;
 var currentSelectedObject = null;
+var objects = [];
 
+window.onLoadCanvas = function(frame) {
+    console.log('On load editor');
 
-PRIMITIVE_DEFINITIONS.forEach(function(element, index, array) {
-    objectMap.set(element, new Array());
-});
-var shapeCount = {};
+    mainFrame = frame;
 
-function init() {
+    initEditor();
+    initCanvas(mainFrame);
+}
+
+function initEditor() {
     idEl = document.getElementsByClassName('object-id')[0];
     shapeEl = document.getElementsByClassName('object-shape')[0];
     positionEl = document.getElementsByClassName('object-position')[0];
@@ -39,13 +46,37 @@ function init() {
     });
 }
 
-function setUpFrame() {
-    mainCanvas = window.frames['main_scene'].contentWindow;
-    mainCanvas.onObjectEditor = onObjectEditor;
-    mainCanvas.onObjectViewer = onObjectViewer;
+function initCanvas() {
+    mainCanvas = require('./canvas.js');
+
+    scene = mainFrame.document.querySelector('a-scene');
+    camera = mainFrame.document.querySelector('[camera]');
+    console.log('camera');
+    console.log(camera);
+
+    mainFrame.AFRAME.registerComponent('object-listener', {
+        schema: {
+            id: {
+                default: "shape"
+            }
+        },
+        init: (editorMode) ? onObjectEditor : onObjectViewer,
+        tick: function(time, timeDelta) {
+            // console.log(time + ', ' + timeDelta);
+            // console.log(camera.getAttribute('rotation'));
+        }
+    });
 }
 
-function isEditorMode() {
+window.setUpFrame = function() {
+    
+    canvasFrame = window.frames['main_scene'].contentWindow;
+    canvasFrame.onObjectEditor = onObjectEditor;
+    canvasFrame.onObjectViewer = onObjectViewer;
+}
+
+
+window.isEditorMode = function() {
     return true;
 }
 
@@ -53,14 +84,15 @@ function getShapeOfObject(object) {
 
 }
 
-function createPrimitive(evt, shape) {
+window.createPrimitive = function(shape) {
     if (!PRIMITIVE_DEFINITIONS.includes(shape)) {
         console.log('Not valid shape:' + shape);
         return;
     }
+    // console.log(mainCanvas.addEntity);
     var el = mainCanvas.addEntity(shape = shape);
-    var num = objectMap.get(shape).push(el);
-    console.log('number of ' + shape + ' is ' + num);
+    // var num = objectMap.get(shape).push(el);
+    // console.log('number of ' + shape + ' is ' + num);
 }
 
 function createObject(evt, type) {

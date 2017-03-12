@@ -1,0 +1,6 @@
+{
+  "ignore": ["static/js"],
+  "events": {
+    "exit": "npm run build"
+  }
+}

@@ -5,11 +5,11 @@
     <meta name="google" content="notranslate" />
     <link rel="stylesheet" href="static/css/bootstrap.min.css">
     <script type="text/javascript" src="static/js/jquery-3.1.1.min.js"></script>
-    <script type="text/javascript" src="static/js/editor.js"></script>
+    <script type="text/javascript" src="static/js/bundle.js"></script>
     <link rel="stylesheet" type="text/css" href="static/css/editor.css">
 </head>
 
-<body onload="init();">
+<body>
     <div class="navbar navbar-fixed-top navbar-default">
         <div class="container">
             <div class="navbar-header"><a class="navbar-brand" href="#">Project name</a>
@@ -39,14 +39,14 @@
                     <div class="well">
                         <ul class="nav">
                             <li class="nav-header">Shape</li>
-                            <li class="active" onclick="createPrimitive(this, 'box')"><a>Box</a></li>
-                            <li onclick="createPrimitive(this, 'sphere')"><a>Sphere</a></li>
-                            <li onclick="createPrimitive(this, 'cylinder')"><a>Cylinder</a></li>
-                            <li onclick="createPrimitive(this, 'plane')"><a>Plane</a></li>
+                            <li class="active" onclick="createPrimitive('box')"><a>Box</a></li>
+                            <li onclick="createPrimitive('sphere')"><a>Sphere</a></li>
+                            <li onclick="createPrimitive('cylinder')"><a>Cylinder</a></li>
+                            <li onclick="createPrimitive('plane')"><a>Plane</a></li>
                             </li>
-                            <li class="nav-header">Object</li>
-                            <li class="active" onclick="createPrimitive(this, 'image')"><a>Image</a></li>
-                            <li onclick="createObject(this, 'teleport')"><a>Teleport</a></li>
+                            <li class="nav-header">Primitive</li>
+                            <li class="active" onclick="createPrimitive('image')"><a>Image</a></li>
+                            <li onclick="createPrimitive('teleport')"><a>Teleport</a></li>
                             </li>
                         </ul>
                     </div>
@@ -56,7 +56,7 @@
             </div>
             <!--/span-->
             <div id="main-canvas" class="col-md-8">
-                <iframe id="main_scene" class="main_scene" width="100%" height="100%" allowfullscreen="yes" scrolling="no" allowvr="yes" src="canvas.html"></iframe>
+                <iframe id="main_scene" class="main_scene" width="100%" height="100%" allowfullscreen="yes" scrolling="no" allowvr="yes" src="static/html/canvas.html"></iframe>
             </div>
             <!--/span-->
             <div class="col-md-2">
@@ -78,6 +78,10 @@
                                 <tr>
                                     <td><b>Position</b></td>
                                     <td class='list-value object-position'>none</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Rotation</b></td>
+                                    <td class='list-value object-rotation'>none</td>
                                 </tr>
                                 <tr>
                                     <td><b>Scale</b></td>

@@ -1,0 +1,19 @@
+{
+  "name": "360-editor",
+  "version": "1.0.0",
+  "description": "",
+  "main": "",
+  "scripts": {
+    "build": "browserify src/editor.js -o static/js/bundle.js",
+    "start": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/xzvfinet/360-editor.git"
+  },
+  "author": "",
+  "dependencies": {
+    "express": "^4.15.2"
+  }
+}
