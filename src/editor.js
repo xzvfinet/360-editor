@@ -7,6 +7,7 @@ var mainCanvas;
 var idEl;
 var shapeEl;
 var positionEl;
+var rotationEl;
 var scaleEl;
 var deleteBtn;
 
@@ -16,23 +17,27 @@ var scene = null;
 var camera = null;
 
 // State Variables
-var editorMode = false;
+var editorMode = true;
 var currentSelectedObject = null;
 var objects = [];
 
+var util = require('./util.js');
+var objs = require('./object.js');
+
 window.onLoadCanvas = function(frame) {
-    console.log('On load editor');
+    console.log('Called from onload of canvas.html');
 
     mainFrame = frame;
 
     initEditor();
-    initCanvas(mainFrame);
+    initCanvas();
 }
 
 function initEditor() {
     idEl = document.getElementsByClassName('object-id')[0];
     shapeEl = document.getElementsByClassName('object-shape')[0];
     positionEl = document.getElementsByClassName('object-position')[0];
+    rotationEl = document.getElementsByClassName('object-rotation')[0];
     scaleEl = document.getElementsByClassName('object-scale')[0];
     deleteBtn = document.getElementById('delete-btn');
     deleteBtn.addEventListener('click', function(evt) {
@@ -47,12 +52,8 @@ function initEditor() {
 }
 
 function initCanvas() {
-    mainCanvas = require('./canvas.js');
-
     scene = mainFrame.document.querySelector('a-scene');
     camera = mainFrame.document.querySelector('[camera]');
-    console.log('camera');
-    console.log(camera);
 
     mainFrame.AFRAME.registerComponent('object-listener', {
         schema: {
@@ -60,37 +61,34 @@ function initCanvas() {
                 default: "shape"
             }
         },
-        init: (editorMode) ? onObjectEditor : onObjectViewer,
+        init: onObjectSelect,
         tick: function(time, timeDelta) {
             // console.log(time + ', ' + timeDelta);
             // console.log(camera.getAttribute('rotation'));
         }
     });
+
+    mainFrame.AFRAME.registerComponent('background-listener', {
+        init: onBackgroundSelect,
+
+    });
 }
 
-window.setUpFrame = function() {
-    
-    canvasFrame = window.frames['main_scene'].contentWindow;
-    canvasFrame.onObjectEditor = onObjectEditor;
-    canvasFrame.onObjectViewer = onObjectViewer;
+window.create = function(type) {
+    if (PRIMITIVE_DEFINITIONS.includes(type)) {
+        createPrimitive(type);
+    } else if (OBJECT_DEFINITIONS.includes(type)) {
+        createObject(type);
+    }
 }
 
-
-window.isEditorMode = function() {
-    return true;
-}
-
-function getShapeOfObject(object) {
-
-}
-
-window.createPrimitive = function(shape) {
+function createPrimitive(shape) {
     if (!PRIMITIVE_DEFINITIONS.includes(shape)) {
         console.log('Not valid shape:' + shape);
         return;
     }
     // console.log(mainCanvas.addEntity);
-    var el = mainCanvas.addEntity(shape = shape);
+    var el = addEntity(shape);
     // var num = objectMap.get(shape).push(el);
     // console.log('number of ' + shape + ' is ' + num);
 }
@@ -111,33 +109,81 @@ function makeArrayAsString() {
     return result;
 }
 
-function makeViewString(position, scale) {
-
-    if (position != null) {
-        return makeArrayAsString(Math.round(position.x * 100) / 100, Math.round(position.y * 100) / 100, Math.round(position.z * 100) / 100);
-    } else if (scale != null) {
-        return makeArrayAsString(scale.x, scale.y, scale.z);
-    }
-}
-
-function onObjectEditor() {
+function onBackgroundSelect() {
     var data = this.data;
     var el = this.el;
-    this.el.addEventListener('click', function(evt) {
+
+    console.log("Clicked background.");
+
+    onObjectUnselect();
+}
+
+function onObjectSelect() {
+    var data = this.data;
+    var el = this.el;
+
+    if (editorMode)
+        onObjectEditor(el);
+    else
+        onObjectViewer(el);
+
+}
+
+function onObjectUnselect() {
+    currentSelectedObject = null;
+    shapeEl.innerHTML = "";
+    positionEl.innerHTML = "";
+    rotationEl.innerHTML = "";
+    scaleEl.innerHTML = "";
+}
+
+function onObjectEditor(el) {
+    el.addEventListener('click', function(evt) {
         currentSelectedObject = this;
         shapeEl.innerHTML = this.getAttribute('geometry').primitive;
-        positionEl.innerHTML = makeViewString(position = this.getAttribute('position'));
-        scaleEl.innerHTML = makeViewString(scale = this.getAttribute('scale'));
+        var position = this.getAttribute('position');
+        positionEl.innerHTML = makeArrayAsString(
+            util.floorTwo(position.x),
+            util.floorTwo(position.y),
+            util.floorTwo(position.z));
+        var rotation = this.getAttribute('rotation');
+        rotationEl.innerHTML = makeArrayAsString(
+            util.floorTwo(rotation.x),
+            util.floorTwo(rotation.y));
+        scale = this.getAttribute('scale');
+        scaleEl.innerHTML = makeArrayAsString(scale.x, scale.y, scale.z);
     });
-    this.el.addEventListener('tick', function(time, deltaTime) {
+    el.addEventListener('tick', function(time, deltaTime) {
         console.log("merong");
     });
 }
 
-function onObjectViewer() {
-    var data = this.data;
-    var el = this.el;
-    this.el.addEventListener('click', function(evt) {
+function onObjectViewer(el) {
+    el.addEventListener('click', function(evt) {
         console.log('(id:' + data.id + ')clicked');
     });
+}
+
+function addEntity(shape, position, rotation, scale) {
+    var tag = 'a-' + shape;
+    var newEl = mainFrame.document.createElement(tag);
+
+    position = util.getForwardPostion(camera.getAttribute('rotation'));
+    rotation = camera.getAttribute('rotation');
+
+    newEl.setAttribute('position', position);
+    newEl.setAttribute('rotation', rotation);
+    if (shape == 'image') {
+        newEl.setAttribute('material', 'src', "http://i.imgur.com/fHyEMsl.jpg");
+        newEl.setAttribute('scale', '1 1 1');
+    } else {
+        newEl.setAttribute('material', 'color', util.getRandomHexColor());
+        newEl.setAttribute('scale', scale);
+    }
+    newEl.setAttribute('object-listener', "id:" + shape);
+
+    scene.appendChild(newEl);
+    console.log(tag + ' shape(' + shape + '), position(' + position + ') is created');
+
+    return newEl;
 }

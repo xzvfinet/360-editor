@@ -1,14 +1,8 @@
-window.onload = function() {
-    console.log("On load canvas");
-
-
-}
-
 function getRandomIntRange(min, max) {
     return Math.floor(Math.random() * (max - min) + min);
 }
 
-function getRandomHexColor() {
+module.exports.getRandomHexColor = function() {
     var color = "#";
     for (var i = 0; i < 6; ++i) {
         var randomCode1 = getRandomIntRange("A".charCodeAt(0), "F".charCodeAt(0));
@@ -27,8 +21,8 @@ function toAngle(radians) {
     return radians * (180 / Math.PI);
 }
 
-function getForwardPostion() {
-    var cameraRotation = camera.getAttribute('rotation');
+module.exports.getForwardPostion = function(rotation) {
+    var cameraRotation = rotation;
     var yaw = -toRadians(cameraRotation.y - 90);
     var pitch = -toRadians(cameraRotation.x);
     var radius = -6;
@@ -38,24 +32,6 @@ function getForwardPostion() {
     return x + ' ' + y + ' ' + z;
 }
 
-module.exports.addEntity = function(shape, position, scale) {
-    var tag = 'a-' + shape;
-    var newEl = document.createElement(tag);
-
-    position = getForwardPostion();
-
-    newEl.setAttribute('position', position);
-    if (shape == 'image') {
-        newEl.setAttribute('material', 'src', "http://i.imgur.com/fHyEMsl.jpg");
-        newEl.setAttribute('scale', '1 1 1');
-    } else {
-        newEl.setAttribute('material', 'color', getRandomHexColor());
-        newEl.setAttribute('scale', scale);
-    }
-    newEl.setAttribute('object-listener', "id:" + shape);
-
-    scene.appendChild(newEl);
-    console.log('shape(' + shape + '), position(' + position + ') is created');
-
-    return newEl;
+module.exports.floorTwo = function(val) {
+    return Math.round(val * 100) / 100;
 }
