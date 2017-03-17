@@ -10,6 +10,7 @@ var positionEl;
 var rotationEl;
 var scaleEl;
 var deleteBtn;
+var editorToggle;
 
 // Aframe Dom Elements
 var mainFrame;
@@ -19,10 +20,9 @@ var camera = null;
 // State Variables
 var editorMode = true;
 var currentSelectedObject = null;
-var objects = [];
 
 var util = require('./util.js');
-var objs = require('./object.js');
+var obj = require('./object.js');
 
 window.onLoadCanvas = function(frame) {
     console.log('Called from onload of canvas.html');
@@ -41,13 +41,18 @@ function initEditor() {
     scaleEl = document.getElementsByClassName('object-scale')[0];
     deleteBtn = document.getElementById('delete-btn');
     deleteBtn.addEventListener('click', function(evt) {
-        console.log(this);
         if (currentSelectedObject == null)
             console.log('Not selected');
         else {
-            currentSelectedObject.parentNode.removeChild(currentSelectedObject);
-            console.log('removed: ' + currentSelectedObject);
+            obj.remove(currentSelectedObject);
         }
+    });
+    editorToggle = $('#toggle-event');
+    // Initially the editor mode is enabled.
+    editorToggle.bootstrapToggle('on');
+    editorMode = true;
+    editorToggle.change(function() {
+        editorMode = !editorMode;
     });
 }
 
@@ -61,16 +66,13 @@ function initCanvas() {
                 default: "shape"
             }
         },
-        init: onObjectSelect,
+        init: function() {
+            this.el.addEventListener('click', onObjectSelect);
+        },
         tick: function(time, timeDelta) {
             // console.log(time + ', ' + timeDelta);
             // console.log(camera.getAttribute('rotation'));
         }
-    });
-
-    mainFrame.AFRAME.registerComponent('background-listener', {
-        init: onBackgroundSelect,
-
     });
 }
 
@@ -87,10 +89,7 @@ function createPrimitive(shape) {
         console.log('Not valid shape:' + shape);
         return;
     }
-    // console.log(mainCanvas.addEntity);
     var el = addEntity(shape);
-    // var num = objectMap.get(shape).push(el);
-    // console.log('number of ' + shape + ' is ' + num);
 }
 
 function createObject(evt, type) {
@@ -109,37 +108,9 @@ function makeArrayAsString() {
     return result;
 }
 
-function onBackgroundSelect() {
-    var data = this.data;
-    var el = this.el;
-
-    console.log("Clicked background.");
-
-    onObjectUnselect();
-}
-
 function onObjectSelect() {
-    var data = this.data;
-    var el = this.el;
-
-    if (editorMode)
-        onObjectEditor(el);
-    else
-        onObjectViewer(el);
-
-}
-
-function onObjectUnselect() {
-    currentSelectedObject = null;
-    shapeEl.innerHTML = "";
-    positionEl.innerHTML = "";
-    rotationEl.innerHTML = "";
-    scaleEl.innerHTML = "";
-}
-
-function onObjectEditor(el) {
-    el.addEventListener('click', function(evt) {
-        currentSelectedObject = this;
+    if (editorMode) {
+        currentSelectedObject = obj.getFromEl(this);
         shapeEl.innerHTML = this.getAttribute('geometry').primitive;
         var position = this.getAttribute('position');
         positionEl.innerHTML = makeArrayAsString(
@@ -152,33 +123,36 @@ function onObjectEditor(el) {
             util.floorTwo(rotation.y));
         scale = this.getAttribute('scale');
         scaleEl.innerHTML = makeArrayAsString(scale.x, scale.y, scale.z);
-    });
-    el.addEventListener('tick', function(time, deltaTime) {
-        console.log("merong");
-    });
+    } else {
+        console.log('id:' + this.id + ' is clicked');
+    }
 }
 
-function onObjectViewer(el) {
-    el.addEventListener('click', function(evt) {
-        console.log('(id:' + data.id + ')clicked');
-    });
+function onObjectUnselect() {
+    currentSelectedObject = null;
+    shapeEl.innerHTML = "";
+    positionEl.innerHTML = "";
+    rotationEl.innerHTML = "";
+    scaleEl.innerHTML = "";
 }
 
 function addEntity(shape, position, rotation, scale) {
     var tag = 'a-' + shape;
     var newEl = mainFrame.document.createElement(tag);
+    var newObj = new obj.Objct(newEl);
 
-    position = util.getForwardPostion(camera.getAttribute('rotation'));
-    rotation = camera.getAttribute('rotation');
+    var position = util.getForwardPostion(camera.getAttribute('rotation'));
+    newObj.setPosition(position);
+    var rotation = camera.getAttribute('rotation');
+    newObj.setRotation(rotation);
 
-    newEl.setAttribute('position', position);
-    newEl.setAttribute('rotation', rotation);
     if (shape == 'image') {
         newEl.setAttribute('material', 'src', "http://i.imgur.com/fHyEMsl.jpg");
+        newObj.setScale('1 1 1');
         newEl.setAttribute('scale', '1 1 1');
     } else {
         newEl.setAttribute('material', 'color', util.getRandomHexColor());
-        newEl.setAttribute('scale', scale);
+        newObj.setScale(scale);
     }
     newEl.setAttribute('object-listener', "id:" + shape);
 
