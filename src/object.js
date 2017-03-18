@@ -6,7 +6,13 @@ function Objct(el) {
     this.transform = {};
     this.material = {};
 
+    this.eventList = [];
+
     objects.push(this);
+}
+
+Objct.prototype.getType = function() {
+    return this.el.getAttribute('geometry').primitive;
 }
 
 Objct.prototype.setPosition = function(newPosition) {
@@ -37,12 +43,9 @@ function remove(obj) {
 }
 
 function getFromEl(el) {
-    console.log("el: " + el);
     var objs = objects.filter(function(obj) {
-        console.log("obj.el: " + obj.el);
         return obj.el == el;
     });
-    console.log("obj length: " + objs.length);
     return objs[0];
 }
 

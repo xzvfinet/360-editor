@@ -29,9 +29,16 @@ module.exports.getForwardPostion = function(rotation) {
     var x = radius * Math.cos(yaw) * Math.cos(pitch);
     var y = radius * Math.sin(pitch);
     var z = radius * Math.sin(yaw) * Math.cos(pitch);
-    return x + ' ' + y + ' ' + z;
+
+    return { x: x, y: y, z: z };
 }
 
 module.exports.floorTwo = function(val) {
     return Math.round(val * 100) / 100;
+}
+
+module.exports.getImageSize = function(url, callback) {
+    var img = new Image();
+    img.onload = callback;
+    img.src = url;
 }

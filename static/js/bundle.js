@@ -2,6 +2,8 @@
 // Constants
 var PRIMITIVE_DEFINITIONS = ['box', 'sphere', 'cylinder', 'plane', 'image'];
 var OBJECT_DEFINITIONS = ['teleport'];
+var OBJECT_LISTENER = 'object-listener';
+var EVENT_LIST = ['teleport', 'link', 'page', 'image', 'video'];
 
 // Editor Dom Elements
 var mainCanvas;
@@ -26,12 +28,18 @@ var util = require('./util.js');
 var obj = require('./object.js');
 
 window.onLoadCanvas = function(frame) {
-    console.log('Called from onload of canvas.html');
-
     mainFrame = frame;
 
     initEditor();
     initCanvas();
+}
+
+window.create = function(type) {
+    if (PRIMITIVE_DEFINITIONS.includes(type)) {
+        createPrimitive(type);
+    } else if (OBJECT_DEFINITIONS.includes(type)) {
+        createObject(type);
+    }
 }
 
 function initEditor() {
@@ -55,13 +63,30 @@ function initEditor() {
     editorToggle.change(function() {
         editorMode = !editorMode;
     });
+
+    for (var i = 0; i < EVENT_LIST.length; ++i) {
+        var li = document.createElement("li");
+        var a = document.createElement("a");
+        a.appendChild(document.createTextNode(EVENT_LIST[i]));
+        a.setAttribute('href', '#');
+        li.appendChild(a);
+        $(".dropdown-menu")[0].appendChild(li);
+    }
+
+    $(".dropdown-menu").on("click", "li", function(event) {
+        if (currentSelectedObject != null) {
+            var eventName = this.children[0].innerHTML;
+            var func = getEventFunction(eventName);
+            currentSelectedObject.eventList.push(func);
+        }
+    })
 }
 
 function initCanvas() {
     scene = mainFrame.document.querySelector('a-scene');
     camera = mainFrame.document.querySelector('[camera]');
 
-    mainFrame.AFRAME.registerComponent('object-listener', {
+    mainFrame.AFRAME.registerComponent(OBJECT_LISTENER, {
         schema: {
             id: {
                 default: "shape"
@@ -77,25 +102,17 @@ function initCanvas() {
     });
 }
 
-window.create = function(type) {
-    if (PRIMITIVE_DEFINITIONS.includes(type)) {
-        createPrimitive(type);
-    } else if (OBJECT_DEFINITIONS.includes(type)) {
-        createObject(type);
-    }
-}
-
 function createPrimitive(shape) {
     if (!PRIMITIVE_DEFINITIONS.includes(shape)) {
         console.log('Not valid shape:' + shape);
         return;
     }
-    var el = addEntity(shape);
+    addEntity(shape);
 }
 
 function createObject(evt, type) {
     if (!PRIMITIVE_DEFINITIONS.includes(type)) {
-        console.log('Not valid shape:' + type);
+        console.log('Not valid type:' + type);
         return;
     }
 }
@@ -110,22 +127,25 @@ function makeArrayAsString() {
 }
 
 function onObjectSelect() {
+    currentSelectedObject = obj.getFromEl(this);
     if (editorMode) {
-        currentSelectedObject = obj.getFromEl(this);
-        shapeEl.innerHTML = this.getAttribute('geometry').primitive;
-        var position = this.getAttribute('position');
+        shapeEl.innerHTML = currentSelectedObject.getType();
+        var position = currentSelectedObject.transform.position;
         positionEl.innerHTML = makeArrayAsString(
             util.floorTwo(position.x),
             util.floorTwo(position.y),
             util.floorTwo(position.z));
-        var rotation = this.getAttribute('rotation');
+        var rotation = currentSelectedObject.transform.rotation;
         rotationEl.innerHTML = makeArrayAsString(
             util.floorTwo(rotation.x),
             util.floorTwo(rotation.y));
-        scale = this.getAttribute('scale');
+        scale = currentSelectedObject.transform.scale;
         scaleEl.innerHTML = makeArrayAsString(scale.x, scale.y, scale.z);
     } else {
-        console.log('id:' + this.id + ' is clicked');
+        // Execute events assigned to object.
+        for (var i = 0; i < currentSelectedObject.eventList.length; ++i) {
+            currentSelectedObject.eventList[i]();
+        }
     }
 }
 
@@ -142,25 +162,33 @@ function addEntity(shape, position, rotation, scale) {
     var newEl = mainFrame.document.createElement(tag);
     var newObj = new obj.Objct(newEl);
 
-    var position = util.getForwardPostion(camera.getAttribute('rotation'));
+    position = util.getForwardPostion(camera.getAttribute('rotation'));
     newObj.setPosition(position);
-    var rotation = camera.getAttribute('rotation');
+    rotation = camera.getAttribute('rotation');
     newObj.setRotation(rotation);
+    scale = { x: 1, y: 1, z: 1 };
+    newObj.setScale(scale);
 
     if (shape == 'image') {
+        util.getImageSize("http://i.imgur.com/fHyEMsl.jpg", function() {
+            newObj.setScale({ x: 1, y: this.height / this.width });
+        });
         newEl.setAttribute('material', 'src', "http://i.imgur.com/fHyEMsl.jpg");
-        newObj.setScale('1 1 1');
-        newEl.setAttribute('scale', '1 1 1');
     } else {
         newEl.setAttribute('material', 'color', util.getRandomHexColor());
-        newObj.setScale(scale);
     }
-    newEl.setAttribute('object-listener', "id:" + shape);
+    newEl.setAttribute(OBJECT_LISTENER, "");
 
     scene.appendChild(newEl);
     console.log(tag + ' shape(' + shape + '), position(' + position + ') is created');
+}
 
-    return newEl;
+function getEventFunction(eventName) {
+    if (eventName == 'teleport') {
+        return function() {
+            console.log('teleport!');
+        }
+    }
 }
 
 },{"./object.js":2,"./util.js":3}],2:[function(require,module,exports){
@@ -172,7 +200,13 @@ function Objct(el) {
     this.transform = {};
     this.material = {};
 
+    this.eventList = [];
+
     objects.push(this);
+}
+
+Objct.prototype.getType = function() {
+    return this.el.getAttribute('geometry').primitive;
 }
 
 Objct.prototype.setPosition = function(newPosition) {
@@ -203,12 +237,9 @@ function remove(obj) {
 }
 
 function getFromEl(el) {
-    console.log("el: " + el);
     var objs = objects.filter(function(obj) {
-        console.log("obj.el: " + obj.el);
         return obj.el == el;
     });
-    console.log("obj length: " + objs.length);
     return objs[0];
 }
 
@@ -251,11 +282,18 @@ module.exports.getForwardPostion = function(rotation) {
     var x = radius * Math.cos(yaw) * Math.cos(pitch);
     var y = radius * Math.sin(pitch);
     var z = radius * Math.sin(yaw) * Math.cos(pitch);
-    return x + ' ' + y + ' ' + z;
+
+    return { x: x, y: y, z: z };
 }
 
 module.exports.floorTwo = function(val) {
     return Math.round(val * 100) / 100;
+}
+
+module.exports.getImageSize = function(url, callback) {
+    var img = new Image();
+    img.onload = callback;
+    img.src = url;
 }
 
 },{}]},{},[1]);
