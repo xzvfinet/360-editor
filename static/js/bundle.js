@@ -4,6 +4,7 @@ var PRIMITIVE_DEFINITIONS = ['box', 'sphere', 'cylinder', 'plane', 'image'];
 var OBJECT_DEFINITIONS = ['teleport'];
 var OBJECT_LISTENER = 'object-listener';
 var EVENT_LIST = ['teleport', 'link', 'page', 'image', 'video'];
+var BACKGROUND_PREFIX = "../img/";
 
 // Editor Dom Elements
 var mainCanvas;
@@ -14,11 +15,13 @@ var rotationEl;
 var scaleEl;
 var deleteBtn;
 var editorToggle;
+var eventArgEl;
 
 // Aframe Dom Elements
 var mainFrame;
 var scene = null;
 var camera = null;
+var background = null;
 
 // State Variables
 var editorMode = true;
@@ -63,6 +66,7 @@ function initEditor() {
     editorToggle.change(function() {
         editorMode = !editorMode;
     });
+    eventArgEl = document.getElementById('eventArg');
 
     for (var i = 0; i < EVENT_LIST.length; ++i) {
         var li = document.createElement("li");
@@ -76,7 +80,8 @@ function initEditor() {
     $(".dropdown-menu").on("click", "li", function(event) {
         if (currentSelectedObject != null) {
             var eventName = this.children[0].innerHTML;
-            var func = getEventFunction(eventName);
+            var func = getEventFunction(eventName, eventArgEl.value);
+            currentSelectedObject.eventList = [];
             currentSelectedObject.eventList.push(func);
         }
     })
@@ -85,6 +90,7 @@ function initEditor() {
 function initCanvas() {
     scene = mainFrame.document.querySelector('a-scene');
     camera = mainFrame.document.querySelector('[camera]');
+    background = mainFrame.document.querySelector('a-sky');
 
     mainFrame.AFRAME.registerComponent(OBJECT_LISTENER, {
         schema: {
@@ -183,10 +189,12 @@ function addEntity(shape, position, rotation, scale) {
     console.log(tag + ' shape(' + shape + '), position(' + position + ') is created');
 }
 
-function getEventFunction(eventName) {
+function getEventFunction(eventName, arg) {
     if (eventName == 'teleport') {
         return function() {
-            console.log('teleport!');
+            console.log('teleport! to:' + arg);
+            var imageUrl = BACKGROUND_PREFIX + arg;
+            background.setAttribute('src', imageUrl);
         }
     }
 }
