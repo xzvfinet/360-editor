@@ -7,6 +7,8 @@ var BACKGROUND_PREFIX = "../img/";
 var EVENT_DICTIONARY = {
     'teleport': teleportEvent
 }
+var TEST_JSON = '[{"el":null,"type":"primitive","shape":"box","transform":{"position":{"x":-3.6739403974420594e-16,"y":0,"z":-6},"rotation":{"x":0,"y":0,"z":0},"scale":{"x":1,"y":1,"z":1}},"material":{"color":"#257654"},"clickListener":"object-listener","eventList":[]},{"el":null,"type":"primitive","shape":"sphere","transform":{"position":{"x":-1.3275046384397702,"y":-1.2272767136552951,"z":-5.721147026867983},"rotation":{"x":-11.802930579694959,"y":13.06343772898277,"z":0},"scale":{"x":1,"y":1,"z":1}},"material":{"color":"#013882"},"clickListener":"object-listener","eventList":[]},{"el":null,"type":"primitive","shape":"cylinder","transform":{"position":{"x":0.9465000710454844,"y":-1.989605502556811,"z":-5.580824989166615},"rotation":{"x":-19.365973475421832,"y":-9.625690958197833,"z":0},"scale":{"x":1,"y":1,"z":1}},"material":{"color":"#404134"},"clickListener":"object-listener","eventList":[]}]';
+
 
 // Editor Dom Elements
 var mainCanvas;
@@ -73,7 +75,7 @@ function initEditor() {
     });
     eventArgEl = document.getElementById('eventArg');
     loadTextEl = document.getElementById('loadInput');
-    loadTextEl.value = testJson;
+    loadTextEl.value = TEST_JSON;
     loadBtnEl = document.getElementById('loadBtn');
     loadBtnEl.addEventListener('click', function(evt) {
         loadObjectsFromJson(loadTextEl.value);
@@ -138,7 +140,7 @@ function createObject(type) {
         console.log('Not valid type:' + type);
         return;
     }
-
+    newObject(type, 'plane');
 }
 
 function makeArrayAsString() {
@@ -185,8 +187,6 @@ function onObjectUnselect() {
     scaleEl.innerHTML = "";
 }
 
-var testJson = '[{"el":null,"type":"primitive","shape":"box","transform":{"position":{"x":-3.6739403974420594e-16,"y":0,"z":-6},"rotation":{"x":0,"y":0,"z":0},"scale":{"x":1,"y":1,"z":1}},"material":{"color":"#257654"},"clickListener":"object-listener","eventList":[]},{"el":null,"type":"primitive","shape":"sphere","transform":{"position":{"x":-1.3275046384397702,"y":-1.2272767136552951,"z":-5.721147026867983},"rotation":{"x":-11.802930579694959,"y":13.06343772898277,"z":0},"scale":{"x":1,"y":1,"z":1}},"material":{"color":"#013882"},"clickListener":"object-listener","eventList":[]},{"el":null,"type":"primitive","shape":"cylinder","transform":{"position":{"x":0.9465000710454844,"y":-1.989605502556811,"z":-5.580824989166615},"rotation":{"x":-19.365973475421832,"y":-9.625690958197833,"z":0},"scale":{"x":1,"y":1,"z":1}},"material":{"color":"#404134"},"clickListener":"object-listener","eventList":[]}]';
-
 function newObject(type, shape, position, rotation, scale) {
     var tag = 'a-' + shape;
     var newEl = mainFrame.document.createElement(tag);
@@ -211,11 +211,10 @@ function newObject(type, shape, position, rotation, scale) {
     }
     newObj.setClickListener(OBJECT_LISTENER);
 
-    scene.appendChild(newEl);
-    console.log(tag + ' shape(' + shape + '), position(' + position + ') is created');
+    newObj.eventList = [];
+    newObj.eventList.push({ 'type': type, 'arg': 'bg1.jpg' });
 
-    // var st = nodeUtil.inspect(newObj.getSaveForm());
-    // console.log(st);
+    scene.appendChild(newEl);
 }
 
 function teleportEvent(arg) {
