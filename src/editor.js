@@ -42,6 +42,34 @@ window.onLoadCanvas = function(frame) {
 
     initEditor();
     initCanvas();
+
+    var boxEl = mainFrame.document.getElementById('testbox');
+    var left = mainFrame.document.getElementById('left');
+    var right = mainFrame.document.getElementById('right');
+    var top = mainFrame.document.getElementById('top');
+    var bottom = mainFrame.document.getElementById('bottom');
+    var els = [left, right, top, bottom];
+    for (var i = 0; i < els.length; ++i) {
+        els[i].setAttribute('mover-listener', "");
+        els[i].addEventListener('mouseenter', function() {
+            var scale = this.getAttribute('scale');
+            this.setAttribute('scale', { x: scale.x * 2, y: scale.y * 2, z: scale.z });
+        });
+        els[i].addEventListener('mouseleave', function() {
+            var scale = this.getAttribute('scale');
+            this.setAttribute('scale', { x: scale.x * 0.5, y: scale.y * 0.5, z: scale.z });
+        });
+        els[i].addEventListener('mousedown', function(evt) {
+            console.log('down');
+        });
+    }
+
+    // boxEl.addEventListener('mouseenter', function() {
+    //     boxEl.setAttribute('scale', { x: 2, y: 2, z: 2 });
+    // });
+    // boxEl.addEventListener('mouseleave', function() {
+    //     boxEl.setAttribute('scale', { x: 1, y: 1, z: 1 });
+    // });
 }
 
 window.create = function(type) {
@@ -50,6 +78,10 @@ window.create = function(type) {
     } else if (OBJECT_DEFINITIONS.includes(type)) {
         createObject(type);
     }
+}
+
+window.onMouseMove = function(evt) {
+    console.log(evt.clientX + ", " + evt.clientY);
 }
 
 function initEditor() {
