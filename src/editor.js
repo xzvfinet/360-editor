@@ -21,6 +21,7 @@ var deleteBtn;
 var editorToggle;
 var eventArgEl;
 var loadTextEl;
+var saveBtnEl;
 var loadBtnEl;
 
 // Aframe Dom Elements
@@ -108,6 +109,11 @@ function initEditor() {
     eventArgEl = document.getElementById('eventArg');
     loadTextEl = document.getElementById('loadInput');
     loadTextEl.value = TEST_JSON;
+    saveBtnEl = document.getElementById('saveBtn');
+    saveBtnEl.addEventListener('click', function(evt) {
+        var json = obj.Controller.objectsToJson();
+        loadTextEl.value = json;
+    });
     loadBtnEl = document.getElementById('loadBtn');
     loadBtnEl.addEventListener('click', function(evt) {
         loadObjectsFromJson(loadTextEl.value);
