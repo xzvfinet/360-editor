@@ -12,6 +12,7 @@ var TEST_JSON = '[{"el":null,"type":"primitive","shape":"box","transform":{"posi
 
 // Editor Dom Elements
 var mainCanvas;
+var menuElList;
 var idEl;
 var shapeEl;
 var positionEl;
@@ -86,6 +87,7 @@ window.onMouseMove = function(evt) {
 }
 
 function initEditor() {
+    menuElList = document.getElementsByClassName('well');
     idEl = document.getElementsByClassName('object-id')[0];
     shapeEl = document.getElementsByClassName('object-shape')[0];
     positionEl = document.getElementsByClassName('object-position')[0];
@@ -105,6 +107,9 @@ function initEditor() {
     editorMode = true;
     editorToggle.change(function() {
         editorMode = !editorMode;
+        for (var i = 0; i < menuElList.length; ++i){
+            menuElList[i].style.visibility = (editorMode) ? 'visible' : 'hidden';
+        }
     });
     eventArgEl = document.getElementById('eventArg');
     loadTextEl = document.getElementById('loadInput');
