@@ -32,6 +32,7 @@ var background = null;
 // State Variables
 var editorMode = true;
 var currentSelectedObject = null;
+var nowClick = null;
 
 var util = require('./util.js');
 var nodeUtil = require('util');
@@ -151,7 +152,6 @@ function initCanvas() {
             // console.log(camera.getAttribute('rotation'));
         }
     });
-
 }
 
 function loadRoom(data) {
@@ -185,6 +185,7 @@ function makeArrayAsString() {
 }
 
 function onObjectSelect() {
+    nowClick = this;
     currentSelectedObject = obj.Controller.findByEl(this);
     if (editorMode) {
         shapeEl.innerHTML = currentSelectedObject.getShape();
@@ -199,6 +200,7 @@ function onObjectSelect() {
             util.floorTwo(rotation.y));
         scale = currentSelectedObject.transform.scale;
         scaleEl.innerHTML = makeArrayAsString(scale.x, scale.y, scale.z);
+        showObjectBorder();
     } else {
         // Execute events assigned to object.
         for (var i = 0; i < currentSelectedObject.eventList.length; ++i) {
@@ -233,20 +235,141 @@ function newObject(type, shape, position, rotation, scale) {
     scale = { x: 1, y: 1, z: 1 };
     newObj.setScale(scale);
 
-    if (shape == 'image') {
+    if (shape == 'image') {/*
         util.getImageSize("http://i.imgur.com/fHyEMsl.jpg", function() {
             newObj.setScale({ x: 1, y: this.height / this.width });
-        });
+        });*/
         newObj.setMaterial({ 'src': "http://i.imgur.com/fHyEMsl.jpg" });
     } else {
         newObj.setMaterial({ 'color': util.getRandomHexColor() });
     }
     newObj.setClickListener(OBJECT_LISTENER);
-
     newObj.eventList = [];
     newObj.eventList.push({ 'type': type, 'arg': 'bg1.jpg' });
-
     scene.appendChild(newEl);
+}
+
+function createImage(transform, material){
+    var newEl = mainFrame.document.createElement('a-image');
+    var newObj = new obj.Objct(newEl);
+
+    newObj.type = 'primitive';
+    newObj.shape = 'image';
+    newObj.setPosition(transform.position);
+    newObj.setRotation(transform.rotation);
+    var scale = { x: 0.1, y: 0.1, z: 1 };
+    newObj.setScale(scale);
+    /*
+    util.getImageSize(material.src, function() {
+        newObj.setScale({ x: 0.1, y: this.height / this.width });
+    });*/
+    newObj.setMaterial(material);
+
+    //scene.appendChild(newEl);
+    nowClick.appendChild(newEl);
+    newEl.addEventListener('mousedown', function (evt) {
+      var pos = this.getAttribute('position');
+      console.log('click : ' + util.floorTwo(pos.x) + ", " + util.floorTwo(pos.y) + ", " + util.floorTwo(pos.z));
+    });
+    console.log('create ' + util.floorTwo(transform.position.x) + ", " + util.floorTwo(transform.position.y) + ", " + util.floorTwo(transform.position.z));
+  }
+
+function showObjectBorder(){
+  console.log(nowClick);
+  console.log(scene);
+  var position = currentSelectedObject.transform.position;
+  var rotation = currentSelectedObject.transform.rotation;
+  var scale = currentSelectedObject.transform.scale;
+
+  var material = { 'src':"http://i.imgur.com/fHyEMsl.jpg"};
+/*
+  var leftTop = {
+    position: {x:position.x-scale.x/2, y:position.y+scale.y/2, z:position.z},
+    rotation: { x: rotation.x, y: rotation.y, z: rotation.z}
+  };
+  var leftBottom = {
+    position: {x:position.x-scale.x/2, y:position.y-scale.y/2, z:position.z},
+    rotation: { x: rotation.x, y: rotation.y, z: rotation.z}
+  };
+  var rightTop = {
+    position: {x:position.x+scale.x/2, y:position.y+scale.y/2, z:position.z},
+    rotation: { x: rotation.x, y: rotation.y, z: rotation.z}
+  };
+  var rightBottom = {
+    position: {x:position.x+scale.x/2, y:position.y-scale.y/2, z:position.z},
+    rotation: { x: rotation.x, y: rotation.y, z: rotation.z}
+  };
+*/
+/*
+  var leftTop = {
+    position: {x:position.x, y:position.y, z:position.z},
+    rotation: { x: rotation.x, y: rotation.y, z: rotation.z}
+  };*/
+  var leftBottom = {
+    position: {x:-scale.x/2, y:-scale.y/2, z:position.z},
+    rotation: { x: rotation.x, y: rotation.y, z: rotation.z}
+  };
+  /*
+  var rightTop = {
+    position: {x:1, y:1, z:-6},
+    rotation: { x: rotation.x, y: rotation.y, z: rotation.z}
+  };
+  var rightBottom = {
+    position: {x:1, y:-1, z:-6},
+    rotation: { x: rotation.x, y: rotation.y, z: rotation.z}
+  };
+*/
+  //createImage(leftTop, material);
+  createImage(leftBottom, material);
+  //createImage(rightTop, material);
+  //createImage(rightBottom, material);
+/*
+  var leftTop = document.createElement('a-plane');
+  leftTop.setAttribute('id', 'leftTop');
+  leftTop.setAttribute('geometry', {
+      primitive : 'plane',
+      height : boxHeight,
+      width : boxWidth
+  });
+  leftTop.setAttribute('position', {x:x-w/2, y:y+h/2, z:z});
+
+  var leftBottom = document.createElement('a-plane');
+  leftBottom.setAttribute('id', 'leftBottom');
+  leftBottom.setAttribute('geometry', {
+      primitive : 'plane',
+      height : boxHeight,
+      width : boxWidth
+  });
+  leftBottom.setAttribute('position', {x:x-w/2, y:y-h/2, z:z});
+
+  var RightTop = document.createElement('a-image');
+  RightTop.setAttribute('material', 'src', "/images/ad.png");
+  RightTop.setAttribute('id', 'RightTop');
+  RightTop.setAttribute('geometry', {
+      primitive : 'plane',
+      height : boxHeight,
+      width : boxWidth
+  });
+  RightTop.setAttribute('position', {x:x+w/2, y:y+h/2, z:z});
+  RightTop.addEventListener('click', function click(){
+    console.log('click rt');
+  });
+  RightTop.addEventListener('mousedown', function down(){
+    console.log('mouse down');
+  }, true);
+
+  var RightBottom = document.createElement('a-plane');
+  RightBottom.setAttribute('id', 'RightBottom');
+  RightBottom.setAttribute('geometry', {
+      primitive : 'plane',
+      height : boxHeight,
+      width : boxWidth
+  });
+  RightBottom.setAttribute('position', {x:x+w/2, y:y-h/2, z:z});
+  //RightBottom.setAttribute('material', 'src', "/images/temp.png");
+  RightBottom.setAttribute('cursor', "se-resize");
+  //RightBottom.addEventListener('mousedown', initialiseResize, false);
+*/
 }
 
 function teleportEvent(arg) {

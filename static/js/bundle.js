@@ -1,414 +1,4 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
-// Constants
-var PRIMITIVE_DEFINITIONS = ['box', 'sphere', 'cylinder', 'plane', 'image'];
-var OBJECT_DEFINITIONS = ['teleport'];
-var OBJECT_LISTENER = 'object-listener';
-var EVENT_LIST = ['teleport', 'link', 'page', 'image', 'video'];
-var BACKGROUND_PREFIX = "../img/";
-var EVENT_DICTIONARY = {
-    'teleport': teleportEvent
-}
-var TEST_JSON = '[{"el":null,"type":"primitive","shape":"box","transform":{"position":{"x":-3.6739403974420594e-16,"y":0,"z":-6},"rotation":{"x":0,"y":0,"z":0},"scale":{"x":1,"y":1,"z":1}},"material":{"color":"#257654"},"clickListener":"object-listener","eventList":[]},{"el":null,"type":"primitive","shape":"sphere","transform":{"position":{"x":-1.3275046384397702,"y":-1.2272767136552951,"z":-5.721147026867983},"rotation":{"x":-11.802930579694959,"y":13.06343772898277,"z":0},"scale":{"x":1,"y":1,"z":1}},"material":{"color":"#013882"},"clickListener":"object-listener","eventList":[]},{"el":null,"type":"primitive","shape":"cylinder","transform":{"position":{"x":0.9465000710454844,"y":-1.989605502556811,"z":-5.580824989166615},"rotation":{"x":-19.365973475421832,"y":-9.625690958197833,"z":0},"scale":{"x":1,"y":1,"z":1}},"material":{"color":"#404134"},"clickListener":"object-listener","eventList":[]}]';
-
-
-// Editor Dom Elements
-var mainCanvas;
-var idEl;
-var shapeEl;
-var positionEl;
-var rotationEl;
-var scaleEl;
-var deleteBtn;
-var editorToggle;
-var eventArgEl;
-var loadTextEl;
-var loadBtnEl;
-
-// Aframe Dom Elements
-var mainFrame;
-var scene = null;
-var camera = null;
-var background = null;
-
-// State Variables
-var editorMode = true;
-var currentSelectedObject = null;
-
-var util = require('./util.js');
-var nodeUtil = require('util');
-var obj = require('./object.js');
-
-window.onLoadCanvas = function(frame) {
-    mainFrame = frame;
-
-    initEditor();
-    initCanvas();
-}
-
-window.create = function(type) {
-    if (PRIMITIVE_DEFINITIONS.includes(type)) {
-        createPrimitive(type);
-    } else if (OBJECT_DEFINITIONS.includes(type)) {
-        createObject(type);
-    }
-}
-
-function initEditor() {
-    idEl = document.getElementsByClassName('object-id')[0];
-    shapeEl = document.getElementsByClassName('object-shape')[0];
-    positionEl = document.getElementsByClassName('object-position')[0];
-    rotationEl = document.getElementsByClassName('object-rotation')[0];
-    scaleEl = document.getElementsByClassName('object-scale')[0];
-    deleteBtn = document.getElementById('delete-btn');
-    deleteBtn.addEventListener('click', function(evt) {
-        if (currentSelectedObject == null)
-            console.log('Not selected');
-        else {
-            obj.Controller.remove(currentSelectedObject);
-        }
-    });
-    editorToggle = $('#toggle-event');
-    // Initially the editor mode is enabled.
-    editorToggle.bootstrapToggle('on');
-    editorMode = true;
-    editorToggle.change(function() {
-        editorMode = !editorMode;
-    });
-    eventArgEl = document.getElementById('eventArg');
-    loadTextEl = document.getElementById('loadInput');
-    loadTextEl.value = TEST_JSON;
-    loadBtnEl = document.getElementById('loadBtn');
-    loadBtnEl.addEventListener('click', function(evt) {
-        loadObjectsFromJson(loadTextEl.value);
-    });
-
-    for (var i = 0; i < EVENT_LIST.length; ++i) {
-        var li = document.createElement("li");
-        var a = document.createElement("a");
-        a.appendChild(document.createTextNode(EVENT_LIST[i]));
-        a.setAttribute('href', '#');
-        li.appendChild(a);
-        $(".dropdown-menu")[0].appendChild(li);
-    }
-
-    $(".dropdown-menu").on("click", "li", function(event) {
-        if (currentSelectedObject != null) {
-            var eventName = this.children[0].innerHTML;
-            currentSelectedObject.eventList = [];
-            currentSelectedObject.eventList.push({ 'type': eventName, 'arg': eventArgEl.value });
-            // currentSelectedObject.eventList.push([eventName, eventArgEl.value]);
-        }
-    })
-}
-
-function initCanvas() {
-    scene = mainFrame.document.querySelector('a-scene');
-    camera = mainFrame.document.querySelector('[camera]');
-    background = mainFrame.document.querySelector('a-sky');
-
-    mainFrame.AFRAME.registerComponent(OBJECT_LISTENER, {
-        schema: {
-            id: {
-                default: "shape"
-            }
-        },
-        init: function() {
-            this.el.addEventListener('click', onObjectSelect);
-        },
-        tick: function(time, timeDelta) {
-            // console.log(time + ', ' + timeDelta);
-            // console.log(camera.getAttribute('rotation'));
-        }
-    });
-
-}
-
-function loadRoom(data) {
-    var bgSrc = data.bgSrc;
-    var objects = data.objects;
-}
-
-function createPrimitive(shape) {
-    if (!PRIMITIVE_DEFINITIONS.includes(shape)) {
-        console.log('Not valid shape:' + shape);
-        return;
-    }
-    newObject('primitive', shape);
-}
-
-function createObject(type) {
-    if (!OBJECT_DEFINITIONS.includes(type)) {
-        console.log('Not valid type:' + type);
-        return;
-    }
-    newObject(type, 'plane');
-}
-
-function makeArrayAsString() {
-    var result = "";
-    for (var i = 0; i < arguments.length - 1; ++i) {
-        result += arguments[i] + ", ";
-    }
-    result += arguments[arguments.length - 1];
-    return result;
-}
-
-function onObjectSelect() {
-    currentSelectedObject = obj.Controller.findByEl(this);
-    if (editorMode) {
-        shapeEl.innerHTML = currentSelectedObject.getShape();
-        var position = currentSelectedObject.transform.position;
-        positionEl.innerHTML = makeArrayAsString(
-            util.floorTwo(position.x),
-            util.floorTwo(position.y),
-            util.floorTwo(position.z));
-        var rotation = currentSelectedObject.transform.rotation;
-        rotationEl.innerHTML = makeArrayAsString(
-            util.floorTwo(rotation.x),
-            util.floorTwo(rotation.y));
-        scale = currentSelectedObject.transform.scale;
-        scaleEl.innerHTML = makeArrayAsString(scale.x, scale.y, scale.z);
-    } else {
-        // Execute events assigned to object.
-        for (var i = 0; i < currentSelectedObject.eventList.length; ++i) {
-            var event = currentSelectedObject.eventList[i];
-            var eventType = event['type'];
-            var func = EVENT_DICTIONARY[eventType];
-            var arg = event['arg'];
-            func(arg);
-        }
-    }
-}
-
-function onObjectUnselect() {
-    currentSelectedObject = null;
-    shapeEl.innerHTML = "";
-    positionEl.innerHTML = "";
-    rotationEl.innerHTML = "";
-    scaleEl.innerHTML = "";
-}
-
-function newObject(type, shape, position, rotation, scale) {
-    var tag = 'a-' + shape;
-    var newEl = mainFrame.document.createElement(tag);
-    var newObj = new obj.Objct(newEl);
-
-    newObj.type = type;
-    newObj.shape = shape;
-    position = util.getForwardPostion(camera.getAttribute('rotation'));
-    newObj.setPosition(position);
-    rotation = camera.getAttribute('rotation');
-    newObj.setRotation(rotation);
-    scale = { x: 1, y: 1, z: 1 };
-    newObj.setScale(scale);
-
-    if (shape == 'image') {
-        util.getImageSize("http://i.imgur.com/fHyEMsl.jpg", function() {
-            newObj.setScale({ x: 1, y: this.height / this.width });
-        });
-        newObj.setMaterial({ 'src': "http://i.imgur.com/fHyEMsl.jpg" });
-    } else {
-        newObj.setMaterial({ 'color': util.getRandomHexColor() });
-    }
-    newObj.setClickListener(OBJECT_LISTENER);
-
-    newObj.eventList = [];
-    newObj.eventList.push({ 'type': type, 'arg': 'bg1.jpg' });
-
-    scene.appendChild(newEl);
-}
-
-function teleportEvent(arg) {
-    console.log('teleport! to:' + arg);
-    var imageUrl = BACKGROUND_PREFIX + arg;
-    background.setAttribute('src', imageUrl);
-}
-
-function loadObjectsFromJson(json) {
-    var objects = obj.Controller.objectsFromJson(json);
-    for (var i = 0; i < objects.length; ++i) {
-        var el = obj.Controller.createElFromObj(mainFrame, objects[i]);
-        scene.appendChild(el);
-    }
-}
-
-},{"./object.js":2,"./util.js":3,"util":7}],2:[function(require,module,exports){
-var objects = [];
-
-function Objct(el, obj) {
-    this.el = el;
-    this.type = "";
-    this.shape = "";
-    this.transform = {};
-    this.material = {};
-
-    this.clickListener = "";
-    this.eventList = [];
-
-    // copy all properties of obj to this
-    for (var prop in obj) {
-        this[prop] = obj[prop];
-    }
-
-    objects.push(this);
-}
-
-Objct.prototype.getShape = function() {
-    if (this.el)
-        return this.el.getAttribute('geometry').primitive;
-    else
-        return this.shape;
-}
-
-Objct.prototype.setPosition = function(newPosition) {
-    if (this.el)
-        this.el.setAttribute('position', newPosition);
-    this.transform.position = newPosition;
-}
-
-Objct.prototype.setRotation = function(newRotation) {
-    if (this.el)
-        this.el.setAttribute('rotation', newRotation);
-    this.transform.rotation = newRotation;
-}
-
-Objct.prototype.setScale = function(newScale) {
-    if (this.el)
-        this.el.setAttribute('scale', newScale);
-    this.transform.scale = newScale;
-}
-
-Objct.prototype.setMaterial = function(newMaterial) {
-    this.material = newMaterial;
-    for (var key in newMaterial) {
-        this.el.setAttribute(key, newMaterial[key]);
-    }
-}
-
-Objct.prototype.setClickListener = function(listener) {
-    if (this.el)
-        this.el.setAttribute(listener, "");
-    this.clickListener = listener;
-}
-
-Objct.prototype.toObj = function() {
-    return null;
-}
-
-Objct.prototype.getSaveForm = function() {
-    var tmp = this.el;
-    this.el = null;
-    var copyObj = JSON.parse(JSON.stringify(this));
-    this.el = tmp;
-    return copyObj;
-}
-
-function Controller() {}
-
-Controller.prototype.objectsFromJson = function(json) {
-    var loadedObjects;
-    loadedObjects = JSON.parse(json);
-    // console.log(loadedObjects);
-    var loadedObjectsWithPrototype = [];
-    for (var i = 0; i < loadedObjects.length; ++i) {
-        var newObj = new Objct(null, loadedObjects[i]);
-        // console.log(loadedObjects[i]);
-        // console.log(newObj);
-        loadedObjectsWithPrototype.push(newObj);
-    }
-    return loadedObjectsWithPrototype;
-}
-
-Controller.prototype.objectsToJson = function() {
-    var saveObjects = [];
-    for (var i = 0; i < objects.length; ++i) {
-        saveObjects.push(objects[i].getSaveForm());
-    }
-    var json = JSON.stringify(saveObjects);
-    return json;
-}
-
-Controller.prototype.createElFromObj = function(frame, obj) {
-    var newEl = frame.document.createElement("a-" + obj.shape);
-    obj.el = newEl;
-    obj.setPosition(obj.transform.position);
-    obj.setRotation(obj.transform.rotation);
-    obj.setScale(obj.transform.scale);
-    obj.setMaterial(obj.material);
-    obj.setClickListener(obj.clickListener);
-
-    return newEl;
-}
-
-Controller.prototype.getNum = function() {
-    return objects.length;
-}
-
-Controller.prototype.remove = function(obj) {
-    if (obj.el) {
-        obj.el.parentElement.removeChild(obj.el);
-    }
-}
-
-Controller.prototype.findByEl = function(el) {
-    var objs = objects.filter(function(obj) {
-        return obj.el == el;
-    });
-    return objs[0];
-}
-
-module.exports = {
-    Objct: Objct,
-    Controller: new Controller()
-};
-
-},{}],3:[function(require,module,exports){
-function getRandomIntRange(min, max) {
-    return Math.floor(Math.random() * (max - min) + min);
-}
-
-module.exports.getRandomHexColor = function() {
-    var color = "#";
-    for (var i = 0; i < 6; ++i) {
-        var randomCode1 = getRandomIntRange("A".charCodeAt(0), "F".charCodeAt(0));
-        var randomCode2 = getRandomIntRange("0".charCodeAt(0), "9".charCodeAt(0));
-        var randomSelect = getRandomIntRange(0, 1);
-        color += String.fromCharCode((randomSelect) ? randomCode1 : randomCode2);
-    }
-    return color;
-}
-
-function toRadians(angle) {
-    return angle * (Math.PI / 180);
-}
-
-function toAngle(radians) {
-    return radians * (180 / Math.PI);
-}
-
-module.exports.getForwardPostion = function(rotation) {
-    var cameraRotation = rotation;
-    var yaw = -toRadians(cameraRotation.y - 90);
-    var pitch = -toRadians(cameraRotation.x);
-    var radius = -6;
-    var x = radius * Math.cos(yaw) * Math.cos(pitch);
-    var y = radius * Math.sin(pitch);
-    var z = radius * Math.sin(yaw) * Math.cos(pitch);
-
-    return { x: x, y: y, z: z };
-}
-
-module.exports.floorTwo = function(val) {
-    return Math.round(val * 100) / 100;
-}
-
-module.exports.getImageSize = function(url, callback) {
-    var img = new Image();
-    img.onload = callback;
-    img.src = url;
-}
-
-},{}],4:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -590,7 +180,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],5:[function(require,module,exports){
+},{}],2:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -615,14 +205,14 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],6:[function(require,module,exports){
+},{}],3:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],7:[function(require,module,exports){
+},{}],4:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -1212,4 +802,569 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":6,"_process":4,"inherits":5}]},{},[1]);
+},{"./support/isBuffer":3,"_process":1,"inherits":2}],5:[function(require,module,exports){
+// Constants
+var PRIMITIVE_DEFINITIONS = ['box', 'sphere', 'cylinder', 'plane', 'image'];
+var OBJECT_DEFINITIONS = ['teleport'];
+var OBJECT_LISTENER = 'object-listener';
+var EVENT_LIST = ['teleport', 'link', 'page', 'image', 'video'];
+var BACKGROUND_PREFIX = "../img/";
+var EVENT_DICTIONARY = {
+    'teleport': teleportEvent
+}
+var TEST_JSON = '[{"el":null,"type":"primitive","shape":"box","transform":{"position":{"x":-3.6739403974420594e-16,"y":0,"z":-6},"rotation":{"x":0,"y":0,"z":0},"scale":{"x":1,"y":1,"z":1}},"material":{"color":"#257654"},"clickListener":"object-listener","eventList":[]},{"el":null,"type":"primitive","shape":"sphere","transform":{"position":{"x":-1.3275046384397702,"y":-1.2272767136552951,"z":-5.721147026867983},"rotation":{"x":-11.802930579694959,"y":13.06343772898277,"z":0},"scale":{"x":1,"y":1,"z":1}},"material":{"color":"#013882"},"clickListener":"object-listener","eventList":[]},{"el":null,"type":"primitive","shape":"cylinder","transform":{"position":{"x":0.9465000710454844,"y":-1.989605502556811,"z":-5.580824989166615},"rotation":{"x":-19.365973475421832,"y":-9.625690958197833,"z":0},"scale":{"x":1,"y":1,"z":1}},"material":{"color":"#404134"},"clickListener":"object-listener","eventList":[]}]';
+
+
+// Editor Dom Elements
+var mainCanvas;
+var idEl;
+var shapeEl;
+var positionEl;
+var rotationEl;
+var scaleEl;
+var deleteBtn;
+var editorToggle;
+var eventArgEl;
+var loadTextEl;
+var loadBtnEl;
+
+// Aframe Dom Elements
+var mainFrame;
+var scene = null;
+var camera = null;
+var background = null;
+
+// State Variables
+var editorMode = true;
+var currentSelectedObject = null;
+var nowClick = null;
+
+var util = require('./util.js');
+var nodeUtil = require('util');
+var obj = require('./object.js');
+
+window.onLoadCanvas = function(frame) {
+    mainFrame = frame;
+
+    initEditor();
+    initCanvas();
+
+    var boxEl = mainFrame.document.getElementById('testbox');
+    var left = mainFrame.document.getElementById('left');
+    var right = mainFrame.document.getElementById('right');
+    var top = mainFrame.document.getElementById('top');
+    var bottom = mainFrame.document.getElementById('bottom');
+    var els = [left, right, top, bottom];
+    for (var i = 0; i < els.length; ++i) {
+        els[i].setAttribute('mover-listener', "");
+        els[i].addEventListener('mouseenter', function() {
+            var scale = this.getAttribute('scale');
+            this.setAttribute('scale', { x: scale.x * 2, y: scale.y * 2, z: scale.z });
+        });
+        els[i].addEventListener('mouseleave', function() {
+            var scale = this.getAttribute('scale');
+            this.setAttribute('scale', { x: scale.x * 0.5, y: scale.y * 0.5, z: scale.z });
+        });
+        els[i].addEventListener('mousedown', function(evt) {
+            console.log('down');
+        });
+    }
+
+    // boxEl.addEventListener('mouseenter', function() {
+    //     boxEl.setAttribute('scale', { x: 2, y: 2, z: 2 });
+    // });
+    // boxEl.addEventListener('mouseleave', function() {
+    //     boxEl.setAttribute('scale', { x: 1, y: 1, z: 1 });
+    // });
+}
+
+window.create = function(type) {
+    if (PRIMITIVE_DEFINITIONS.includes(type)) {
+        createPrimitive(type);
+    } else if (OBJECT_DEFINITIONS.includes(type)) {
+        createObject(type);
+    }
+}
+
+window.onMouseMove = function(evt) {
+    console.log(evt.clientX + ", " + evt.clientY);
+}
+
+function initEditor() {
+    idEl = document.getElementsByClassName('object-id')[0];
+    shapeEl = document.getElementsByClassName('object-shape')[0];
+    positionEl = document.getElementsByClassName('object-position')[0];
+    rotationEl = document.getElementsByClassName('object-rotation')[0];
+    scaleEl = document.getElementsByClassName('object-scale')[0];
+    deleteBtn = document.getElementById('delete-btn');
+    deleteBtn.addEventListener('click', function(evt) {
+        if (currentSelectedObject == null)
+            console.log('Not selected');
+        else {
+            obj.Controller.remove(currentSelectedObject);
+        }
+    });
+    editorToggle = $('#toggle-event');
+    // Initially the editor mode is enabled.
+    editorToggle.bootstrapToggle('on');
+    editorMode = true;
+    editorToggle.change(function() {
+        editorMode = !editorMode;
+    });
+    eventArgEl = document.getElementById('eventArg');
+    loadTextEl = document.getElementById('loadInput');
+    loadTextEl.value = TEST_JSON;
+    loadBtnEl = document.getElementById('loadBtn');
+    loadBtnEl.addEventListener('click', function(evt) {
+        loadObjectsFromJson(loadTextEl.value);
+    });
+
+    for (var i = 0; i < EVENT_LIST.length; ++i) {
+        var li = document.createElement("li");
+        var a = document.createElement("a");
+        a.appendChild(document.createTextNode(EVENT_LIST[i]));
+        a.setAttribute('href', '#');
+        li.appendChild(a);
+        $(".dropdown-menu")[0].appendChild(li);
+    }
+
+    $(".dropdown-menu").on("click", "li", function(event) {
+        if (currentSelectedObject != null) {
+            var eventName = this.children[0].innerHTML;
+            currentSelectedObject.eventList = [];
+            currentSelectedObject.eventList.push({ 'type': eventName, 'arg': eventArgEl.value });
+            // currentSelectedObject.eventList.push([eventName, eventArgEl.value]);
+        }
+    })
+}
+
+function initCanvas() {
+    scene = mainFrame.document.querySelector('a-scene');
+    camera = mainFrame.document.querySelector('[camera]');
+    background = mainFrame.document.querySelector('a-sky');
+
+    mainFrame.AFRAME.registerComponent(OBJECT_LISTENER, {
+        schema: {
+            id: {
+                default: "shape"
+            }
+        },
+        init: function() {
+            this.el.addEventListener('click', onObjectSelect);
+        },
+        tick: function(time, timeDelta) {
+            // console.log(time + ', ' + timeDelta);
+            // console.log(camera.getAttribute('rotation'));
+        }
+    });
+}
+
+function loadRoom(data) {
+    var bgSrc = data.bgSrc;
+    var objects = data.objects;
+}
+
+function createPrimitive(shape) {
+    if (!PRIMITIVE_DEFINITIONS.includes(shape)) {
+        console.log('Not valid shape:' + shape);
+        return;
+    }
+    newObject('primitive', shape);
+}
+
+function createObject(type) {
+    if (!OBJECT_DEFINITIONS.includes(type)) {
+        console.log('Not valid type:' + type);
+        return;
+    }
+    newObject(type, 'plane');
+}
+
+function makeArrayAsString() {
+    var result = "";
+    for (var i = 0; i < arguments.length - 1; ++i) {
+        result += arguments[i] + ", ";
+    }
+    result += arguments[arguments.length - 1];
+    return result;
+}
+
+function onObjectSelect() {
+    nowClick = this;
+    currentSelectedObject = obj.Controller.findByEl(this);
+    if (editorMode) {
+        shapeEl.innerHTML = currentSelectedObject.getShape();
+        var position = currentSelectedObject.transform.position;
+        positionEl.innerHTML = makeArrayAsString(
+            util.floorTwo(position.x),
+            util.floorTwo(position.y),
+            util.floorTwo(position.z));
+        var rotation = currentSelectedObject.transform.rotation;
+        rotationEl.innerHTML = makeArrayAsString(
+            util.floorTwo(rotation.x),
+            util.floorTwo(rotation.y));
+        scale = currentSelectedObject.transform.scale;
+        scaleEl.innerHTML = makeArrayAsString(scale.x, scale.y, scale.z);
+        showObjectBorder();
+    } else {
+        // Execute events assigned to object.
+        for (var i = 0; i < currentSelectedObject.eventList.length; ++i) {
+            var event = currentSelectedObject.eventList[i];
+            var eventType = event['type'];
+            var func = EVENT_DICTIONARY[eventType];
+            var arg = event['arg'];
+            func(arg);
+        }
+    }
+}
+
+function onObjectUnselect() {
+    currentSelectedObject = null;
+    shapeEl.innerHTML = "";
+    positionEl.innerHTML = "";
+    rotationEl.innerHTML = "";
+    scaleEl.innerHTML = "";
+}
+
+function newObject(type, shape, position, rotation, scale) {
+    var tag = 'a-' + shape;
+    var newEl = mainFrame.document.createElement(tag);
+    var newObj = new obj.Objct(newEl);
+
+    newObj.type = type;
+    newObj.shape = shape;
+    position = util.getForwardPostion(camera.getAttribute('rotation'));
+    newObj.setPosition(position);
+    rotation = camera.getAttribute('rotation');
+    newObj.setRotation(rotation);
+    scale = { x: 2, y: 2, z: 1 };
+    newObj.setScale(scale);
+
+    if (shape == 'image') {/*
+        util.getImageSize("http://i.imgur.com/fHyEMsl.jpg", function() {
+            newObj.setScale({ x: 1, y: this.height / this.width });
+        });*/
+        newObj.setMaterial({ 'src': "http://i.imgur.com/fHyEMsl.jpg" });
+    } else {
+        newObj.setMaterial({ 'color': util.getRandomHexColor() });
+    }
+    newObj.setClickListener(OBJECT_LISTENER);
+    newObj.eventList = [];
+    newObj.eventList.push({ 'type': type, 'arg': 'bg1.jpg' });
+    scene.appendChild(newEl);
+}
+
+function createImage(transform, material){
+    var newEl = mainFrame.document.createElement('a-image');
+    var newObj = new obj.Objct(newEl);
+
+    newObj.type = 'primitive';
+    newObj.shape = 'image';
+    newObj.setPosition(transform.position);
+    newObj.setRotation(transform.rotation);
+    var scale = { x: 0.1, y: 0.1, z: 1 };
+    newObj.setScale(scale);
+    /*
+    util.getImageSize(material.src, function() {
+        newObj.setScale({ x: 0.1, y: this.height / this.width });
+    });*/
+    newObj.setMaterial(material);
+
+    //scene.appendChild(newEl);
+    nowClick.appendChild(newEl);
+    newEl.addEventListener('mousedown', function (evt) {
+      var pos = this.getAttribute('position');
+      console.log('click : ' + util.floorTwo(pos.x) + ", " + util.floorTwo(pos.y) + ", " + util.floorTwo(pos.z));
+    });
+    console.log('create ' + util.floorTwo(transform.position.x) + ", " + util.floorTwo(transform.position.y) + ", " + util.floorTwo(transform.position.z));
+  }
+
+function showObjectBorder(){
+  console.log(nowClick);
+  console.log(scene);
+  var position = currentSelectedObject.transform.position;
+  var rotation = currentSelectedObject.transform.rotation;
+  var scale = currentSelectedObject.transform.scale;
+
+  var material = { 'src':"http://i.imgur.com/fHyEMsl.jpg"};
+/*
+  var leftTop = {
+    position: {x:position.x-scale.x/2, y:position.y+scale.y/2, z:position.z},
+    rotation: { x: rotation.x, y: rotation.y, z: rotation.z}
+  };
+  var leftBottom = {
+    position: {x:position.x-scale.x/2, y:position.y-scale.y/2, z:position.z},
+    rotation: { x: rotation.x, y: rotation.y, z: rotation.z}
+  };
+  var rightTop = {
+    position: {x:position.x+scale.x/2, y:position.y+scale.y/2, z:position.z},
+    rotation: { x: rotation.x, y: rotation.y, z: rotation.z}
+  };
+  var rightBottom = {
+    position: {x:position.x+scale.x/2, y:position.y-scale.y/2, z:position.z},
+    rotation: { x: rotation.x, y: rotation.y, z: rotation.z}
+  };
+*/
+/*
+  var leftTop = {
+    position: {x:position.x, y:position.y, z:position.z},
+    rotation: { x: rotation.x, y: rotation.y, z: rotation.z}
+  };*/
+  var leftBottom = {
+    position: {x:-scale.x/2, y:-scale.y/2, z:position.z},
+    rotation: { x: rotation.x, y: rotation.y, z: rotation.z}
+  };
+  /*
+  var rightTop = {
+    position: {x:1, y:1, z:-6},
+    rotation: { x: rotation.x, y: rotation.y, z: rotation.z}
+  };
+  var rightBottom = {
+    position: {x:1, y:-1, z:-6},
+    rotation: { x: rotation.x, y: rotation.y, z: rotation.z}
+  };
+*/
+  //createImage(leftTop, material);
+  createImage(leftBottom, material);
+  //createImage(rightTop, material);
+  //createImage(rightBottom, material);
+/*
+  var leftTop = document.createElement('a-plane');
+  leftTop.setAttribute('id', 'leftTop');
+  leftTop.setAttribute('geometry', {
+      primitive : 'plane',
+      height : boxHeight,
+      width : boxWidth
+  });
+  leftTop.setAttribute('position', {x:x-w/2, y:y+h/2, z:z});
+
+  var leftBottom = document.createElement('a-plane');
+  leftBottom.setAttribute('id', 'leftBottom');
+  leftBottom.setAttribute('geometry', {
+      primitive : 'plane',
+      height : boxHeight,
+      width : boxWidth
+  });
+  leftBottom.setAttribute('position', {x:x-w/2, y:y-h/2, z:z});
+
+  var RightTop = document.createElement('a-image');
+  RightTop.setAttribute('material', 'src', "/images/ad.png");
+  RightTop.setAttribute('id', 'RightTop');
+  RightTop.setAttribute('geometry', {
+      primitive : 'plane',
+      height : boxHeight,
+      width : boxWidth
+  });
+  RightTop.setAttribute('position', {x:x+w/2, y:y+h/2, z:z});
+  RightTop.addEventListener('click', function click(){
+    console.log('click rt');
+  });
+  RightTop.addEventListener('mousedown', function down(){
+    console.log('mouse down');
+  }, true);
+
+  var RightBottom = document.createElement('a-plane');
+  RightBottom.setAttribute('id', 'RightBottom');
+  RightBottom.setAttribute('geometry', {
+      primitive : 'plane',
+      height : boxHeight,
+      width : boxWidth
+  });
+  RightBottom.setAttribute('position', {x:x+w/2, y:y-h/2, z:z});
+  //RightBottom.setAttribute('material', 'src', "/images/temp.png");
+  RightBottom.setAttribute('cursor', "se-resize");
+  //RightBottom.addEventListener('mousedown', initialiseResize, false);
+*/
+}
+
+function teleportEvent(arg) {
+    console.log('teleport! to:' + arg);
+    var imageUrl = BACKGROUND_PREFIX + arg;
+    background.setAttribute('src', imageUrl);
+}
+
+function loadObjectsFromJson(json) {
+    var objects = obj.Controller.objectsFromJson(json);
+    for (var i = 0; i < objects.length; ++i) {
+        var el = obj.Controller.createElFromObj(mainFrame, objects[i]);
+        scene.appendChild(el);
+    }
+}
+
+},{"./object.js":6,"./util.js":7,"util":4}],6:[function(require,module,exports){
+var objects = [];
+
+function Objct(el, obj) {
+    this.el = el;
+    this.type = "";
+    this.shape = "";
+    this.transform = {};
+    this.material = {};
+
+    this.clickListener = "";
+    this.eventList = [];
+
+    // copy all properties of obj to this
+    for (var prop in obj) {
+        this[prop] = obj[prop];
+    }
+
+    objects.push(this);
+}
+
+Objct.prototype.getShape = function() {
+    if (this.el)
+        return this.el.getAttribute('geometry').primitive;
+    else
+        return this.shape;
+}
+
+Objct.prototype.setPosition = function(newPosition) {
+    if (this.el)
+        this.el.setAttribute('position', newPosition);
+    this.transform.position = newPosition;
+}
+
+Objct.prototype.setRotation = function(newRotation) {
+    if (this.el)
+        this.el.setAttribute('rotation', newRotation);
+    this.transform.rotation = newRotation;
+}
+
+Objct.prototype.setScale = function(newScale) {
+    if (this.el)
+        this.el.setAttribute('scale', newScale);
+    this.transform.scale = newScale;
+}
+
+Objct.prototype.setMaterial = function(newMaterial) {
+    this.material = newMaterial;
+    for (var key in newMaterial) {
+        this.el.setAttribute(key, newMaterial[key]);
+    }
+}
+
+Objct.prototype.setClickListener = function(listener) {
+    if (this.el)
+        this.el.setAttribute(listener, "");
+    this.clickListener = listener;
+}
+
+Objct.prototype.toObj = function() {
+    return null;
+}
+
+Objct.prototype.getSaveForm = function() {
+    var tmp = this.el;
+    this.el = null;
+    var copyObj = JSON.parse(JSON.stringify(this));
+    this.el = tmp;
+    return copyObj;
+}
+
+function Controller() {}
+
+Controller.prototype.objectsFromJson = function(json) {
+    var loadedObjects;
+    loadedObjects = JSON.parse(json);
+    // console.log(loadedObjects);
+    var loadedObjectsWithPrototype = [];
+    for (var i = 0; i < loadedObjects.length; ++i) {
+        var newObj = new Objct(null, loadedObjects[i]);
+        // console.log(loadedObjects[i]);
+        // console.log(newObj);
+        loadedObjectsWithPrototype.push(newObj);
+    }
+    return loadedObjectsWithPrototype;
+}
+
+Controller.prototype.objectsToJson = function() {
+    var saveObjects = [];
+    for (var i = 0; i < objects.length; ++i) {
+        saveObjects.push(objects[i].getSaveForm());
+    }
+    var json = JSON.stringify(saveObjects);
+    return json;
+}
+
+Controller.prototype.createElFromObj = function(frame, obj) {
+    var newEl = frame.document.createElement("a-" + obj.shape);
+    obj.el = newEl;
+    obj.setPosition(obj.transform.position);
+    obj.setRotation(obj.transform.rotation);
+    obj.setScale(obj.transform.scale);
+    obj.setMaterial(obj.material);
+    obj.setClickListener(obj.clickListener);
+
+    return newEl;
+}
+
+Controller.prototype.getNum = function() {
+    return objects.length;
+}
+
+Controller.prototype.remove = function(obj) {
+    if (obj.el) {
+        obj.el.parentElement.removeChild(obj.el);
+    }
+}
+
+Controller.prototype.findByEl = function(el) {
+    var objs = objects.filter(function(obj) {
+        return obj.el == el;
+    });
+    return objs[0];
+}
+
+module.exports = {
+    Objct: Objct,
+    Controller: new Controller()
+};
+
+},{}],7:[function(require,module,exports){
+function getRandomIntRange(min, max) {
+    return Math.floor(Math.random() * (max - min) + min);
+}
+
+module.exports.getRandomHexColor = function() {
+    var color = "#";
+    for (var i = 0; i < 6; ++i) {
+        var randomCode1 = getRandomIntRange("A".charCodeAt(0), "F".charCodeAt(0));
+        var randomCode2 = getRandomIntRange("0".charCodeAt(0), "9".charCodeAt(0));
+        var randomSelect = getRandomIntRange(0, 1);
+        color += String.fromCharCode((randomSelect) ? randomCode1 : randomCode2);
+    }
+    return color;
+}
+
+function toRadians(angle) {
+    return angle * (Math.PI / 180);
+}
+
+function toAngle(radians) {
+    return radians * (180 / Math.PI);
+}
+
+module.exports.getForwardPostion = function(rotation) {
+    var cameraRotation = rotation;
+    var yaw = -toRadians(cameraRotation.y - 90);
+    var pitch = -toRadians(cameraRotation.x);
+    var radius = -6;
+    var x = radius * Math.cos(yaw) * Math.cos(pitch);
+    var y = radius * Math.sin(pitch);
+    var z = radius * Math.sin(yaw) * Math.cos(pitch);
+
+    return { x: x, y: y, z: z };
+}
+
+module.exports.floorTwo = function(val) {
+    return Math.round(val * 100) / 100;
+}
+
+module.exports.getImageSize = function(url, callback) {
+    var img = new Image();
+    img.onload = callback;
+    img.src = url;
+}
+
+},{}]},{},[5]);
