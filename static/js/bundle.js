@@ -827,6 +827,7 @@ var editorToggle;
 var eventArgEl;
 var loadTextEl;
 var loadBtnEl;
+var borderList = [];
 
 // Aframe Dom Elements
 var mainFrame;
@@ -990,6 +991,7 @@ function makeArrayAsString() {
 }
 
 function onObjectSelect() {
+    hideBorder();
     nowClick = this;
     currentSelectedObject = obj.Controller.findByEl(this);
     if (editorMode) {
@@ -1040,10 +1042,13 @@ function newObject(type, shape, position, rotation, scale) {
     scale = { x: 2, y: 2, z: 1 };
     newObj.setScale(scale);
 
-    if (shape == 'image') {/*
+    if (shape == 'image') {
+      /*
+        why??
         util.getImageSize("http://i.imgur.com/fHyEMsl.jpg", function() {
             newObj.setScale({ x: 1, y: this.height / this.width });
-        });*/
+        });
+      */
         newObj.setMaterial({ 'src': "http://i.imgur.com/fHyEMsl.jpg" });
     } else {
         newObj.setMaterial({ 'color': util.getRandomHexColor() });
@@ -1054,127 +1059,73 @@ function newObject(type, shape, position, rotation, scale) {
     scene.appendChild(newEl);
 }
 
-function createImage(transform, material){
-    var newEl = mainFrame.document.createElement('a-image');
-    var newObj = new obj.Objct(newEl);
+function createBorder(id, transform, material){
+  var newEl = mainFrame.document.createElement('a-image');
+  var newObj = new obj.Objct(newEl);
 
-    newObj.type = 'primitive';
-    newObj.shape = 'image';
-    newObj.setPosition(transform.position);
-    newObj.setRotation(transform.rotation);
-    var scale = { x: 0.1, y: 0.1, z: 1 };
-    newObj.setScale(scale);
-    /*
-    util.getImageSize(material.src, function() {
-        newObj.setScale({ x: 0.1, y: this.height / this.width });
-    });*/
-    newObj.setMaterial(material);
+  newObj.type = 'primitive';
+  newObj.shape = 'image';
+  newObj.setPosition(transform.position);
+  newObj.setRotation(transform.rotation);
+  var scale = { x: 0.1, y: 0.1, z: 1 };
+  newObj.setScale(scale);
+  /*
+  util.getImageSize(material.src, function() {
+      newObj.setScale({ x: 0.1, y: this.height / this.width });
+  });*/
+  newObj.setMaterial(material);
 
-    //scene.appendChild(newEl);
-    nowClick.appendChild(newEl);
-    newEl.addEventListener('mousedown', function (evt) {
-      var pos = this.getAttribute('position');
-      console.log('click : ' + util.floorTwo(pos.x) + ", " + util.floorTwo(pos.y) + ", " + util.floorTwo(pos.z));
-    });
-    console.log('create ' + util.floorTwo(transform.position.x) + ", " + util.floorTwo(transform.position.y) + ", " + util.floorTwo(transform.position.z));
+  //scene.appendChild(newEl);
+  nowClick.appendChild(newEl);
+
+  newEl.setAttribute('id', id);
+  newEl.addEventListener('mousedown', function (evt) {
+    var pos = this.getAttribute('position');
+    console.log('click : ' + util.floorTwo(pos.x) + ", " + util.floorTwo(pos.y) + ", " + util.floorTwo(pos.z));
+  });
+  console.log('create ' + util.floorTwo(transform.position.x) + ", " + util.floorTwo(transform.position.y) + ", " + util.floorTwo(transform.position.z));
+  borderList.push(newEl);
+}
+
+function hideBorder(){
+  if(nowClick!=null){
+    for(var i=0; i<borderList.length; i++)
+      nowClick.removeChild(borderList[i]);
+
+    borderList = [];
   }
+}
 
 function showObjectBorder(){
-  console.log(nowClick);
-  console.log(scene);
+  console.log("now Click : " + nowClick);
+  console.log("scene : "  + scene);
   var position = currentSelectedObject.transform.position;
   var rotation = currentSelectedObject.transform.rotation;
   var scale = currentSelectedObject.transform.scale;
-
   var material = { 'src':"http://i.imgur.com/fHyEMsl.jpg"};
-/*
+
+  // position now working
   var leftTop = {
-    position: {x:position.x-scale.x/2, y:position.y+scale.y/2, z:position.z},
-    rotation: { x: rotation.x, y: rotation.y, z: rotation.z}
+    position: {x:-scale.x/2, y:+scale.y/2, z:position.z},
+    rotation: { x: 0, y: 0, z: 0}
   };
-  var leftBottom = {
-    position: {x:position.x-scale.x/2, y:position.y-scale.y/2, z:position.z},
-    rotation: { x: rotation.x, y: rotation.y, z: rotation.z}
-  };
-  var rightTop = {
-    position: {x:position.x+scale.x/2, y:position.y+scale.y/2, z:position.z},
-    rotation: { x: rotation.x, y: rotation.y, z: rotation.z}
-  };
-  var rightBottom = {
-    position: {x:position.x+scale.x/2, y:position.y-scale.y/2, z:position.z},
-    rotation: { x: rotation.x, y: rotation.y, z: rotation.z}
-  };
-*/
-/*
-  var leftTop = {
-    position: {x:position.x, y:position.y, z:position.z},
-    rotation: { x: rotation.x, y: rotation.y, z: rotation.z}
-  };*/
   var leftBottom = {
     position: {x:-scale.x/2, y:-scale.y/2, z:position.z},
     rotation: { x: rotation.x, y: rotation.y, z: rotation.z}
   };
-  /*
   var rightTop = {
-    position: {x:1, y:1, z:-6},
+    position: {x:scale.x/2, y:+scale.y/2, z:position.z},
     rotation: { x: rotation.x, y: rotation.y, z: rotation.z}
   };
   var rightBottom = {
-    position: {x:1, y:-1, z:-6},
+    position: {x:scale.x/2, y:-scale.y/2, z:position.z},
     rotation: { x: rotation.x, y: rotation.y, z: rotation.z}
   };
-*/
-  //createImage(leftTop, material);
-  createImage(leftBottom, material);
-  //createImage(rightTop, material);
-  //createImage(rightBottom, material);
-/*
-  var leftTop = document.createElement('a-plane');
-  leftTop.setAttribute('id', 'leftTop');
-  leftTop.setAttribute('geometry', {
-      primitive : 'plane',
-      height : boxHeight,
-      width : boxWidth
-  });
-  leftTop.setAttribute('position', {x:x-w/2, y:y+h/2, z:z});
 
-  var leftBottom = document.createElement('a-plane');
-  leftBottom.setAttribute('id', 'leftBottom');
-  leftBottom.setAttribute('geometry', {
-      primitive : 'plane',
-      height : boxHeight,
-      width : boxWidth
-  });
-  leftBottom.setAttribute('position', {x:x-w/2, y:y-h/2, z:z});
-
-  var RightTop = document.createElement('a-image');
-  RightTop.setAttribute('material', 'src', "/images/ad.png");
-  RightTop.setAttribute('id', 'RightTop');
-  RightTop.setAttribute('geometry', {
-      primitive : 'plane',
-      height : boxHeight,
-      width : boxWidth
-  });
-  RightTop.setAttribute('position', {x:x+w/2, y:y+h/2, z:z});
-  RightTop.addEventListener('click', function click(){
-    console.log('click rt');
-  });
-  RightTop.addEventListener('mousedown', function down(){
-    console.log('mouse down');
-  }, true);
-
-  var RightBottom = document.createElement('a-plane');
-  RightBottom.setAttribute('id', 'RightBottom');
-  RightBottom.setAttribute('geometry', {
-      primitive : 'plane',
-      height : boxHeight,
-      width : boxWidth
-  });
-  RightBottom.setAttribute('position', {x:x+w/2, y:y-h/2, z:z});
-  //RightBottom.setAttribute('material', 'src', "/images/temp.png");
-  RightBottom.setAttribute('cursor', "se-resize");
-  //RightBottom.addEventListener('mousedown', initialiseResize, false);
-*/
+  createBorder('leftTop', leftTop, material);
+  createBorder('leftBottom', leftBottom, material);
+  createImage('rightTop', rightTop, material);
+  createImage('rightBottom', rightBottom, material);
 }
 
 function teleportEvent(arg) {
