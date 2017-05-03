@@ -262,7 +262,7 @@ function createBorder(id, transform, material){
   newObj.shape = 'image';
   newObj.setPosition(transform.position);
   newObj.setRotation(transform.rotation);
-  var scale = { x: 0.1, y: 0.1, z: 1 };
+  var scale = { x: 0.2, y: 0.2, z: 1 };
   newObj.setScale(scale);
   /*
   util.getImageSize(material.src, function() {
@@ -278,6 +278,15 @@ function createBorder(id, transform, material){
     var pos = this.getAttribute('position');
     console.log('click : ' + util.floorTwo(pos.x) + ", " + util.floorTwo(pos.y) + ", " + util.floorTwo(pos.z));
   });
+
+  newEl.addEventListener('mouseenter', function(evt){
+    mainFrame.document.querySelector('canvas').className = "a-canvas a-resize-cursor";
+  });
+
+  newEl.addEventListener('mouseleave', function(evt){
+    mainFrame.document.querySelector('canvas').className = "a-canvas a-grab-cursor";
+  });
+
   console.log('create ' + util.floorTwo(transform.position.x) + ", " + util.floorTwo(transform.position.y) + ", " + util.floorTwo(transform.position.z));
   borderList.push(newEl);
 }
@@ -301,26 +310,26 @@ function showObjectBorder(){
 
   // position now working
   var leftTop = {
-    position: {x:-scale.x/2, y:+scale.y/2, z:position.z},
+    position: {x:-scale.x/2, y:scale.y/2, z:0},
     rotation: { x: 0, y: 0, z: 0}
   };
   var leftBottom = {
-    position: {x:-scale.x/2, y:-scale.y/2, z:position.z},
-    rotation: { x: rotation.x, y: rotation.y, z: rotation.z}
+    position: {x:-scale.x/2, y:-scale.y/2, z:0},
+    rotation: { x: 0, y: 0, z: 0}
   };
   var rightTop = {
-    position: {x:scale.x/2, y:+scale.y/2, z:position.z},
-    rotation: { x: rotation.x, y: rotation.y, z: rotation.z}
+    position: {x:scale.x/2, y:+scale.y/2, z:0},
+    rotation: { x: 0, y: 0, z: 0}
   };
   var rightBottom = {
-    position: {x:scale.x/2, y:-scale.y/2, z:position.z},
-    rotation: { x: rotation.x, y: rotation.y, z: rotation.z}
+    position: {x:scale.x/2, y:-scale.y/2, z:0},
+    rotation: { x: 0, y: 0, z: 0}
   };
 
   createBorder('leftTop', leftTop, material);
   createBorder('leftBottom', leftBottom, material);
-  createImage('rightTop', rightTop, material);
-  createImage('rightBottom', rightBottom, material);
+  createBorder('rightTop', rightTop, material);
+  createBorder('rightBottom', rightBottom, material);
 }
 
 function teleportEvent(arg) {
