@@ -225,7 +225,7 @@
 	    }
 
 	    if (this.__intersectedEl) {
-	      this.__emit('mousedown');
+	      this.__emit('mousedown', evt);
 	    }
 	  },
 
@@ -273,6 +273,10 @@
 
 	    if (this.__isDown) {
 	      this.__setMousePosition(evt);
+	    }
+
+	    if (this.__intersectedEl) {
+	    	this.__emit('mymousemove', evt);
 	    }
 	  },
 
@@ -517,12 +521,12 @@
 	  /**
 	   * @private
 	   */
-	  __emit: function __emit(evt) {
+	  __emit: function __emit(evt, mouseEvent) {
 	    var __intersectedEl = this.__intersectedEl;
 
 	    this.el.emit(evt, { target: __intersectedEl });
 	    if (__intersectedEl) {
-	      __intersectedEl.emit(evt);
+	      __intersectedEl.emit(evt, { mouseEvent: mouseEvent });
 	    }
 	  }
 	});

@@ -30,10 +30,13 @@ var mainFrame;
 var scene = null;
 var camera = null;
 var background = null;
+var mover = null;
 
 // State Variables
 var editorMode = true;
 var currentSelectedObject = null;
+var isDown = false;
+var currentSelectedArrowEl = null;
 
 var util = require('./util.js');
 var nodeUtil = require('util');
@@ -45,27 +48,56 @@ window.onLoadCanvas = function(frame) {
     initEditor();
     initCanvas();
 
-    var boxEl = mainFrame.document.getElementById('testbox');
-    var left = mainFrame.document.getElementById('left');
-    var right = mainFrame.document.getElementById('right');
-    var top = mainFrame.document.getElementById('top');
-    var bottom = mainFrame.document.getElementById('bottom');
-    var els = [left, right, top, bottom];
-    for (var i = 0; i < els.length; ++i) {
-        els[i].setAttribute('mover-listener', "");
-        els[i].addEventListener('mouseenter', function() {
-            var scale = this.getAttribute('scale');
-            this.setAttribute('scale', { x: scale.x * 2, y: scale.y * 2, z: scale.z });
-        });
-        els[i].addEventListener('mouseleave', function() {
-            var scale = this.getAttribute('scale');
-            this.setAttribute('scale', { x: scale.x * 0.5, y: scale.y * 0.5, z: scale.z });
-        });
-        els[i].addEventListener('mousedown', function(evt) {
-            console.log('down');
-        });
-    }
+    var initialPos = null;
+    var radius = 6;
 
+    mover = mainFrame.document.getElementById('mover');
+    mover.setAttribute('mover-listener', "");
+    mover.addEventListener('mouseenter', function() {
+        var scale = this.getAttribute('scale');
+        this.setAttribute('scale', { x: scale.x * 2, y: scale.y * 2, z: scale.z });
+    });
+    mover.addEventListener('mouseleave', function() {
+        var scale = this.getAttribute('scale');
+        this.setAttribute('scale', { x: scale.x * 0.5, y: scale.y * 0.5, z: scale.z });
+        this.emit('mouseup');
+    });
+    mover.addEventListener('mousedown', function(evt) {
+        this.setAttribute('material', 'color', "#FFFFFF");
+        camera.removeAttribute('look-controls');
+        isDown = true;
+        currentSelectedArrowEl = this;
+        initialPos = { x: evt.detail.mouseEvent.x, y: evt.detail.mouseEvent.y };
+
+        var pos = camera.components['mouse-cursor'].__raycaster.ray.direction;
+        initialPos = { x: pos.x * radius, y: pos.y * radius, z: pos.z * radius };
+
+        console.log(initialPos);
+    });
+    mover.addEventListener('mouseup', function(evt) {
+        this.setAttribute('material', 'color', "#000000");
+        camera.setAttribute('look-controls', "");
+        isDown = false;
+        currentSelectedArrowEl = null;
+    });
+    mover.addEventListener('mymousemove', function(evt) {
+        // var mouseEvent = evt.detail.mouseEvent;
+        console.log();
+        if (isDown) {
+            // console.log(this);
+            var a = camera.components['mouse-cursor'].__raycaster;
+            var b = a.ray.direction;
+            var newPos = { x: b.x * radius, y: b.y * radius, z: b.z * radius };
+            console.log(newPos);
+            mover.parentEl.setAttribute('position', newPos);
+            mover.parentEl.setAttribute('rotation', '');
+        }
+    });
+    mover.addEventListener('click', function(evt) {
+        console.log(this);
+    });
+    // mover.parentElement.removeChild(mover);
+    // boxEl.setAttribute(OBJECT_LISTENER, "");
     // boxEl.addEventListener('mouseenter', function() {
     //     boxEl.setAttribute('scale', { x: 2, y: 2, z: 2 });
     // });
@@ -80,10 +112,6 @@ window.create = function(type) {
     } else if (OBJECT_DEFINITIONS.includes(type)) {
         createObject(type);
     }
-}
-
-window.onMouseMove = function(evt) {
-    console.log(evt.clientX + ", " + evt.clientY);
 }
 
 function initEditor() {
@@ -214,6 +242,9 @@ function onObjectSelect() {
             util.floorTwo(rotation.y));
         scale = currentSelectedObject.transform.scale;
         scaleEl.innerHTML = makeArrayAsString(scale.x, scale.y, scale.z);
+
+        // append arrow element
+        this.appendChild(mover);
     } else {
         // Execute events assigned to object.
         for (var i = 0; i < currentSelectedObject.eventList.length; ++i) {
@@ -241,7 +272,7 @@ function newObject(type, shape, position, rotation, scale) {
 
     newObj.type = type;
     newObj.shape = shape;
-    position = util.getForwardPostion(camera.getAttribute('rotation'));
+    position = util.getForwardPosition(camera.getAttribute('rotation'));
     newObj.setPosition(position);
     rotation = camera.getAttribute('rotation');
     newObj.setRotation(rotation);

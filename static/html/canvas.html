@@ -4,7 +4,6 @@
 <head>
     <title>Test A-Frame</title>
     <script type="text/javascript" src="../js/aframe.min.js"></script>
-    <!-- <script type="text/javascript" src="https://rawgit.com/mayognaise/aframe-mouse-cursor-component/master/dist/aframe-mouse-cursor-component.min.js"></script> -->
     <script type="text/javascript" src="../js/aframe-mouse-cursor-component.js"></script>
     <style type="text/css">
     body {
@@ -14,7 +13,6 @@
 </head>
 
 <body>
-    <!-- <a-scene onmousemove="onMouseMove(event)"> -->
     <a-scene>
         <!-- BACKGROUND -->
         <a-sky src="../img/puydesancy.jpg"></a-sky>
@@ -22,10 +20,7 @@
         <a-entity camera look-controls mouse-cursor>
         </a-entity>
         <a-box id="testbox" position="0 0 -6" material="color:#123466">
-            <a-plane id="left" position="-0.26 0 1" scale="0.1 0.4 1" material="color:#000000"></a-plane>
-            <a-plane id="right" position="0.26 0 1" scale="0.1 0.4 1" material="color:#000000"></a-plane>
-            <a-plane id="top" position="0 0.26 1" scale="0.4 0.1 1" material="color:#000000"></a-plane>
-            <a-plane id="bottom" position="0 -0.26 1" scale="0.4 0.1 1" material="color:#000000"></a-plane>
+            <a-plane id="mover" position="0 0 1" scale="0.1 0.1 1" material="color:#000000"></a-plane>
         </a-box>
     </a-scene>
     <script type="text/javascript">
