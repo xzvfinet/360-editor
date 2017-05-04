@@ -21,11 +21,11 @@ function toAngle(radians) {
     return radians * (180 / Math.PI);
 }
 
-module.exports.getForwardPostion = function(rotation) {
-    var cameraRotation = rotation;
-    var yaw = -toRadians(cameraRotation.y - 90);
-    var pitch = -toRadians(cameraRotation.x);
-    var radius = -6;
+module.exports.getForwardPosition = function(rotation, radius) {
+    if (radius == undefined) radius = -6;
+
+    var yaw = -toRadians(rotation.y - 90);
+    var pitch = -toRadians(rotation.x);
     var x = radius * Math.cos(yaw) * Math.cos(pitch);
     var y = radius * Math.sin(pitch);
     var z = radius * Math.sin(yaw) * Math.cos(pitch);

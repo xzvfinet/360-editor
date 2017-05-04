@@ -87,6 +87,7 @@ window.onMouseMove = function(evt) {
 }
 
 function initEditor() {
+    mainCanvas = $('#main-canvas')[0];
     menuElList = document.getElementsByClassName('well');
     idEl = document.getElementsByClassName('object-id')[0];
     shapeEl = document.getElementsByClassName('object-shape')[0];
@@ -107,9 +108,12 @@ function initEditor() {
     editorMode = true;
     editorToggle.change(function() {
         editorMode = !editorMode;
-        for (var i = 0; i < menuElList.length; ++i){
+        for (var i = 0; i < menuElList.length; ++i) {
             menuElList[i].style.visibility = (editorMode) ? 'visible' : 'hidden';
         }
+
+        mainCanvas.style.width = (editorMode) ? '' : '100%';
+
     });
     eventArgEl = document.getElementById('eventArg');
     loadTextEl = document.getElementById('loadInput');
