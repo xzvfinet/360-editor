@@ -17,7 +17,7 @@ function toRadians(angle) {
     return angle * (Math.PI / 180);
 }
 
-function toAngle(radians) {
+function toDegree(radians) {
     return radians * (180 / Math.PI);
 }
 
@@ -31,6 +31,30 @@ module.exports.getForwardPosition = function(rotation, radius) {
     var z = radius * Math.sin(yaw) * Math.cos(pitch);
 
     return { x: x, y: y, z: z };
+}
+
+function vector2Rotation(v) {
+    var radius = Math.sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
+    var pitch = Math.asin(v.y/radius);
+    var yaw = Math.acos(v.x/(radius*Math.cos(pitch)));
+
+    var rotation = {};
+    rotation.y = -(toDegree(yaw) + 90);
+    rotation.x = -toDegree(pitch);
+    rotation.z = 0;
+
+    return rotation;
+}
+
+module.exports.calcRotationBetweenVector = function(v1, v2) {
+    var r1 = vector2Rotation(v1);
+    var r2 = vector2Rotation(v2);
+
+    return {
+        x: r1.x-r2.x,
+        y: r1.y-r2.y,
+        z: 0
+    };
 }
 
 module.exports.floorTwo = function(val) {

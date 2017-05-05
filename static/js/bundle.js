@@ -13,6 +13,7 @@ var TEST_JSON = '[{"el":null,"type":"primitive","shape":"box","transform":{"posi
 
 // Editor Dom Elements
 var mainCanvas;
+var menuElList;
 var idEl;
 var shapeEl;
 var positionEl;
@@ -30,10 +31,13 @@ var mainFrame;
 var scene = null;
 var camera = null;
 var background = null;
+var mover = null;
 
 // State Variables
 var editorMode = true;
 var currentSelectedObject = null;
+var isDown = false;
+var currentSelectedArrowEl = null;
 
 var util = require('./util.js');
 var nodeUtil = require('util');
@@ -55,6 +59,8 @@ window.create = function(type) {
 }
 
 function initEditor() {
+    mainCanvas = $('#main-canvas')[0];
+    menuElList = document.getElementsByClassName('well');
     idEl = document.getElementsByClassName('object-id')[0];
     shapeEl = document.getElementsByClassName('object-shape')[0];
     positionEl = document.getElementsByClassName('object-position')[0];
@@ -74,10 +80,15 @@ function initEditor() {
     editorMode = true;
     editorToggle.change(function() {
         editorMode = !editorMode;
+        for (var i = 0; i < menuElList.length; ++i) {
+            menuElList[i].style.visibility = (editorMode) ? 'visible' : 'hidden';
+        }
+
+        mainCanvas.style.width = (editorMode) ? '' : '100%';
+
     });
     eventArgEl = document.getElementById('eventArg');
     loadTextEl = document.getElementById('loadInput');
-    loadTextEl.value = TEST_JSON;
     saveBtnEl = document.getElementById('saveBtn');
     saveBtnEl.addEventListener('click', function(evt) {
         var json = obj.Controller.objectsToJson();
@@ -104,7 +115,64 @@ function initEditor() {
             currentSelectedObject.eventList.push({ 'type': eventName, 'arg': eventArgEl.value });
             // currentSelectedObject.eventList.push([eventName, eventArgEl.value]);
         }
-    })
+    });
+
+    // Object mover
+    var initialPos = null;
+    var prevPos = null;
+    var radius = 6;
+
+    mover = mainFrame.document.getElementById('mover');
+    mover.setAttribute('mover-listener', "");
+    mover.addEventListener('mouseenter', function() {
+        var scale = this.getAttribute('scale');
+        this.setAttribute('scale', { x: scale.x * 2, y: scale.y * 2, z: scale.z });
+    });
+    mover.addEventListener('mouseleave', function() {
+        var scale = this.getAttribute('scale');
+        this.setAttribute('scale', { x: scale.x / 2, y: scale.y / 2, z: scale.z });
+        this.emit('mouseup');
+    });
+    mover.addEventListener('mousedown', function(evt) {
+        this.setAttribute('material', 'color', "#FFFFFF");
+        camera.removeAttribute('look-controls');
+        isDown = true;
+        currentSelectedArrowEl = this;
+
+        var pos = camera.components['mouse-cursor'].__raycaster.ray.direction;
+        initialPos = { x: pos.x * radius, y: pos.y * radius, z: pos.z * radius };
+        prevPos = initialPos;
+    });
+    mover.addEventListener('mouseup', function(evt) {
+        this.setAttribute('material', 'color', "#000000");
+        camera.setAttribute('look-controls', "");
+        isDown = false;
+        currentSelectedArrowEl = null;
+    });
+    mover.addEventListener('mymousemove', function(evt) {
+        // var mouseEvent = evt.detail.mouseEvent;
+        if (isDown) {
+            var direction = camera.components['mouse-cursor'].__raycaster.ray.direction;
+            var newPos = {
+                x: direction.x * radius,
+                y: direction.y * radius,
+                z: direction.z * radius
+            };
+            mover.parentEl.setAttribute('position', newPos);
+
+            var deltaRot = util.calcRotationBetweenVector(prevPos, newPos);
+            prevPos = newPos;
+
+            var currentRot = mover.parentEl.getAttribute('rotation');
+            var newRot = {
+                x: currentRot.x + deltaRot.x,
+                y: currentRot.y + deltaRot.y,
+                z: 0
+            };
+
+            mover.parentEl.setAttribute('rotation', newRot);
+        }
+    });
 }
 
 function initCanvas() {
@@ -174,6 +242,9 @@ function onObjectSelect() {
             util.floorTwo(rotation.y));
         scale = currentSelectedObject.transform.scale;
         scaleEl.innerHTML = makeArrayAsString(scale.x, scale.y, scale.z);
+
+        // append arrow element
+        this.appendChild(mover);
     } else {
         // Execute events assigned to object.
         for (var i = 0; i < currentSelectedObject.eventList.length; ++i) {
@@ -201,7 +272,7 @@ function newObject(type, shape, position, rotation, scale) {
 
     newObj.type = type;
     newObj.shape = shape;
-    position = util.getForwardPostion(camera.getAttribute('rotation'));
+    position = util.getForwardPosition(camera.getAttribute('rotation'));
     newObj.setPosition(position);
     rotation = camera.getAttribute('rotation');
     newObj.setRotation(rotation);
@@ -388,20 +459,44 @@ function toRadians(angle) {
     return angle * (Math.PI / 180);
 }
 
-function toAngle(radians) {
+function toDegree(radians) {
     return radians * (180 / Math.PI);
 }
 
-module.exports.getForwardPostion = function(rotation) {
-    var cameraRotation = rotation;
-    var yaw = -toRadians(cameraRotation.y - 90);
-    var pitch = -toRadians(cameraRotation.x);
-    var radius = -6;
+module.exports.getForwardPosition = function(rotation, radius) {
+    if (radius == undefined) radius = -6;
+
+    var yaw = -toRadians(rotation.y - 90);
+    var pitch = -toRadians(rotation.x);
     var x = radius * Math.cos(yaw) * Math.cos(pitch);
     var y = radius * Math.sin(pitch);
     var z = radius * Math.sin(yaw) * Math.cos(pitch);
 
     return { x: x, y: y, z: z };
+}
+
+function vector2Rotation(v) {
+    var radius = Math.sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
+    var pitch = Math.asin(v.y/radius);
+    var yaw = Math.acos(v.x/(radius*Math.cos(pitch)));
+
+    var rotation = {};
+    rotation.y = -(toDegree(yaw) + 90);
+    rotation.x = -toDegree(pitch);
+    rotation.z = 0;
+
+    return rotation;
+}
+
+module.exports.calcRotationBetweenVector = function(v1, v2) {
+    var r1 = vector2Rotation(v1);
+    var r2 = vector2Rotation(v2);
+
+    return {
+        x: r1.x-r2.x,
+        y: r1.y-r2.y,
+        z: 0
+    };
 }
 
 module.exports.floorTwo = function(val) {
