@@ -109,6 +109,10 @@ Controller.prototype.getNum = function() {
     return objects.length;
 }
 
+Controller.prototype.getObjects = function(){
+    return objects;
+}
+
 Controller.prototype.remove = function(obj) {
     if (obj.el) {
         obj.el.parentElement.removeChild(obj.el);
