@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta name="google" content="notranslate" />
+    <link rel="stylesheet" href="static/css/bootstrap.min.css">
+    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+    <script type="text/javascript" src="static/js/jquery-3.1.1.min.js"></script>
+    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
+    <script type="text/javascript" src="static/js/bundle.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="static/css/editor.css">
+</head>
+
+<body>
+    <div class="navbar navbar-fixed-top navbar-default">
+        <div class="container">
+            <div class="navbar-header"><a class="navbar-brand" href="#">Project name</a>
+                <a class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="glyphicon glyphicon-bar"></span>
+                    <span class="glyphicon glyphicon-bar"></span>
+                    <span class="glyphicon glyphicon-bar"></span>
+                </a>
+            </div>
+            <div class="navbar-collapse">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="#">Home</a>
+                    </li>
+                    <li><a href="#about">About</a>
+                    </li>
+                    <li><a href="#contact">Contact</a>
+                    </li>
+                </ul>
+                <div class="navbar-right">
+                    <label class="checkbox-inline">
+                        <input id="toggle-event" type="checkbox" data-toggle="toggle"> Editor Mode
+                    </label>
+                </div>
+            </div>
+            <!--/.navbar-collapse -->
+        </div>
+    </div>
+    <div class="container">
+        <div id="wrapper" class="row">
+            <div class="col-md-2">
+                <div class="sidebar-nav-fixed affix">
+                    <div class="well">
+                        <ul class="nav">
+                            <li class="nav-header">Shape</li>
+                            <li class="active" onclick="create('box')"><a>Box</a></li>
+                            <li onclick="create('sphere')"><a>Sphere</a></li>
+                            <li onclick="create('cylinder')"><a>Cylinder</a></li>
+                            <li onclick="create('plane')"><a>Plane</a></li>
+                            </li>
+                            <li class="nav-header">Primitive</li>
+                            <li class="active" onclick="create('image')"><a>Image</a></li>
+                            <li onclick="create('teleport')"><a>Teleport</a></li>
+                            </li>
+                        </ul>
+                    </div>
+                    <!--/.well -->
+                    <form  action='/upload' method="post" enctype="multipart/form-data">
+                      <input type='file' name='image' id='image' onchange="this.form.submit()">
+                    </form>
+                </div>
+                <!--/sidebar-nav-fixed -->
+            </div>
+            <!--/span-->
+            <div id="main-canvas" class="col-md-8">
+                <iframe id="main_scene" class="main_scene" width="100%" height="100%" allowfullscreen="yes" scrolling="no" allowvr="yes" src="static/html/canvas.html"></iframe>
+            </div>
+            <!--/span-->
+            <div class="col-md-2">
+                <div class="sidebar-nav-fixed pull-right affix">
+                    <div class="well">
+                        <table class="nav object-list">
+                            <thead>
+                                <h4>Properties</h4>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><b>Id</b></td>
+                                    <td class='list-value object-id'>none</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Shape</b></td>
+                                    <td class='list-value object-shape'>none</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Position</b></td>
+                                    <td class='list-value object-position'>none</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Rotation</b></td>
+                                    <td class='list-value object-rotation'>none</td>
+                                </tr>
+                                <tr>
+                                    <td><b>Scale</b></td>
+                                    <td class='list-value object-scale'>none</td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td>
+                                        <button id="delete-btn">Delete</button>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <!--/.well -->
+                    <div class="well">
+                        <table class="nav object-list">
+                            <thead>
+                                <h4>Events</h4>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td class='list-value object-id'>
+                                        <div class="dropdown">
+                                            <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Dropdown Example
+                                                <span class="caret"></span></button>
+                                            <ul class="dropdown-menu">
+                                            </ul>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <input id="eventArg" type="text" name="">
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <div class="well">
+                        <table class="nav object-list">
+                            <thead>
+                                <h4>Loads</h4>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>
+                                        <input id="loadInput" type="text" name="">
+                                        <button id="loadBtn">Load</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td>
+                                    </td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                    <!--/.well -->
+                </div>
+                <!--/sidebar-nav-fixed -->
+            </div>
+            <!--/span-->
+        </div>
+        <!--/row-->
+        <footer>
+        </footer>
+    </div>
+    <!--/.fluid-container-->
+</body>
+
+</html>
+
+<script>
+/*
+$(document).on('click', '#image', function () {
+  console.log('image!');
+    $.ajax({
+        url: '/upload',
+        data: formData,
+        processData: false,
+        contentType: false,
+        type: 'POST',
+        success: function (data) {
+            alert("이미지 업로드 성공");
+        }
+    });
+});
+*/
+
+$(document).ready(function (e) {
+    $('#image').change(function(e) {
+      console.log("success");
+      $.ajax({
+          url: '/upload',
+          data: formData,
+          processData: false,
+          contentType: false,
+          type: 'POST',
+          success: function (data) {
+              alert("이미지 업로드 성공");
+          }
+      });
+    });
+});
+
+</script>

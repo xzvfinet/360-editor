@@ -223,19 +223,16 @@ function onObjectUnselect() {
     scaleEl.innerHTML = "";
 }
 
-function newObject(type, shape, position, rotation, scale) {
+function newObject(type, shape, src) {
     var tag = 'a-' + shape;
     var newEl = mainFrame.document.createElement(tag);
     var newObj = new obj.Objct(newEl);
 
     newObj.type = type;
     newObj.shape = shape;
-    position = util.getForwardPostion(camera.getAttribute('rotation'));
-    newObj.setPosition(position);
-    rotation = camera.getAttribute('rotation');
-    newObj.setRotation(rotation);
-    scale = { x: 2, y: 2, z: 1 };
-    newObj.setScale(scale);
+    newObj.setPosition(util.getForwardPostion(camera.getAttribute('rotation')));
+    newObj.setRotation(camera.getAttribute('rotation'););
+    newObj.setScale({ x: 2, y: 2, z: 1 });
 
     if (shape == 'image') {
       /*
@@ -244,7 +241,8 @@ function newObject(type, shape, position, rotation, scale) {
             newObj.setScale({ x: 1, y: this.height / this.width });
         });
       */
-        newObj.setMaterial({ 'src': "http://i.imgur.com/fHyEMsl.jpg" });
+        //newObj.setMaterial({ 'src': "http://i.imgur.com/fHyEMsl.jpg" });
+        newObj.setMaterial({ 'src': src });
     } else {
         newObj.setMaterial({ 'color': util.getRandomHexColor() });
     }
