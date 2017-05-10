@@ -1,7 +1,7 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 // Constants
 var PRIMITIVE_DEFINITIONS = ['box', 'sphere', 'cylinder', 'plane', 'image'];
-var OBJECT_DEFINITIONS = ['teleport','minimap'];
+var OBJECT_DEFINITIONS = ['teleport', 'minimap'];
 var OBJECT_LISTENER = 'object-listener';
 var EVENT_LIST = ['teleport', 'link', 'page', 'image', 'video'];
 var BACKGROUND_PREFIX = "../img/";
@@ -120,69 +120,14 @@ function initEditor() {
             // currentSelectedObject.eventList.push([eventName, eventArgEl.value]);
         }
     });
-
-    // Object mover
-    var initialPos = null;
-    var prevPos = null;
-    var radius = 6;
-
-    mover = mainFrame.document.getElementById('mover');
-    mover.setAttribute('mover-listener', "");
-    mover.addEventListener('mouseenter', function() {
-        var scale = this.getAttribute('scale');
-        this.setAttribute('scale', { x: scale.x * 2, y: scale.y * 2, z: scale.z });
-    });
-    mover.addEventListener('mouseleave', function() {
-        var scale = this.getAttribute('scale');
-        this.setAttribute('scale', { x: scale.x / 2, y: scale.y / 2, z: scale.z });
-        this.emit('mouseup');
-    });
-    mover.addEventListener('mousedown', function(evt) {
-        this.setAttribute('material', 'color', "#FFFFFF");
-        camera.removeAttribute('look-controls');
-        isDown = true;
-        currentSelectedArrowEl = this;
-
-        var pos = camera.components['mouse-cursor'].__raycaster.ray.direction;
-        initialPos = { x: pos.x * radius, y: pos.y * radius, z: pos.z * radius };
-        prevPos = initialPos;
-    });
-    mover.addEventListener('mouseup', function(evt) {
-        this.setAttribute('material', 'color', "#000000");
-        camera.setAttribute('look-controls', "");
-        isDown = false;
-        currentSelectedArrowEl = null;
-    });
-    mover.addEventListener('mymousemove', function(evt) {
-        // var mouseEvent = evt.detail.mouseEvent;
-        if (isDown) {
-            var direction = camera.components['mouse-cursor'].__raycaster.ray.direction;
-            var newPos = {
-                x: direction.x * radius,
-                y: direction.y * radius,
-                z: direction.z * radius
-            };
-            mover.parentEl.setAttribute('position', newPos);
-
-            var deltaRot = util.calcRotationBetweenVector(prevPos, newPos);
-            prevPos = newPos;
-
-            var currentRot = mover.parentEl.getAttribute('rotation');
-            var newRot = {
-                x: currentRot.x + deltaRot.x,
-                y: currentRot.y + deltaRot.y,
-                z: 0
-            };
-
-            mover.parentEl.setAttribute('rotation', newRot);
-        }
-    });
 }
 
 function initCanvas() {
     scene = mainFrame.document.querySelector('a-scene');
     camera = mainFrame.document.querySelector('[camera]');
     background = mainFrame.document.querySelector('a-sky');
+
+    document.mainFrame = mainFrame;
 
     mainFrame.AFRAME.registerComponent(OBJECT_LISTENER, {
         schema: {
@@ -200,9 +145,9 @@ function initCanvas() {
     });
     mainFrame.AFRAME.registerComponent('minimap-direction', {
 
-        init: function(){
+        init: function() {
             var mouseDown = false;
-             // Mouse Events
+            // Mouse Events
             scene.addEventListener('mousedown', this.onMouseDown, false);
             scene.addEventListener('mousemove', this.onMouseMove, false);
             scene.addEventListener('mouseup', this.releaseMouse, false);
@@ -212,18 +157,71 @@ function initCanvas() {
             scene.addEventListener('touchmove', this.onTouchMove);
             scene.addEventListener('touchend', this.onTouchEnd);
         },
-        onMouseDown: function (event) {
+        onMouseDown: function(event) {
             this.mouseDown = true;
         },
-        releaseMouse: function (event) {
+        releaseMouse: function(event) {
             this.mouseDown = false;
         },
-        onMouseMove: function (event){
-            if(this.mouseDown){
-                miniMapDirector.setAttribute('rotation',{x:0,y:0,z:camera.getAttribute('rotation').y});
+        onMouseMove: function(event) {
+            if (this.mouseDown) {
+                miniMapDirector.setAttribute('rotation', { x: 0, y: 0, z: camera.getAttribute('rotation').y });
             }
         }
     });
+
+    mainFrame.AFRAME.registerComponent('mover-listener', {
+        schema: {},
+        init: function() {
+            var initialPos = null;
+            var prevPos = null;
+            var radius = 6;
+
+            this.el.addEventListener('mouseenter', function() {
+                var scale = this.getAttribute('scale');
+                this.setAttribute('scale', { x: scale.x * 2, y: scale.y * 2, z: scale.z });
+            });
+            this.el.addEventListener('mouseleave', function() {
+                var scale = this.getAttribute('scale');
+                this.setAttribute('scale', { x: scale.x / 2, y: scale.y / 2, z: scale.z });
+                this.emit('mouseup');
+            });
+            this.el.addEventListener('mousedown', function(evt) {
+                this.setAttribute('material', 'color', "#FFFFFF");
+                camera.removeAttribute('look-controls');
+                isDown = true;
+                currentSelectedArrowEl = this;
+
+                var pos = camera.components['mouse-cursor'].__raycaster.ray.direction;
+                initialPos = { x: pos.x * radius, y: pos.y * radius, z: pos.z * radius };
+                prevPos = initialPos;
+            });
+            this.el.addEventListener('mouseup', function(evt) {
+                this.setAttribute('material', 'color', "#000000");
+                camera.setAttribute('look-controls', "");
+                isDown = false;
+                currentSelectedArrowEl = null;
+            });
+            this.el.addEventListener('mymousemove', function(evt) {
+                if (isDown) {
+                    var direction = camera.components['mouse-cursor'].__raycaster.ray.direction;
+                    var newPos = {
+                        x: direction.x * radius,
+                        y: direction.y * radius,
+                        z: direction.z * radius
+                    };
+                    this.parentEl.setAttribute('position', newPos);
+                }
+            });
+        },
+        tick: function(time, timeDelta) {
+            // console.log(time + ', ' + timeDelta);
+            // console.log(camera.getAttribute('rotation'));
+        }
+    });
+
+    mover = mainFrame.document.getElementById('mover');
+    mover.setAttribute('mover-listener', "");
 
 }
 
@@ -322,6 +320,9 @@ function newObject(type, shape, position, rotation, scale) {
     newObj.eventList = [];
     newObj.eventList.push({ 'type': type, 'arg': 'bg1.jpg' });
 
+    // Make object face at camera origin by default.
+    newEl.setAttribute('look-at', '#camera');
+
     scene.appendChild(newEl);
 
     setObjectOnMiniMap(position);
@@ -343,57 +344,56 @@ function loadObjectsFromJson(json) {
 
 //minimap
 
- window.setMiniMap = function(){
-     if(miniMap == null){
+window.setMiniMap = function() {
+    if (miniMap == null) {
         miniMap = mainFrame.document.createElement('a-image');
         miniMapDirector = mainFrame.document.createElement('a-image');
-        
-        miniMap.setAttribute('id','minimap');
-        miniMap.setAttribute('material','opacity',0);
-        
-        miniMapDirector.setAttribute('id','minimap-director');
-        miniMapDirector.setAttribute('material','src','/static/img/Minimap_Director.png');
-        miniMapDirector.setAttribute('minimap-direction',"")
-        //var newObj = new obj.Objct(miniMap);
 
-        rotation = {x:0,y:0,z:camera.getAttribute('rotation').y}
-        miniMapDirector.setAttribute('rotation',rotation);
-        
-        position = {x:-4,y:-3.5,z:-5};
-        miniMap.setAttribute('position',position);
+        miniMap.setAttribute('id', 'minimap');
+        miniMap.setAttribute('material', 'opacity', 0);
+
+        miniMapDirector.setAttribute('id', 'minimap-director');
+        miniMapDirector.setAttribute('material', 'src', '/static/img/Minimap_Director.png');
+        miniMapDirector.setAttribute('minimap-direction', "")
+            //var newObj = new obj.Objct(miniMap);
+
+        rotation = { x: 0, y: 0, z: camera.getAttribute('rotation').y }
+        miniMapDirector.setAttribute('rotation', rotation);
+
+        position = { x: -4, y: -3.5, z: -5 };
+        miniMap.setAttribute('position', position);
         //newObj.setPosition(position);
 
         miniMap.appendChild(miniMapDirector);
         camera.appendChild(miniMap);
 
         var objects = obj.Controller.getObjects();
-        
-        for(var i = 0;i<obj.Controller.getNum();i++){
+
+        for (var i = 0; i < obj.Controller.getNum(); i++) {
             setObjectOnMiniMap(objects[i].transform.position);
         }
-     }else{
-         console.log('already has minimap');
-     }
+    } else {
+        console.log('already has minimap');
+    }
 }
 
-window.setObjectOnMiniMap = function(position){
-    if(miniMap != null){
-        var x = position.x/10 - 2.4;
-        var y = position.z/10 * -1 - 2.1;
+window.setObjectOnMiniMap = function(position) {
+    if (miniMap != null) {
+        var x = position.x / 10 - 2.4;
+        var y = position.z / 10 * -1 - 2.1;
         var newEl = mainFrame.document.createElement('a-plane');
         //var newObj = new obj.Objct(newEl);
 
-        position = { x: x, y: y ,z: -3 };
-        newEl.setAttribute('position',position);
+        position = { x: x, y: y, z: -3 };
+        newEl.setAttribute('position', position);
         //newObj.setPosition(position);
         scale = { x: 0.2, y: 0.2, z: 0.2 };
-        newEl.setAttribute('scale',scale);
+        newEl.setAttribute('scale', scale);
         //newObj.setScale(scale);
 
         miniMap.appendChild(newEl);
     }
 }
-
 
 },{"./object.js":2,"./util.js":3,"util":7}],2:[function(require,module,exports){
 var objects = [];
@@ -554,39 +554,21 @@ function toDegree(radians) {
 }
 
 module.exports.getForwardPosition = function(rotation, radius) {
-    if (radius == undefined) radius = -6;
+    if (radius == undefined) radius = 6;
 
-    var yaw = -toRadians(rotation.y - 90);
-    var pitch = -toRadians(rotation.x);
-    var x = radius * Math.cos(yaw) * Math.cos(pitch);
-    var y = radius * Math.sin(pitch);
-    var z = radius * Math.sin(yaw) * Math.cos(pitch);
+    console.log(rotation);
+
+    var theta = rotation.x;
+    var pi = rotation.y + 90;
+
+    var thetaRad = toRadians(theta);
+    var piRad = toRadians(pi);
+
+    var x = radius * Math.cos(thetaRad) * Math.cos(piRad);
+    var y = radius * Math.sin(thetaRad);
+    var z = -radius * Math.cos(thetaRad) * Math.sin(piRad);
 
     return { x: x, y: y, z: z };
-}
-
-function vector2Rotation(v) {
-    var radius = Math.sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
-    var pitch = Math.asin(v.y/radius);
-    var yaw = Math.acos(v.x/(radius*Math.cos(pitch)));
-
-    var rotation = {};
-    rotation.y = -(toDegree(yaw) + 90);
-    rotation.x = -toDegree(pitch);
-    rotation.z = 0;
-
-    return rotation;
-}
-
-module.exports.calcRotationBetweenVector = function(v1, v2) {
-    var r1 = vector2Rotation(v1);
-    var r2 = vector2Rotation(v2);
-
-    return {
-        x: r1.x-r2.x,
-        y: r1.y-r2.y,
-        z: 0
-    };
 }
 
 module.exports.floorTwo = function(val) {

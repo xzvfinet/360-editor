@@ -119,63 +119,6 @@ function initEditor() {
             // currentSelectedObject.eventList.push([eventName, eventArgEl.value]);
         }
     });
-
-    // Object mover
-    var initialPos = null;
-    var prevPos = null;
-    var radius = 6;
-
-    mover = mainFrame.document.getElementById('mover');
-    mover.setAttribute('mover-listener', "");
-    mover.addEventListener('mouseenter', function() {
-        var scale = this.getAttribute('scale');
-        this.setAttribute('scale', { x: scale.x * 2, y: scale.y * 2, z: scale.z });
-    });
-    mover.addEventListener('mouseleave', function() {
-        var scale = this.getAttribute('scale');
-        this.setAttribute('scale', { x: scale.x / 2, y: scale.y / 2, z: scale.z });
-        this.emit('mouseup');
-    });
-    mover.addEventListener('mousedown', function(evt) {
-        this.setAttribute('material', 'color', "#FFFFFF");
-        camera.removeAttribute('look-controls');
-        isDown = true;
-        currentSelectedArrowEl = this;
-
-        var pos = camera.components['mouse-cursor'].__raycaster.ray.direction;
-        initialPos = { x: pos.x * radius, y: pos.y * radius, z: pos.z * radius };
-        prevPos = initialPos;
-    });
-    mover.addEventListener('mouseup', function(evt) {
-        this.setAttribute('material', 'color', "#000000");
-        camera.setAttribute('look-controls', "");
-        isDown = false;
-        currentSelectedArrowEl = null;
-    });
-    mover.addEventListener('mymousemove', function(evt) {
-        // var mouseEvent = evt.detail.mouseEvent;
-        if (isDown) {
-            var direction = camera.components['mouse-cursor'].__raycaster.ray.direction;
-            var newPos = {
-                x: direction.x * radius,
-                y: direction.y * radius,
-                z: direction.z * radius
-            };
-            mover.parentEl.setAttribute('position', newPos);
-
-            var deltaRot = util.calcRotationBetweenVector(prevPos, newPos);
-            prevPos = newPos;
-
-            var currentRot = mover.parentEl.getAttribute('rotation');
-            var newRot = {
-                x: currentRot.x + deltaRot.x,
-                y: currentRot.y + deltaRot.y,
-                z: 0
-            };
-
-            mover.parentEl.setAttribute('rotation', newRot);
-        }
-    });
 }
 
 function initCanvas() {
@@ -223,6 +166,59 @@ function initCanvas() {
             }
         }
     });
+
+    mainFrame.AFRAME.registerComponent('mover-listener', {
+        schema: {},
+        init: function() {
+            var initialPos = null;
+            var prevPos = null;
+            var radius = 6;
+
+            this.el.addEventListener('mouseenter', function() {
+                var scale = this.getAttribute('scale');
+                this.setAttribute('scale', { x: scale.x * 2, y: scale.y * 2, z: scale.z });
+            });
+            this.el.addEventListener('mouseleave', function() {
+                var scale = this.getAttribute('scale');
+                this.setAttribute('scale', { x: scale.x / 2, y: scale.y / 2, z: scale.z });
+                this.emit('mouseup');
+            });
+            this.el.addEventListener('mousedown', function(evt) {
+                this.setAttribute('material', 'color', "#FFFFFF");
+                camera.removeAttribute('look-controls');
+                isDown = true;
+                currentSelectedArrowEl = this;
+
+                var pos = camera.components['mouse-cursor'].__raycaster.ray.direction;
+                initialPos = { x: pos.x * radius, y: pos.y * radius, z: pos.z * radius };
+                prevPos = initialPos;
+            });
+            this.el.addEventListener('mouseup', function(evt) {
+                this.setAttribute('material', 'color', "#000000");
+                camera.setAttribute('look-controls', "");
+                isDown = false;
+                currentSelectedArrowEl = null;
+            });
+            this.el.addEventListener('mymousemove', function(evt) {
+                if (isDown) {
+                    var direction = camera.components['mouse-cursor'].__raycaster.ray.direction;
+                    var newPos = {
+                        x: direction.x * radius,
+                        y: direction.y * radius,
+                        z: direction.z * radius
+                    };
+                    this.parentEl.setAttribute('position', newPos);
+                }
+            });
+        },
+        tick: function(time, timeDelta) {
+            // console.log(time + ', ' + timeDelta);
+            // console.log(camera.getAttribute('rotation'));
+        }
+    });
+
+    mover = mainFrame.document.getElementById('mover');
+    mover.setAttribute('mover-listener', "");
 
 }
 
@@ -320,6 +316,9 @@ function newObject(type, shape, position, rotation, scale) {
 
     newObj.eventList = [];
     newObj.eventList.push({ 'type': type, 'arg': 'bg1.jpg' });
+
+    // Make object face at camera origin by default.
+    newEl.setAttribute('look-at', '#camera');
 
     scene.appendChild(newEl);
 

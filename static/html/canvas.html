@@ -5,6 +5,7 @@
     <title>Test A-Frame</title>
     <script type="text/javascript" src="../js/aframe.min.js"></script>
     <script type="text/javascript" src="../js/aframe-mouse-cursor-component.js"></script>
+    <script type="text/javascript" src="../js/aframe-look-at-component.js"></script>
     <style type="text/css">
     body {
         border: 0;
@@ -17,9 +18,9 @@
         <!-- BACKGROUND -->
         <a-sky src="../img/puydesancy.jpg"></a-sky>
         <!-- CAMERA -->
-        <a-entity camera look-controls mouse-cursor>
+        <a-entity id="camera" camera look-controls mouse-cursor>
         </a-entity>
-        <a-box id="testbox" position="0 0 -6" material="color:#123466">
+        <a-box look-at="#camera" id="testbox" position="0 0 -6" material="color:#123466">
             <a-plane id="mover" position="0 0 1" scale="0.1 0.1 1" material="color:#000000"></a-plane>
         </a-box>
     </a-scene>

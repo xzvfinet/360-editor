@@ -22,39 +22,21 @@ function toDegree(radians) {
 }
 
 module.exports.getForwardPosition = function(rotation, radius) {
-    if (radius == undefined) radius = -6;
+    if (radius == undefined) radius = 6;
 
-    var yaw = -toRadians(rotation.y - 90);
-    var pitch = -toRadians(rotation.x);
-    var x = radius * Math.cos(yaw) * Math.cos(pitch);
-    var y = radius * Math.sin(pitch);
-    var z = radius * Math.sin(yaw) * Math.cos(pitch);
+    console.log(rotation);
+
+    var theta = rotation.x;
+    var pi = rotation.y + 90;
+
+    var thetaRad = toRadians(theta);
+    var piRad = toRadians(pi);
+
+    var x = radius * Math.cos(thetaRad) * Math.cos(piRad);
+    var y = radius * Math.sin(thetaRad);
+    var z = -radius * Math.cos(thetaRad) * Math.sin(piRad);
 
     return { x: x, y: y, z: z };
-}
-
-function vector2Rotation(v) {
-    var radius = Math.sqrt(v.x*v.x + v.y*v.y + v.z*v.z);
-    var pitch = Math.asin(v.y/radius);
-    var yaw = Math.acos(v.x/(radius*Math.cos(pitch)));
-
-    var rotation = {};
-    rotation.y = -(toDegree(yaw) + 90);
-    rotation.x = -toDegree(pitch);
-    rotation.z = 0;
-
-    return rotation;
-}
-
-module.exports.calcRotationBetweenVector = function(v1, v2) {
-    var r1 = vector2Rotation(v1);
-    var r2 = vector2Rotation(v2);
-
-    return {
-        x: r1.x-r2.x,
-        y: r1.y-r2.y,
-        z: 0
-    };
 }
 
 module.exports.floorTwo = function(val) {
