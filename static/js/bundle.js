@@ -822,6 +822,7 @@ var TEST_JSON = '[{"el":null,"type":"primitive","shape":"box","transform":{"posi
 
 // Editor Dom Elements
 var mainCanvas;
+var menuElList;
 var idEl;
 var shapeEl;
 var positionEl;
@@ -840,6 +841,7 @@ var mainFrame;
 var scene = null;
 var camera = null;
 var background = null;
+var mover = null;
 
 var miniMap = null;
 var miniMapDirector = null;
@@ -847,6 +849,8 @@ var miniMapDirector = null;
 // State Variables
 var editorMode = true;
 var currentSelectedObject = null;
+var isDown = false;
+var currentSelectedArrowEl = null;
 
 var util = require('./util.js');
 var nodeUtil = require('util');
@@ -868,6 +872,8 @@ window.create = function(type) {
 }
 
 function initEditor() {
+    mainCanvas = $('#main-canvas')[0];
+    menuElList = document.getElementsByClassName('well');
     idEl = document.getElementsByClassName('object-id')[0];
     shapeEl = document.getElementsByClassName('object-shape')[0];
     positionEl = document.getElementsByClassName('object-position')[0];
@@ -887,6 +893,12 @@ function initEditor() {
     editorMode = true;
     editorToggle.change(function() {
         editorMode = !editorMode;
+        for (var i = 0; i < menuElList.length; ++i) {
+            menuElList[i].style.visibility = (editorMode) ? 'visible' : 'hidden';
+        }
+
+        mainCanvas.style.width = (editorMode) ? '' : '100%';
+
     });
     eventArgEl = document.getElementById('eventArg');
     loadTextEl = document.getElementById('loadInput');
@@ -917,7 +929,7 @@ function initEditor() {
             currentSelectedObject.eventList.push({ 'type': eventName, 'arg': eventArgEl.value });
             // currentSelectedObject.eventList.push([eventName, eventArgEl.value]);
         }
-    })
+    });
 }
 
 function initCanvas() {
@@ -940,6 +952,60 @@ function initCanvas() {
             // console.log(camera.getAttribute('rotation'));
         }
     });
+    mainFrame.AFRAME.registerComponent('mover-listener', {
+        schema: {},
+        init: function() {
+            var initialPos = null;
+            var prevPos = null;
+            var radius = 6;
+
+            this.el.addEventListener('mouseenter', function() {
+                var scale = this.getAttribute('scale');
+                this.setAttribute('scale', { x: scale.x * 2, y: scale.y * 2, z: scale.z });
+            });
+            this.el.addEventListener('mouseleave', function() {
+                var scale = this.getAttribute('scale');
+                this.setAttribute('scale', { x: scale.x / 2, y: scale.y / 2, z: scale.z });
+                this.emit('mouseup');
+            });
+            this.el.addEventListener('mousedown', function(evt) {
+                this.setAttribute('material', 'color', "#FFFFFF");
+                camera.removeAttribute('look-controls');
+                isDown = true;
+                currentSelectedArrowEl = this;
+
+                var pos = camera.components['mouse-cursor'].__raycaster.ray.direction;
+                initialPos = { x: pos.x * radius, y: pos.y * radius, z: pos.z * radius };
+                prevPos = initialPos;
+            });
+            this.el.addEventListener('mouseup', function(evt) {
+                this.setAttribute('material', 'color', "#000000");
+                camera.setAttribute('look-controls', "");
+                isDown = false;
+                currentSelectedArrowEl = null;
+            });
+            this.el.addEventListener('mymousemove', function(evt) {
+                if (isDown) {
+                    var direction = camera.components['mouse-cursor'].__raycaster.ray.direction;
+                    var newPos = {
+                        x: direction.x * radius,
+                        y: direction.y * radius,
+                        z: direction.z * radius
+                    };
+                    this.parentEl.setAttribute('position', newPos);
+                }
+            });
+        },
+        tick: function(time, timeDelta) {
+            // console.log(time + ', ' + timeDelta);
+            // console.log(camera.getAttribute('rotation'));
+        }
+    });
+
+    mover = mainFrame.document.getElementById('mover');
+    mover.setAttribute('mover-listener', "");
+
+
     mainFrame.AFRAME.registerComponent('minimap-direction', {
 
         init: function(){
@@ -966,28 +1032,12 @@ function initCanvas() {
             }
         }
     });
+
     var isMiniClick = false;
     var transparentEl;
      mainFrame.AFRAME.registerComponent('minimap-object', {
         init: function() {
             this.el.addEventListener('click',tempCameraMove);
-            /*this.el.addEventListener('click', function lookAtObject(){
-                
-                console.log("mini click"+this.getAttribute('position').x);
-                transparentEl = mainFrame.document.createElement('a-plane');
-                var animationEl = mainFrame.document.createElement('a-animation');
-
-                animationEl.setAttribute('attribute','position');
-                position = util.getForwardPostion(camera.getAttribute('rotation'));
-                transparentEl.setAttribute('position',position);
-                position = this.getAttribute('realPos');
-                animationEl.setAttribute('to',position);
-                animationEl.setAttribute('dur',1500);
-
-                transparentEl.appendChild(animationEl);
-                scene.appendChild(transparentEl);
-                isMiniClick = true;
-            });*/
         },
         tick: function(){
             console.log(isMiniClick);
@@ -997,12 +1047,6 @@ function initCanvas() {
             }
         }
     });
-}
-function setIsMiniClick(){
-    if(isMiniClick)
-        isMiniClick = false;
-    else
-        isMiniClick = true;
 }
 
 function loadRoom(data) {
@@ -1050,6 +1094,9 @@ function onObjectSelect() {
             util.floorTwo(rotation.y));
         scale = currentSelectedObject.transform.scale;
         scaleEl.innerHTML = makeArrayAsString(scale.x, scale.y, scale.z);
+
+        // append arrow element
+        this.appendChild(mover);
     } else {
         // Execute events assigned to object.
         for (var i = 0; i < currentSelectedObject.eventList.length; ++i) {
@@ -1077,7 +1124,7 @@ function newObject(type, shape, position, rotation, scale) {
 
     newObj.type = type;
     newObj.shape = shape;
-    position = util.getForwardPostion(camera.getAttribute('rotation'));
+    position = util.getForwardPosition(camera.getAttribute('rotation'));
     newObj.setPosition(position);
     rotation = camera.getAttribute('rotation');
     newObj.setRotation(rotation);
@@ -1096,6 +1143,9 @@ function newObject(type, shape, position, rotation, scale) {
 
     newObj.eventList = [];
     newObj.eventList.push({ 'type': type, 'arg': 'bg1.jpg' });
+
+    // Make object face at camera origin by default.
+    newEl.setAttribute('look-at', '#camera');
 
     scene.appendChild(newEl);
 
@@ -1391,18 +1441,24 @@ function toRadians(angle) {
     return angle * (Math.PI / 180);
 }
 
-function toAngle(radians) {
+function toDegree(radians) {
     return radians * (180 / Math.PI);
 }
 
-module.exports.getForwardPostion = function(rotation) {
-    var cameraRotation = rotation;
-    var yaw = -toRadians(cameraRotation.y - 90);
-    var pitch = -toRadians(cameraRotation.x);
-    var radius = -6;
-    var x = radius * Math.cos(yaw) * Math.cos(pitch);
-    var y = radius * Math.sin(pitch);
-    var z = radius * Math.sin(yaw) * Math.cos(pitch);
+module.exports.getForwardPosition = function(rotation, radius) {
+    if (radius == undefined) radius = 6;
+
+    console.log(rotation);
+
+    var theta = rotation.x;
+    var pi = rotation.y + 90;
+
+    var thetaRad = toRadians(theta);
+    var piRad = toRadians(pi);
+
+    var x = radius * Math.cos(thetaRad) * Math.cos(piRad);
+    var y = radius * Math.sin(thetaRad);
+    var z = -radius * Math.cos(thetaRad) * Math.sin(piRad);
 
     return { x: x, y: y, z: z };
 }

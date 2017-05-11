@@ -17,18 +17,24 @@ function toRadians(angle) {
     return angle * (Math.PI / 180);
 }
 
-function toAngle(radians) {
+function toDegree(radians) {
     return radians * (180 / Math.PI);
 }
 
-module.exports.getForwardPostion = function(rotation) {
-    var cameraRotation = rotation;
-    var yaw = -toRadians(cameraRotation.y - 90);
-    var pitch = -toRadians(cameraRotation.x);
-    var radius = -6;
-    var x = radius * Math.cos(yaw) * Math.cos(pitch);
-    var y = radius * Math.sin(pitch);
-    var z = radius * Math.sin(yaw) * Math.cos(pitch);
+module.exports.getForwardPosition = function(rotation, radius) {
+    if (radius == undefined) radius = 6;
+
+    console.log(rotation);
+
+    var theta = rotation.x;
+    var pi = rotation.y + 90;
+
+    var thetaRad = toRadians(theta);
+    var piRad = toRadians(pi);
+
+    var x = radius * Math.cos(thetaRad) * Math.cos(piRad);
+    var y = radius * Math.sin(thetaRad);
+    var z = -radius * Math.cos(thetaRad) * Math.sin(piRad);
 
     return { x: x, y: y, z: z };
 }
