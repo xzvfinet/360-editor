@@ -2,10 +2,15 @@
 var PRIMITIVE_DEFINITIONS = ['box', 'sphere', 'cylinder', 'plane', 'image'];
 var OBJECT_DEFINITIONS = ['teleport','minimap'];
 var OBJECT_LISTENER = 'object-listener';
-var EVENT_LIST = ['teleport', 'link', 'page', 'image', 'video'];
+var EVENT_LIST = ['teleport', 'link', 'page', 'image', 'video','sound','variable'];
 var BACKGROUND_PREFIX = "../img/";
+var SOUND_PREFIX ="../sound/";
 var EVENT_DICTIONARY = {
-    'teleport': teleportEvent
+    'teleport': teleportEvent,
+    'link': linkEvent,
+    'image': imageEvent,
+    'sound': soundEvent,
+    'variable': variableEvent
 }
 var TEST_JSON = '[{"el":null,"type":"primitive","shape":"box","transform":{"position":{"x":-3.6739403974420594e-16,"y":0,"z":-6},"rotation":{"x":0,"y":0,"z":0},"scale":{"x":1,"y":1,"z":1}},"material":{"color":"#257654"},"clickListener":"object-listener","eventList":[]},{"el":null,"type":"primitive","shape":"sphere","transform":{"position":{"x":-1.3275046384397702,"y":-1.2272767136552951,"z":-5.721147026867983},"rotation":{"x":-11.802930579694959,"y":13.06343772898277,"z":0},"scale":{"x":1,"y":1,"z":1}},"material":{"color":"#013882"},"clickListener":"object-listener","eventList":[]},{"el":null,"type":"primitive","shape":"cylinder","transform":{"position":{"x":0.9465000710454844,"y":-1.989605502556811,"z":-5.580824989166615},"rotation":{"x":-19.365973475421832,"y":-9.625690958197833,"z":0},"scale":{"x":1,"y":1,"z":1}},"material":{"color":"#404134"},"clickListener":"object-listener","eventList":[]}]';
 
@@ -23,6 +28,7 @@ var eventArgEl;
 var loadTextEl;
 var saveBtnEl;
 var loadBtnEl;
+var variableEl = {};
 
 // Aframe Dom Elements
 var mainFrame;
@@ -110,6 +116,7 @@ function initEditor() {
 }
 
 function initCanvas() {
+    document.mainFrame = mainFrame;
     scene = mainFrame.document.querySelector('a-scene');
     camera = mainFrame.document.querySelector('[camera]');
     background = mainFrame.document.querySelector('a-sky');
@@ -133,9 +140,9 @@ function initCanvas() {
         init: function(){
             var mouseDown = false;
              // Mouse Events
-            scene.addEventListener('mousedown', this.onMouseDown, false);
-            scene.addEventListener('mousemove', this.onMouseMove, false);
-            scene.addEventListener('mouseup', this.releaseMouse, false);
+            mainFrame.window.addEventListener('mousedown', this.onMouseDown, false);
+            mainFrame.window.addEventListener('mousemove', this.onMouseMove, false);
+            mainFrame.window.addEventListener('mouseup', this.releaseMouse, false);
 
             // Touch events
             scene.addEventListener('touchstart', this.onTouchStart);
@@ -154,7 +161,43 @@ function initCanvas() {
             }
         }
     });
+    var isMiniClick = false;
+    var transparentEl;
+     mainFrame.AFRAME.registerComponent('minimap-object', {
+        init: function() {
+            this.el.addEventListener('click',tempCameraMove);
+            /*this.el.addEventListener('click', function lookAtObject(){
+                
+                console.log("mini click"+this.getAttribute('position').x);
+                transparentEl = mainFrame.document.createElement('a-plane');
+                var animationEl = mainFrame.document.createElement('a-animation');
 
+                animationEl.setAttribute('attribute','position');
+                position = util.getForwardPostion(camera.getAttribute('rotation'));
+                transparentEl.setAttribute('position',position);
+                position = this.getAttribute('realPos');
+                animationEl.setAttribute('to',position);
+                animationEl.setAttribute('dur',1500);
+
+                transparentEl.appendChild(animationEl);
+                scene.appendChild(transparentEl);
+                isMiniClick = true;
+            });*/
+        },
+        tick: function(){
+            console.log(isMiniClick);
+            if(isMiniClick){
+                miniMapDirector.setAttribute('rotation',{x:0,y:0,z:camera.getAttribute('rotation').y});
+                //console.log("DO");
+            }
+        }
+    });
+}
+function setIsMiniClick(){
+    if(isMiniClick)
+        isMiniClick = false;
+    else
+        isMiniClick = true;
 }
 
 function loadRoom(data) {
@@ -260,6 +303,52 @@ function teleportEvent(arg) {
     background.setAttribute('src', imageUrl);
 }
 
+function linkEvent(arg){
+    console.log('link! to:' + arg);
+    window.open("http://"+arg, 'newWindow');
+}
+
+function imageEvent(arg){
+        console.log('image popup! to:' + arg);
+        var imageEl = mainFrame.document.createElement('a-image');
+        camera.appendChild(imageEl);
+        imageEl.setAttribute('id', 'popup');
+        imageEl.setAttribute('geometry', {
+            primitive : 'plane',
+            height : 1.2,
+            width : 2
+        });
+        imageEl.setAttribute('material', 'src', BACKGROUND_PREFIX + arg);
+        imageEl.setAttribute('position', {x:0, y:0, z:-1});
+}
+
+function soundEvent(arg){
+    console.log('sound played :' + arg);
+    //var soundEl = mainFrame.document.createElement('a-sound');
+    var soundUrl = SOUND_PREFIX + arg;
+    currentSelectedObject.setSoundSrc(soundUrl);
+    //soundEl.setAttribute('src',soundUrl);
+    //scene.appendChild(soundEl);
+    //soundEl.components.sound.playSound();
+}
+
+function variableEvent(arg){
+    var str = arg.split(' ');
+    if(str[1] == '='){
+        variableEl[str[0]] = Number(str[2]);
+    }else if(str[1] == '+'){
+        variableEl[str[0]] += Number(str[2]);
+    }else if(str[1] == '-'){
+        variableEl[str[0]] -= Number(str[2]);
+    }else if(str[1] == '*'){
+        variableEl[str[0]] *= Number(str[2]);
+    }else if(str[1] == '/'){
+        variableEl[str[0]] /= Number(str[2]);
+    }
+    console.log(str[0]+"="+variableEl[str[0]]);
+}
+
+
 function loadObjectsFromJson(json) {
     var objects = obj.Controller.objectsFromJson(json);
     for (var i = 0; i < objects.length; ++i) {
@@ -305,19 +394,32 @@ function loadObjectsFromJson(json) {
 
 window.setObjectOnMiniMap = function(position){
     if(miniMap != null){
-        var x = position.x/10 - 2.4;
-        var y = position.z/10 * -1 - 2.1;
+        var x = position.x/10 + 0.8;
+        var y = position.z/-10 + 0.8;
         var newEl = mainFrame.document.createElement('a-plane');
         //var newObj = new obj.Objct(newEl);
+        newEl.setAttribute('realPos',position.x+" "+position.y+" "+position.z);
 
-        position = { x: x, y: y ,z: -3 };
+        position = { x: x, y: y ,z: 1};
         newEl.setAttribute('position',position);
+        
         //newObj.setPosition(position);
-        scale = { x: 0.2, y: 0.2, z: 0.2 };
+        size = 0.2
+        scale = { x: size, y: size, z: size };
         newEl.setAttribute('scale',scale);
+        newEl.setAttribute('minimap-object',"");
         //newObj.setScale(scale);
 
         miniMap.appendChild(newEl);
     }
 }
+function lookAtObject(){
+    //console.log(camera.getAttribute('rotation'));
+    
+
+
+    //camera.object3D.lookAt(new mainFrame.THREE.Vector3(0,0,0));
+}
+
+
 

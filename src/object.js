@@ -50,6 +50,14 @@ Objct.prototype.setMaterial = function(newMaterial) {
     }
 }
 
+Objct.prototype.setSoundSrc = function(soundUrl){
+    sound = {
+        src: soundUrl,
+        on: 'click'
+    }
+    this.el.setAttribute('sound',sound);
+}
+
 Objct.prototype.setClickListener = function(listener) {
     if (this.el)
         this.el.setAttribute(listener, "");
