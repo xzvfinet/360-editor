@@ -1,10 +1,10 @@
 // Constants
 var PRIMITIVE_DEFINITIONS = ['box', 'sphere', 'cylinder', 'plane', 'image'];
-var OBJECT_DEFINITIONS = ['teleport','minimap'];
+var OBJECT_DEFINITIONS = ['teleport', 'minimap'];
 var OBJECT_LISTENER = 'object-listener';
-var EVENT_LIST = ['teleport', 'link', 'page', 'image', 'video','sound','variable'];
+var EVENT_LIST = ['teleport', 'link', 'page', 'image', 'video', 'sound', 'variable'];
 var BACKGROUND_PREFIX = "../img/";
-var SOUND_PREFIX ="../sound/";
+var SOUND_PREFIX = "../sound/";
 var EVENT_DICTIONARY = {
     'teleport': teleportEvent,
     'link': linkEvent,
@@ -12,8 +12,10 @@ var EVENT_DICTIONARY = {
     'sound': soundEvent,
     'variable': variableEvent
 }
-var TEST_JSON = '[{"el":null,"type":"primitive","shape":"box","transform":{"position":{"x":-3.6739403974420594e-16,"y":0,"z":-6},"rotation":{"x":0,"y":0,"z":0},"scale":{"x":1,"y":1,"z":1}},"material":{"color":"#257654"},"clickListener":"object-listener","eventList":[]},{"el":null,"type":"primitive","shape":"sphere","transform":{"position":{"x":-1.3275046384397702,"y":-1.2272767136552951,"z":-5.721147026867983},"rotation":{"x":-11.802930579694959,"y":13.06343772898277,"z":0},"scale":{"x":1,"y":1,"z":1}},"material":{"color":"#013882"},"clickListener":"object-listener","eventList":[]},{"el":null,"type":"primitive","shape":"cylinder","transform":{"position":{"x":0.9465000710454844,"y":-1.989605502556811,"z":-5.580824989166615},"rotation":{"x":-19.365973475421832,"y":-9.625690958197833,"z":0},"scale":{"x":1,"y":1,"z":1}},"material":{"color":"#404134"},"clickListener":"object-listener","eventList":[]}]';
 
+var util = require('./util.js');
+var nodeUtil = require('util');
+var obj = require('./object.js');
 
 // Editor Dom Elements
 var mainCanvas;
@@ -33,8 +35,8 @@ var variableEl = {};
 
 // Aframe Dom Elements
 var mainFrame;
-var scene = null;
-var camera = null;
+var sceneEl = null;
+var cameraEl = null;
 var background = null;
 var mover = null;
 
@@ -46,10 +48,6 @@ var editorMode = true;
 var currentSelectedObject = null;
 var isDown = false;
 var currentSelectedArrowEl = null;
-
-var util = require('./util.js');
-var nodeUtil = require('util');
-var obj = require('./object.js');
 
 window.onLoadCanvas = function(frame) {
     mainFrame = frame;
@@ -97,15 +95,23 @@ function initEditor() {
     });
     eventArgEl = document.getElementById('eventArg');
     loadTextEl = document.getElementById('loadInput');
-    loadTextEl.value = TEST_JSON;
     saveBtnEl = document.getElementById('saveBtn');
     saveBtnEl.addEventListener('click', function(evt) {
-        var json = obj.Controller.objectsToJson();
-        loadTextEl.value = json;
+        var sceneryObject = {};
+        var objectsJson = obj.Controller.objectsToJson();
+
+        sceneryObject.bgUrl = background.getAttribute('src');
+        sceneryObject.objects = objectsJson;
+
+        loadTextEl.value = JSON.stringify(sceneryObject);
     });
     loadBtnEl = document.getElementById('loadBtn');
     loadBtnEl.addEventListener('click', function(evt) {
-        loadObjectsFromJson(loadTextEl.value);
+        var sceneryObject = JSON.parse(loadTextEl.value);
+
+        loadObjectsFromJson(sceneryObject.objects);
+
+        background.setAttribute('src', sceneryObject.bgUrl);
     });
 
     for (var i = 0; i < EVENT_LIST.length; ++i) {
@@ -128,9 +134,8 @@ function initEditor() {
 }
 
 function initCanvas() {
-    document.mainFrame = mainFrame;
-    scene = mainFrame.document.querySelector('a-scene');
-    camera = mainFrame.document.querySelector('[camera]');
+    sceneEl = mainFrame.document.querySelector('a-scene');
+    cameraEl = mainFrame.document.querySelector('[camera]');
     background = mainFrame.document.querySelector('a-sky');
 
     mainFrame.AFRAME.registerComponent(OBJECT_LISTENER, {
@@ -143,8 +148,6 @@ function initCanvas() {
             this.el.addEventListener('click', onObjectSelect);
         },
         tick: function(time, timeDelta) {
-            // console.log(time + ', ' + timeDelta);
-            // console.log(camera.getAttribute('rotation'));
         }
     });
     mainFrame.AFRAME.registerComponent('mover-listener', {
@@ -165,23 +168,23 @@ function initCanvas() {
             });
             this.el.addEventListener('mousedown', function(evt) {
                 this.setAttribute('material', 'color', "#FFFFFF");
-                camera.removeAttribute('look-controls');
+                cameraEl.removeAttribute('look-controls');
                 isDown = true;
                 currentSelectedArrowEl = this;
 
-                var pos = camera.components['mouse-cursor'].__raycaster.ray.direction;
+                var pos = cameraEl.components['mouse-cursor'].__raycaster.ray.direction;
                 initialPos = { x: pos.x * radius, y: pos.y * radius, z: pos.z * radius };
                 prevPos = initialPos;
             });
             this.el.addEventListener('mouseup', function(evt) {
                 this.setAttribute('material', 'color', "#000000");
-                camera.setAttribute('look-controls', "");
+                cameraEl.setAttribute('look-controls', "");
                 isDown = false;
                 currentSelectedArrowEl = null;
             });
             this.el.addEventListener('mymousemove', function(evt) {
                 if (isDown) {
-                    var direction = camera.components['mouse-cursor'].__raycaster.ray.direction;
+                    var direction = cameraEl.components['mouse-cursor'].__raycaster.ray.direction;
                     var newPos = {
                         x: direction.x * radius,
                         y: direction.y * radius,
@@ -193,7 +196,7 @@ function initCanvas() {
         },
         tick: function(time, timeDelta) {
             // console.log(time + ', ' + timeDelta);
-            // console.log(camera.getAttribute('rotation'));
+            // console.log(cameraEl.getAttribute('rotation'));
         }
     });
 
@@ -203,41 +206,41 @@ function initCanvas() {
 
     mainFrame.AFRAME.registerComponent('minimap-direction', {
 
-        init: function(){
+        init: function() {
             var mouseDown = false;
-             // Mouse Events
+            // Mouse Events
             mainFrame.window.addEventListener('mousedown', this.onMouseDown, false);
             mainFrame.window.addEventListener('mousemove', this.onMouseMove, false);
             mainFrame.window.addEventListener('mouseup', this.releaseMouse, false);
 
             // Touch events
-            scene.addEventListener('touchstart', this.onTouchStart);
-            scene.addEventListener('touchmove', this.onTouchMove);
-            scene.addEventListener('touchend', this.onTouchEnd);
+            sceneEl.addEventListener('touchstart', this.onTouchStart);
+            sceneEl.addEventListener('touchmove', this.onTouchMove);
+            sceneEl.addEventListener('touchend', this.onTouchEnd);
         },
-        onMouseDown: function (event) {
+        onMouseDown: function(event) {
             this.mouseDown = true;
         },
-        releaseMouse: function (event) {
+        releaseMouse: function(event) {
             this.mouseDown = false;
         },
-        onMouseMove: function (event){
-            if(this.mouseDown){
-                miniMapDirector.setAttribute('rotation',{x:0,y:0,z:camera.getAttribute('rotation').y});
+        onMouseMove: function(event) {
+            if (this.mouseDown) {
+                miniMapDirector.setAttribute('rotation', { x: 0, y: 0, z: cameraEl.getAttribute('rotation').y });
             }
         }
     });
 
     var isMiniClick = false;
     var transparentEl;
-     mainFrame.AFRAME.registerComponent('minimap-object', {
+    mainFrame.AFRAME.registerComponent('minimap-object', {
         init: function() {
-            this.el.addEventListener('click',tempCameraMove);
+            this.el.addEventListener('click', tempCameraMove);
         },
-        tick: function(){
+        tick: function() {
             console.log(isMiniClick);
-            if(isMiniClick){
-                miniMapDirector.setAttribute('rotation',{x:0,y:0,z:camera.getAttribute('rotation').y});
+            if (isMiniClick) {
+                miniMapDirector.setAttribute('rotation', { x: 0, y: 0, z: cameraEl.getAttribute('rotation').y });
                 //console.log("DO");
             }
         }
@@ -319,9 +322,9 @@ function newObject(type, shape, position, rotation, scale) {
 
     newObj.type = type;
     newObj.shape = shape;
-    position = util.getForwardPosition(camera.getAttribute('rotation'));
+    position = util.getForwardPosition(cameraEl.getAttribute('rotation'));
     newObj.setPosition(position);
-    rotation = camera.getAttribute('rotation');
+    rotation = cameraEl.getAttribute('rotation');
     newObj.setRotation(rotation);
     scale = { x: 1, y: 1, z: 1 };
     newObj.setScale(scale);
@@ -342,7 +345,7 @@ function newObject(type, shape, position, rotation, scale) {
     // Make object face at camera origin by default.
     newEl.setAttribute('look-at', '#camera');
 
-    scene.appendChild(newEl);
+    sceneEl.appendChild(newEl);
 
     setObjectOnMiniMap(position);
 }
@@ -353,49 +356,49 @@ function teleportEvent(arg) {
     background.setAttribute('src', imageUrl);
 }
 
-function linkEvent(arg){
+function linkEvent(arg) {
     console.log('link! to:' + arg);
-    window.open("http://"+arg, 'newWindow');
+    window.open("http://" + arg, 'newWindow');
 }
 
-function imageEvent(arg){
-        console.log('image popup! to:' + arg);
-        var imageEl = mainFrame.document.createElement('a-image');
-        camera.appendChild(imageEl);
-        imageEl.setAttribute('id', 'popup');
-        imageEl.setAttribute('geometry', {
-            primitive : 'plane',
-            height : 1.2,
-            width : 2
-        });
-        imageEl.setAttribute('material', 'src', BACKGROUND_PREFIX + arg);
-        imageEl.setAttribute('position', {x:0, y:0, z:-1});
+function imageEvent(arg) {
+    console.log('image popup! to:' + arg);
+    var imageEl = mainFrame.document.createElement('a-image');
+    cameraEl.appendChild(imageEl);
+    imageEl.setAttribute('id', 'popup');
+    imageEl.setAttribute('geometry', {
+        primitive: 'plane',
+        height: 1.2,
+        width: 2
+    });
+    imageEl.setAttribute('material', 'src', BACKGROUND_PREFIX + arg);
+    imageEl.setAttribute('position', { x: 0, y: 0, z: -1 });
 }
 
-function soundEvent(arg){
+function soundEvent(arg) {
     console.log('sound played :' + arg);
     //var soundEl = mainFrame.document.createElement('a-sound');
     var soundUrl = SOUND_PREFIX + arg;
     currentSelectedObject.setSoundSrc(soundUrl);
     //soundEl.setAttribute('src',soundUrl);
-    //scene.appendChild(soundEl);
+    //sceneEl.appendChild(soundEl);
     //soundEl.components.sound.playSound();
 }
 
-function variableEvent(arg){
+function variableEvent(arg) {
     var str = arg.split(' ');
-    if(str[1] == '='){
+    if (str[1] == '=') {
         variableEl[str[0]] = Number(str[2]);
-    }else if(str[1] == '+'){
+    } else if (str[1] == '+') {
         variableEl[str[0]] += Number(str[2]);
-    }else if(str[1] == '-'){
+    } else if (str[1] == '-') {
         variableEl[str[0]] -= Number(str[2]);
-    }else if(str[1] == '*'){
+    } else if (str[1] == '*') {
         variableEl[str[0]] *= Number(str[2]);
-    }else if(str[1] == '/'){
+    } else if (str[1] == '/') {
         variableEl[str[0]] /= Number(str[2]);
     }
-    console.log(str[0]+"="+variableEl[str[0]]);
+    console.log(str[0] + "=" + variableEl[str[0]]);
 }
 
 
@@ -403,73 +406,63 @@ function loadObjectsFromJson(json) {
     var objects = obj.Controller.objectsFromJson(json);
     for (var i = 0; i < objects.length; ++i) {
         var el = obj.Controller.createElFromObj(mainFrame, objects[i]);
-        scene.appendChild(el);
+        sceneEl.appendChild(el);
     }
 }
 
 //minimap
 
- window.setMiniMap = function(){
-     if(miniMap == null){
+window.setMiniMap = function() {
+    if (miniMap == null) {
         miniMap = mainFrame.document.createElement('a-image');
         miniMapDirector = mainFrame.document.createElement('a-image');
-        
-        miniMap.setAttribute('id','minimap');
-        miniMap.setAttribute('material','opacity',0);
-        
-        miniMapDirector.setAttribute('id','minimap-director');
-        miniMapDirector.setAttribute('material','src','/static/img/Minimap_Director.png');
-        miniMapDirector.setAttribute('minimap-direction',"")
-        //var newObj = new obj.Objct(miniMap);
 
-        rotation = {x:0,y:0,z:camera.getAttribute('rotation').y}
-        miniMapDirector.setAttribute('rotation',rotation);
-        
-        position = {x:-4,y:-3.5,z:-5};
-        miniMap.setAttribute('position',position);
+        miniMap.setAttribute('id', 'minimap');
+        miniMap.setAttribute('material', 'opacity', 0);
+
+        miniMapDirector.setAttribute('id', 'minimap-director');
+        miniMapDirector.setAttribute('material', 'src', '/static/img/Minimap_Director.png');
+        miniMapDirector.setAttribute('minimap-direction', "")
+            //var newObj = new obj.Objct(miniMap);
+
+        rotation = { x: 0, y: 0, z: cameraEl.getAttribute('rotation').y }
+        miniMapDirector.setAttribute('rotation', rotation);
+
+        position = { x: -4, y: -3.5, z: -5 };
+        miniMap.setAttribute('position', position);
         //newObj.setPosition(position);
 
         miniMap.appendChild(miniMapDirector);
-        camera.appendChild(miniMap);
+        cameraEl.appendChild(miniMap);
 
         var objects = obj.Controller.getObjects();
-        
-        for(var i = 0;i<obj.Controller.getNum();i++){
+
+        for (var i = 0; i < obj.Controller.getNum(); i++) {
             setObjectOnMiniMap(objects[i].transform.position);
         }
-     }else{
-         console.log('already has minimap');
-     }
+    } else {
+        console.log('already has minimap');
+    }
 }
 
-window.setObjectOnMiniMap = function(position){
-    if(miniMap != null){
-        var x = position.x/10 + 0.8;
-        var y = position.z/-10 + 0.8;
+window.setObjectOnMiniMap = function(position) {
+    if (miniMap != null) {
+        var x = position.x / 10 + 0.8;
+        var y = position.z / -10 + 0.8;
         var newEl = mainFrame.document.createElement('a-plane');
         //var newObj = new obj.Objct(newEl);
-        newEl.setAttribute('realPos',position.x+" "+position.y+" "+position.z);
+        newEl.setAttribute('realPos', position.x + " " + position.y + " " + position.z);
 
-        position = { x: x, y: y ,z: 1};
-        newEl.setAttribute('position',position);
-        
+        position = { x: x, y: y, z: 1 };
+        newEl.setAttribute('position', position);
+
         //newObj.setPosition(position);
         size = 0.2
         scale = { x: size, y: size, z: size };
-        newEl.setAttribute('scale',scale);
-        newEl.setAttribute('minimap-object',"");
+        newEl.setAttribute('scale', scale);
+        newEl.setAttribute('minimap-object', "");
         //newObj.setScale(scale);
 
         miniMap.appendChild(newEl);
     }
 }
-function lookAtObject(){
-    //console.log(camera.getAttribute('rotation'));
-    
-
-
-    //camera.object3D.lookAt(new mainFrame.THREE.Vector3(0,0,0));
-}
-
-
-

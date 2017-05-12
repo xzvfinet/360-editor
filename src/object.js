@@ -81,12 +81,9 @@ function Controller() {}
 Controller.prototype.objectsFromJson = function(json) {
     var loadedObjects;
     loadedObjects = JSON.parse(json);
-    // console.log(loadedObjects);
     var loadedObjectsWithPrototype = [];
     for (var i = 0; i < loadedObjects.length; ++i) {
         var newObj = new Objct(null, loadedObjects[i]);
-        // console.log(loadedObjects[i]);
-        // console.log(newObj);
         loadedObjectsWithPrototype.push(newObj);
     }
     return loadedObjectsWithPrototype;
