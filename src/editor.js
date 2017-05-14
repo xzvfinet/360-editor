@@ -66,6 +66,15 @@ window.create = function(type) {
     }
 }
 
+window.createImage = function(type, src) {
+    newObject('primitive', type, src);
+}
+
+window.setBackground = function(src) {
+    //background.setMaterial({'src' : src});
+    background.setAttribute('material', 'src', src);
+}
+
 function initEditor() {
     mainCanvas = $('#main-canvas')[0];
     menuElList = document.getElementsByClassName('well');
@@ -156,8 +165,7 @@ function initCanvas() {
         init: function() {
             this.el.addEventListener('click', onObjectSelect);
         },
-        tick: function(time, timeDelta) {
-        }
+        tick: function(time, timeDelta) {}
     });
     mainFrame.AFRAME.registerComponent('mover-listener', {
         schema: {},
@@ -479,6 +487,7 @@ window.setMiniMap = function() {
 
         position = { x: -4, y: -3.5, z: -5 };
         miniMap.setAttribute('position', position);
+
         //newObj.setPosition(position);
 
         miniMap.appendChild(miniMapDirector);
@@ -505,6 +514,8 @@ window.setObjectOnMiniMap = function(position) {
         position = { x: x, y: y, z: 1 };
         newEl.setAttribute('position', position);
 
+        position = { x: x, y: y, z: 1 };
+        newEl.setAttribute('position', position);
         //newObj.setPosition(position);
         size = 0.2
         scale = { x: size, y: size, z: size };
