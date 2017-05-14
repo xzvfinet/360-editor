@@ -10,6 +10,8 @@ function Objct(el, obj) {
     this.clickListener = "";
     this.eventList = [];
 
+    this.lookat = "";
+
     // copy all properties of obj to this
     for (var prop in obj) {
         this[prop] = obj[prop];
@@ -25,10 +27,14 @@ Objct.prototype.getShape = function() {
         return this.shape;
 }
 
-Objct.prototype.setPosition = function(newPosition) {
+Objct.prototype.setPosition = function(newX, newY, newZ) {
+    var newPos = newX;
+    if (typeof newPos == "number") {
+        newPos = { x: newX, y: newY, z: newZ };
+    }
     if (this.el)
-        this.el.setAttribute('position', newPosition);
-    this.transform.position = newPosition;
+        this.el.setAttribute('position', newPos);
+    this.transform.position = newPos;
 }
 
 Objct.prototype.setRotation = function(newRotation) {
@@ -37,7 +43,11 @@ Objct.prototype.setRotation = function(newRotation) {
     this.transform.rotation = newRotation;
 }
 
-Objct.prototype.setScale = function(newScale) {
+Objct.prototype.setScale = function(newX, newY, newZ) {
+    var newScale = newX;
+    if (typeof newScale == "number") {
+        newScale = { x: newX, y: newY, z: newZ };
+    }
     if (this.el)
         this.el.setAttribute('scale', newScale);
     this.transform.scale = newScale;
@@ -50,12 +60,12 @@ Objct.prototype.setMaterial = function(newMaterial) {
     }
 }
 
-Objct.prototype.setSoundSrc = function(soundUrl){
+Objct.prototype.setSoundSrc = function(soundUrl) {
     sound = {
         src: soundUrl,
         on: 'click'
     }
-    this.el.setAttribute('sound',sound);
+    this.el.setAttribute('sound', sound);
 }
 
 Objct.prototype.setClickListener = function(listener) {
@@ -74,6 +84,12 @@ Objct.prototype.getSaveForm = function() {
     var copyObj = JSON.parse(JSON.stringify(this));
     this.el = tmp;
     return copyObj;
+}
+
+Objct.prototype.setLookAt = function(target) {
+    if (this.el)
+        this.el.setAttribute('look-at', target);
+    this.lookat = target;
 }
 
 function Controller() {}
@@ -106,6 +122,7 @@ Controller.prototype.createElFromObj = function(frame, obj) {
     obj.setScale(obj.transform.scale);
     obj.setMaterial(obj.material);
     obj.setClickListener(obj.clickListener);
+    obj.setLookAt(obj.lookat);
 
     return newEl;
 }
@@ -114,7 +131,7 @@ Controller.prototype.getNum = function() {
     return objects.length;
 }
 
-Controller.prototype.getObjects = function(){
+Controller.prototype.getObjects = function() {
     return objects;
 }
 

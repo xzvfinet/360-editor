@@ -12,6 +12,7 @@ var EVENT_DICTIONARY = {
     'sound': soundEvent,
     'variable': variableEvent
 }
+var BASE_WIDTH = 300;
 
 var util = require('./util.js');
 var nodeUtil = require('util');
@@ -32,6 +33,7 @@ var loadTextEl;
 var saveBtnEl;
 var loadBtnEl;
 var variableEl = {};
+var imageUrlInputEl;
 
 // Aframe Dom Elements
 var mainFrame;
@@ -131,6 +133,13 @@ function initEditor() {
             // currentSelectedObject.eventList.push([eventName, eventArgEl.value]);
         }
     });
+
+    $("#image-form").submit(function() {
+        return false;
+    });
+
+
+    imageUrlInputEl = document.getElementById('img-url');
 }
 
 function initCanvas() {
@@ -157,13 +166,37 @@ function initCanvas() {
             var prevPos = null;
             var radius = 6;
 
+            var parentObject = obj.Controller.findByEl(this.el.parentEl);
+
+            var originalScale = this.el.getAttribute('scale');
+            var parentScale = this.el.parentEl.getAttribute('scale');
+
+            var initialScale = {
+                x: originalScale.x / parentScale.x,
+                y: originalScale.y / parentScale.y,
+                z: 1
+            };
+            this.el.setAttribute('scale', initialScale);
+
+            var factor = 2;
+            var xFactor = factor / parentScale.x;
+            var yFactor = factor / parentScale.y;
+
             this.el.addEventListener('mouseenter', function() {
-                var scale = this.getAttribute('scale');
-                this.setAttribute('scale', { x: scale.x * 2, y: scale.y * 2, z: scale.z });
+                var newScale = {
+                    x: originalScale.x * xFactor,
+                    y: originalScale.y * yFactor,
+                    z: 1
+                };
+                this.setAttribute('scale', newScale);
             });
             this.el.addEventListener('mouseleave', function() {
-                var scale = this.getAttribute('scale');
-                this.setAttribute('scale', { x: scale.x / 2, y: scale.y / 2, z: scale.z });
+                var newScale = {
+                    x: initialScale.x,
+                    y: initialScale.y,
+                    z: 1
+                };
+                this.setAttribute('scale', newScale);
                 this.emit('mouseup');
             });
             this.el.addEventListener('mousedown', function(evt) {
@@ -190,7 +223,7 @@ function initCanvas() {
                         y: direction.y * radius,
                         z: direction.z * radius
                     };
-                    this.parentEl.setAttribute('position', newPos);
+                    parentObject.setPosition(newPos);
                 }
             });
         },
@@ -199,10 +232,6 @@ function initCanvas() {
             // console.log(cameraEl.getAttribute('rotation'));
         }
     });
-
-    mover = mainFrame.document.getElementById('mover');
-    mover.setAttribute('mover-listener', "");
-
 
     mainFrame.AFRAME.registerComponent('minimap-direction', {
 
@@ -278,7 +307,12 @@ function makeArrayAsString() {
 }
 
 function onObjectSelect() {
-    currentSelectedObject = obj.Controller.findByEl(this);
+    var selected = obj.Controller.findByEl(this);
+    if (currentSelectedObject == selected) {
+        return;
+    }
+    currentSelectedObject = selected;
+
     if (editorMode) {
         shapeEl.innerHTML = currentSelectedObject.getShape();
         var position = currentSelectedObject.transform.position;
@@ -293,7 +327,8 @@ function onObjectSelect() {
         scale = currentSelectedObject.transform.scale;
         scaleEl.innerHTML = makeArrayAsString(scale.x, scale.y, scale.z);
 
-        // append arrow element
+        // append mover element
+        mover = newMover();
         this.appendChild(mover);
     } else {
         // Execute events assigned to object.
@@ -315,6 +350,19 @@ function onObjectUnselect() {
     scaleEl.innerHTML = "";
 }
 
+function newMover() {
+    if (mover)
+        mover.parentEl.removeChild(mover);
+    var newMover;
+    newMover = mainFrame.document.createElement('a-plane');
+    newMover.setAttribute('position', { x: 0, y: 0, z: 5 });
+    newMover.setAttribute('scale', { x: 0.1, y: 0.1, z: 1 });
+    newMover.setAttribute('material', "color:#000000");
+    newMover.setAttribute('mover-listener', "");
+
+    return newMover;
+}
+
 function newObject(type, shape, position, rotation, scale) {
     var tag = 'a-' + shape;
     var newEl = mainFrame.document.createElement(tag);
@@ -330,10 +378,11 @@ function newObject(type, shape, position, rotation, scale) {
     newObj.setScale(scale);
 
     if (shape == 'image') {
-        util.getImageSize("http://i.imgur.com/fHyEMsl.jpg", function() {
-            newObj.setScale({ x: 1, y: this.height / this.width });
+        var url = imageUrlInputEl.value;
+        util.getImageSize(url, function() {
+            newObj.setScale({ x: this.width / BASE_WIDTH, y: this.height / BASE_WIDTH });
         });
-        newObj.setMaterial({ 'src': "http://i.imgur.com/fHyEMsl.jpg" });
+        newObj.setMaterial({ 'src': url });
     } else {
         newObj.setMaterial({ 'color': util.getRandomHexColor() });
     }
@@ -343,7 +392,7 @@ function newObject(type, shape, position, rotation, scale) {
     newObj.eventList.push({ 'type': type, 'arg': 'bg1.jpg' });
 
     // Make object face at camera origin by default.
-    newEl.setAttribute('look-at', '#camera');
+    newObj.setLookAt('#camera');
 
     sceneEl.appendChild(newEl);
 

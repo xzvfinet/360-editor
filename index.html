@@ -49,7 +49,7 @@
                             <li onclick="create('plane')"><a>Plane</a></li>
                             </li>
                             <li class="nav-header">Primitive</li>
-                            <li class="active" onclick="create('image')"><a>Image</a></li>
+                            <li class="active" data-toggle="modal" data-target="#myModal"><a>Image</a></li>
                             <li onclick="create('teleport')"><a>Teleport</a></li>
                             <li onclick="setMiniMap()"><a>minimap</a></li>
                             </li>
@@ -166,6 +166,30 @@
         </footer>
     </div>
     <!--/.fluid-container-->
+    <!-- Modal -->
+    <div id="myModal" class="modal fade" role="dialog">
+        <form id="image-form">
+            <input type="submit" style="position: absolute; left: -9999px" />
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Image</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>URL:
+                            <input id="img-url" type="" name="">
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal" onclick="create('image')">OK</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
 </body>
 
 </html>
