@@ -9,7 +9,9 @@
     <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
     <script type="text/javascript" src="static/js/bundle.js"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="static/js/dropzone.js"></script>
     <link rel="stylesheet" type="text/css" href="static/css/editor.css">
+    <link rel="stylesheet" type="text/css" href="static/css/dropzone.css">
 </head>
 
 <body>
@@ -56,12 +58,27 @@
                         </ul>
                     </div>
                     <!--/.well -->
+                    <form id="image_form" action="/upload/image" method="post" enctype="multipart/form-data" target="uploader_iframe">
+                    	<input id="image_file" type="file" name="image_file" size="30" />
+                    </form>
+                    <!-- Hidden iframe which will interact with the server, do not forget to give both name and id values same -->
+                    <iframe id="uploader_iframe" name="uploader_iframe" style="display: none;"></iframe>
                 </div>
                 <!--/sidebar-nav-fixed -->
             </div>
             <!--/span-->
             <div id="main-canvas" class="col-md-8">
+              <div id="upload_before">
+                <form action="/upload/background" class="dropzone needsclick dz-clickable" id="my" method="post" enctype="multipart/form-data">
+                  <input type="file" name="file" id="file" class="dz-hidden-input" style="visibility:hidden;"/>
+                  <div class="dz-message needsclick">
+                    "Drop files or click to upload"
+                  </div>
+                </form>
+              </div>
+              <div id="upload_after" style="height:100%;display:none;">
                 <iframe id="main_scene" class="main_scene" width="100%" height="100%" allowfullscreen="yes" scrolling="no" allowvr="yes" src="static/html/canvas.html"></iframe>
+              </div>
             </div>
             <!--/span-->
             <div class="col-md-2">
@@ -169,3 +186,26 @@
 </body>
 
 </html>
+<script type="text/javascript">
+  $(function() {
+    $("#image_file").change(function() {
+      $("#image_form").submit();  // Submits the form on change event, you consider this code as the start point of your request (to show loader)
+      $("#uploader_iframe").unbind().on('load', function() {  // This block of code will execute when the response is sent from the server.
+        result = JSON.parse($(this).contents().text());  // Content of the iframe will be the response sent from the server. Parse the response as the JSON object
+        createImage('image', result.result);
+      });
+    });
+  });
+
+  Dropzone.options.my = {
+      paramName: "photo", // The name that will be used to transfer the file
+      maxFilesize: 1024, // MB
+      url: "/upload/background",
+      success : function(file, res){
+        console.log('backgroudn : ' + res);
+        $("#upload_before").css("display", "none");
+        $("#upload_after").css("display", "");
+        setBackground(res);
+      }
+    };
+</script>

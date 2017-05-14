@@ -66,6 +66,15 @@ window.create = function(type) {
     }
 }
 
+window.createImage = function(type, src){
+  newObject('primitive', type, src);
+}
+
+window.setBackground = function(src){
+  //background.setMaterial({'src' : src});
+  background.setAttribute('material', 'src', src);
+}
+
 function initEditor() {
     mainCanvas = $('#main-canvas')[0];
     menuElList = document.getElementsByClassName('well');
@@ -312,7 +321,7 @@ function onObjectUnselect() {
     scaleEl.innerHTML = "";
 }
 
-function newObject(type, shape, position, rotation, scale) {
+function newObject(type, shape, src, position, rotation, scale) {
     var tag = 'a-' + shape;
     var newEl = mainFrame.document.createElement(tag);
     var newObj = new obj.Objct(newEl);
@@ -327,10 +336,11 @@ function newObject(type, shape, position, rotation, scale) {
     newObj.setScale(scale);
 
     if (shape == 'image') {
-        util.getImageSize("http://i.imgur.com/fHyEMsl.jpg", function() {
+      console.log('create image ' + src);
+        util.getImageSize(src, function() {
             newObj.setScale({ x: 1, y: this.height / this.width });
         });
-        newObj.setMaterial({ 'src': "http://i.imgur.com/fHyEMsl.jpg" });
+        newObj.setMaterial({ 'src': src });
     } else {
         newObj.setMaterial({ 'color': util.getRandomHexColor() });
     }
@@ -413,10 +423,10 @@ function loadObjectsFromJson(json) {
      if(miniMap == null){
         miniMap = mainFrame.document.createElement('a-image');
         miniMapDirector = mainFrame.document.createElement('a-image');
-        
+
         miniMap.setAttribute('id','minimap');
         miniMap.setAttribute('material','opacity',0);
-        
+
         miniMapDirector.setAttribute('id','minimap-director');
         miniMapDirector.setAttribute('material','src','/static/img/Minimap_Director.png');
         miniMapDirector.setAttribute('minimap-direction',"")
@@ -424,7 +434,7 @@ function loadObjectsFromJson(json) {
 
         rotation = {x:0,y:0,z:camera.getAttribute('rotation').y}
         miniMapDirector.setAttribute('rotation',rotation);
-        
+
         position = {x:-4,y:-3.5,z:-5};
         miniMap.setAttribute('position',position);
         //newObj.setPosition(position);
@@ -433,7 +443,7 @@ function loadObjectsFromJson(json) {
         camera.appendChild(miniMap);
 
         var objects = obj.Controller.getObjects();
-        
+
         for(var i = 0;i<obj.Controller.getNum();i++){
             setObjectOnMiniMap(objects[i].transform.position);
         }
@@ -452,7 +462,7 @@ window.setObjectOnMiniMap = function(position){
 
         position = { x: x, y: y ,z: 1};
         newEl.setAttribute('position',position);
-        
+
         //newObj.setPosition(position);
         size = 0.2
         scale = { x: size, y: size, z: size };
@@ -465,11 +475,8 @@ window.setObjectOnMiniMap = function(position){
 }
 function lookAtObject(){
     //console.log(camera.getAttribute('rotation'));
-    
+
 
 
     //camera.object3D.lookAt(new mainFrame.THREE.Vector3(0,0,0));
 }
-
-
-
