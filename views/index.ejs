@@ -1,11 +1,8 @@
 <!DOCTYPE html>
-<html class="fullscreen_page sticky_menu">
+<html>
+
 <head>
-<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-<meta name="google" content="notranslate" />
-
-
+    
 <link rel="shortcut icon" href="img/favico.ico" type="image/x-icon">
 <link rel="apple-touch-icon" href="img/apple_icons_57x57.png">
 <link rel="apple-touch-icon" sizes="72x72" href="img/apple_icons_72x72.png">
@@ -19,19 +16,21 @@
 <link rel="stylesheet" href="static/css/custom.css" type="text/css" media="all" />
 <link rel="stylesheet" href="static/css/bootstrap.min.css">
 <link rel="stylesheet" href="static/css/editor.css" type="text/css">
+<link rel="stylesheet" type="text/css" href="static/css/dropzone.css">
 
+<script type="text/javascript" src="static/js/dropzone.js"></script>
 <script type="text/javascript" src="static/js/jquery-3.1.1.min.js"></script>
 <script type="text/javascript" src="static/js/jquery.min.js"></script>
 <script type="text/javascript" src="static/js/bundle.js"></script>
 <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
 
-
 </head>
+
 <body>
-	<header class="main_header">
+    <header class="main_header">
         <div class="header_wrapper">
         	<div class="logo_sect">
-                <a href="index.html" class="logo"><img src="static/img/logo.png" alt=""  class="logo_def"><img src="static/img/retina/logo.png" alt="" class="logo_retina"></a>
+                <a href="index.html" class="logo"><img src="img/logo.png" alt=""  class="logo_def"><img src="img/retina/logo.png" alt="" class="logo_retina"></a>
                 <div class="slogan">html photo template</div>
             </div>                       
             <div class="header_rp">
@@ -173,11 +172,6 @@
             <a class="fs_share_close hided" href="javascript:void(0)"></a>
         </div>
     </div>
-    <div id="main-canvas" class="fs_gallery_container fade">
-        <iframe id="main_scene" width="100%" height="100%" allowfullscreen="yes" scrolling="no" allowvr="yes" src="static/html/canvas.html"></iframe>
-    </div>
-
-	<div class="content_bg"></div>
     <div class="container">
         <div id="wrapper" class="row">
             <div class="col-md-2">
@@ -191,20 +185,37 @@
                             <li onclick="create('plane')"><a>Plane</a></li>
                             </li>
                             <li class="nav-header">Primitive</li>
-                            <li class="active" onclick="create('image')"><a>Image</a></li>
+                            <li class="active" data-toggle="modal" data-target="#myModal"><a>Image</a></li>
                             <li onclick="create('teleport')"><a>Teleport</a></li>
                             <li onclick="setMiniMap()"><a>minimap</a></li>
                             </li>
                         </ul>
                     </div>
                     <!--/.well -->
+                    <form id="image_form" action="/upload/image" method="post" enctype="multipart/form-data" target="uploader_iframe">
+                    	<input id="image_file" type="file" name="image_file" size="30" />
+                    </form>
+                    <!-- Hidden iframe which will interact with the server, do not forget to give both name and id values same -->
+                    <iframe id="uploader_iframe" name="uploader_iframe" style="display: none;"></iframe>
                 </div>
                 <!--/sidebar-nav-fixed -->
             </div>
             <!--/span-->
-            
+            <div id="main-canvas" class="col-md-8 ">
+              <div id="upload_before">
+                <form action="/upload/background" class="dropzone needsclick dz-clickable" id="my" method="post" enctype="multipart/form-data">
+                  <input type="file" name="file" id="file" class="dz-hidden-input" style="visibility:hidden;"/>
+                  <div class="dz-message needsclick">
+                    "Drop files or click to upload"
+                  </div>
+                </form>
+              </div>
+              <div id="upload_after" style="height:100%;display:none;">
+                <iframe id="main_scene" class="main_scene" width="100%" height="100%" allowfullscreen="yes" scrolling="no" allowvr="yes" src="static/html/canvas.html"></iframe>
+              </div>
+            </div>
             <!--/span-->
-            <div class="col-md-2 col-md-offset-10">
+            <div class="col-md-2">
                 <div class="sidebar-nav-fixed pull-right affix">
                     <div class="well">
                         <table class="nav object-list">
@@ -305,32 +316,37 @@
         <footer>
         </footer>
     </div>
-    
-	<script type="text/javascript" src="static/js/jquery-ui.min.js"></script>    
+    <!--/.fluid-container-->
+    <!-- Modal -->
+    <div id="myModal" class="modal fade" role="dialog">
+        <form id="image-form">
+            <input type="submit" style="position: absolute; left: -9999px" />
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Image</h4>
+                    </div>
+                    <div class="modal-body">
+                        <p>URL:
+                            <input id="img-url" type="" name="">
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal" onclick="create('image')">OK</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <script type="text/javascript" src="static/js/jquery-ui.min.js"></script>    
     <script type="text/javascript" src="static/js/modules.js"></script>
 	<script type="text/javascript" src="static/js/theme.js"></script>
     <script type="text/javascript" src="static/js/bootstrap.min.js"></script>
     <script>
-		gallery_set = [/*
-			{image: "static/img/gallery/slider/1.jpg", thmb: "static/img/gallery/slider/thumbs/1.jpg", alt: "SEASHORE", title: "SEASHORE", description: "Discover elegant solution for your online portfolio", titleColor: "#ffffff", descriptionColor: "#ffffff"},
-			{image: "static/img/gallery/slider/2.jpg", thmb: "static/img/gallery/slider/thumbs/2.jpg", alt: "Colors", title: "Colors", description: "Discover elegant solution for your online portfolio", titleColor: "#ffffff", descriptionColor: "#ffffff"},			
-			{image: "static/img/gallery/slider/3.jpg", thmb: "static/img/gallery/slider/thumbs/3.jpg", alt: "Forest", title: "Forest", description: "Discover elegant solution for your online portfolio", titleColor: "#ffffff", descriptionColor: "#ffffff"},			
-			{image: "static/img/gallery/slider/4.jpg", thmb: "static/img/gallery/slider/thumbs/4.jpg", alt: "Coffee", title: "Coffee", description: "Discover elegant solution for your online portfolio", titleColor: "#ffffff", descriptionColor: "#ffffff"},			
-			{image: "static/img/gallery/slider/5.jpg", thmb: "static/img/gallery/slider/thumbs/5.jpg", alt: "Dude", title: "Dude", description: "Discover elegant solution for your online portfolio", titleColor: "#ffffff", descriptionColor: "#ffffff"},
-			{image: "static/img/gallery/slider/6.jpg", thmb: "static/img/gallery/slider/thumbs/6.jpg", alt: "Summer", title: "Summer", description: "Discover elegant solution for your online portfolio", titleColor: "#ffffff", descriptionColor: "#ffffff"},			
-			{image: "static/img/gallery/slider/7.jpg", thmb: "static/img/gallery/slider/thumbs/7.jpg", alt: "Skate", title: "Skate", description: "Discover elegant solution for your online portfolio", titleColor: "#ffffff", descriptionColor: "#ffffff"},
-			{image: "static/img/gallery/slider/8.jpg", thmb: "static/img/gallery/slider/thumbs/8.jpg", alt: "Forest", title: "Forest", description: "Discover elegant solution for your online portfolio", titleColor: "#ffffff", descriptionColor: "#ffffff"},			
-			{image: "static/img/gallery/slider/9.jpg", thmb: "static/img/gallery/slider/thumbs/9.jpg", alt: "Mountains", title: "Mountains", description: "Discover elegant solution for your online portfolio", titleColor: "#ffffff", descriptionColor: "#ffffff"},			
-			{image: "static/img/gallery/slider/10.jpg", thmb: "static/img/gallery/slider/thumbs/10.jpg", alt: "Seashore", title: "Seashore", description: "Discover elegant solution for your online portfolio", titleColor: "#ffffff", descriptionColor: "#ffffff"},			
-			{image: "static/img/gallery/slider/11.jpg", thmb: "static/img/gallery/slider/thumbs/11.jpg", alt: "Pier", title: "Pier", description: "Discover elegant solution for your online portfolio", titleColor: "#ffffff", descriptionColor: "#ffffff"},			
-			{image: "static/img/gallery/slider/12.jpg", thmb: "static/img/gallery/slider/thumbs/12.jpg", alt: "Desert", title: "Desert", description: "Discover elegant solution for your online portfolio", titleColor: "#ffffff", descriptionColor: "#ffffff"},			
-			{image: "static/img/gallery/slider/13.jpg", thmb: "static/img/gallery/slider/thumbs/13.jpg", alt: "Mountains", title: "Mountains", description: "Discover elegant solution for your online portfolio", titleColor: "#ffffff", descriptionColor: "#ffffff"},			
-			{image: "static/img/gallery/slider/14.jpg", thmb: "static/img/gallery/slider/thumbs/14.jpg", alt: "Tourist", title: "Tourist", description: "Discover elegant solution for your online portfolio", titleColor: "#ffffff", descriptionColor: "#ffffff"},			
-			{image: "static/img/gallery/slider/15.jpg", thmb: "static/img/gallery/slider/thumbs/15.jpg", alt: "Fog", title: "Fog", description: "Discover elegant solution for your online portfolio", titleColor: "#ffffff", descriptionColor: "#ffffff"},			
-			{image: "static/img/gallery/slider/16.jpg", thmb: "static/img/gallery/slider/thumbs/16.jpg", alt: "Desert", title: "Desert", description: "Discover elegant solution for your online portfolio", titleColor: "#ffffff", descriptionColor: "#ffffff"},			
-			{image: "static/img/gallery/slider/17.jpg", thmb: "static/img/gallery/slider/thumbs/17.jpg", alt: "Seashore", title: "Seashore", description: "Discover elegant solution for your online portfolio", titleColor: "#ffffff", descriptionColor: "#ffffff"},		
-			{image: "static/img/gallery/slider/18.jpg", thmb: "static/img/gallery/slider/thumbs/18.jpg", alt: "Stones", title: "Stones", description: "Discover elegant solution for your online portfolio", titleColor: "#ffffff", descriptionColor: "#ffffff"}
-		*/]
+		gallery_set = []
 		
 		jQuery(document).ready(function(){
 			"use strict";
@@ -382,4 +398,28 @@
     
     <script type="text/javascript" src="static/js/fs_gallery.js"></script>
 </body>
+
 </html>
+<script type="text/javascript">
+  $(function() {
+    $("#image_file").change(function() {
+      $("#image_form").submit();  // Submits the form on change event, you consider this code as the start point of your request (to show loader)
+      $("#uploader_iframe").unbind().on('load', function() {  // This block of code will execute when the response is sent from the server.
+        result = JSON.parse($(this).contents().text());  // Content of the iframe will be the response sent from the server. Parse the response as the JSON object
+        createImage('image', result.result);
+      });
+    });
+  });
+
+  Dropzone.options.my = {
+      paramName: "photo", // The name that will be used to transfer the file
+      maxFilesize: 1024, // MB
+      url: "/upload/background",
+      success : function(file, res){
+        console.log('backgroudn : ' + res);
+        $("#upload_before").css("display", "none");
+        $("#upload_after").css("display", "");
+        setBackground(res);
+      }
+    };
+</script>
