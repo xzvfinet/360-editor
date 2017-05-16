@@ -4,11 +4,12 @@ html {
 
 body {
     padding-bottom: 0px;
-    /*padding-top: 60px;*/
+    /**/
     height: 100%;
 }
 
 .container {
+    padding-top: 30px;
     width: 100%;
     height: 100%;
 }
