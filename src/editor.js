@@ -89,6 +89,7 @@ function initEditor() {
             console.log('Not selected');
         else {
             obj.Controller.remove(currentSelectedObject);
+            mover = null;
         }
     });
     editorToggle = $('#toggle-event');
