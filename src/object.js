@@ -94,7 +94,15 @@ Objct.prototype.setLookAt = function(target) {
     this.lookat = target;
 }
 
+Objct.prototype.addEvent = function(eventType, eventArgs) {
+    this.eventList.push({ 'type': eventType, 'arg': eventArgs });
+}
+
 function Controller() {}
+
+Controller.prototype.createObject = function(el) {
+    return new Objct(el);
+}
 
 Controller.prototype.objectsFromJson = function(json) {
     var loadedObjects;
@@ -140,6 +148,12 @@ Controller.prototype.getObjects = function() {
 Controller.prototype.remove = function(obj) {
     if (obj.el) {
         obj.el.parentElement.removeChild(obj.el);
+    }
+
+    // remove object from list
+    var index = objects.indexOf(obj);
+    if (index > -1) {
+        objects.splice(index, 1);
     }
 }
 

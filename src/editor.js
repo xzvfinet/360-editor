@@ -86,7 +86,13 @@ function initEditor() {
             menuElList[i].style.visibility = (editorMode) ? 'visible' : 'hidden';
         }
 
+        if (!editorMode && mover) {
+            mover.parentEl.removeChild(mover);
+            mover = null;
+        }
+
         mainCanvas.style.width = (editorMode) ? '' : '100%';
+        onObjectUnselect();
 
     });
     eventArgEl = document.getElementById('eventArg');
@@ -100,7 +106,7 @@ function initEditor() {
         // sceneryObject.objects = objectsJson;
         var saveObject = {
             'sceneriesJson': sceneriesJson,
-            'objectsJson' : objectsJson
+            'objectsJson': objectsJson
         }
 
         loadTextEl.value = JSON.stringify(saveObject);
@@ -323,35 +329,28 @@ function createObject(type) {
     newObject(type, 'plane');
 }
 
-function makeArrayAsString() {
-    var result = "";
-    for (var i = 0; i < arguments.length - 1; ++i) {
-        result += arguments[i] + ", ";
-    }
-    result += arguments[arguments.length - 1];
-    return result;
-}
-
 function onObjectSelect() {
     var selected = obj.Controller.findByEl(this);
-    if (currentSelectedObject == selected) {
+
+    if (editorMode && currentSelectedObject == selected) {
         return;
     }
+
     currentSelectedObject = selected;
 
     if (editorMode) {
         shapeEl.innerHTML = currentSelectedObject.getShape();
         var position = currentSelectedObject.transform.position;
-        positionEl.innerHTML = makeArrayAsString(
+        positionEl.innerHTML = util.makeArrayAsString(
             util.floorTwo(position.x),
             util.floorTwo(position.y),
             util.floorTwo(position.z));
         var rotation = currentSelectedObject.transform.rotation;
-        rotationEl.innerHTML = makeArrayAsString(
+        rotationEl.innerHTML = util.makeArrayAsString(
             util.floorTwo(rotation.x),
             util.floorTwo(rotation.y));
         scale = currentSelectedObject.transform.scale;
-        scaleEl.innerHTML = makeArrayAsString(scale.x, scale.y, scale.z);
+        scaleEl.innerHTML = util.makeArrayAsString(scale.x, scale.y, scale.z);
 
         // append mover element
         mover = newMover();

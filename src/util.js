@@ -48,3 +48,12 @@ module.exports.getImageSize = function(url, callback) {
     img.onload = callback;
     img.src = url;
 }
+
+module.exports.makeArrayAsString = function() {
+    var result = "";
+    for (var i = 0; i < arguments.length - 1; ++i) {
+        result += arguments[i] + ", ";
+    }
+    result += arguments[arguments.length - 1];
+    return result;
+}
