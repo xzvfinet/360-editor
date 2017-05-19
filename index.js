@@ -12,10 +12,10 @@ app.set('view engine', 'ejs');
 
 app.listen(8000);
 
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
 app.use('/', main);
 app.use('/project', project);
-
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
 
 module.exports = app;
