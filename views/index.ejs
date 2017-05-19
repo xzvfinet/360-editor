@@ -1,215 +1,72 @@
 <!DOCTYPE html>
-<html>
-
+<html class="fullscreen_page sticky_menu">
 <head>
-    <meta name="google" content="notranslate" />
-    <link rel="stylesheet" href="static/css/bootstrap.min.css">
-    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
-    <script type="text/javascript" src="static/js/jquery-3.1.1.min.js"></script>
-    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
-    <script type="text/javascript" src="static/js/bundle.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="static/js/dropzone.js"></script>
-    <script type="text/javascript" src="static/js/jquery.ui.widget.js"></script>
-    <script type="text/javascript" src="static/js/jquery.iframe-transport.js"></script>
-    <script type="text/javascript" src="static/js/jquery.fileupload.js"></script>
-    <script type="text/javascript" src="static/js/jquery.cloudinary.js"></script>
-    <link rel="stylesheet" type="text/css" href="static/css/editor.css">
-    <link rel="stylesheet" type="text/css" href="static/css/dropzone.css">
+<% include head %>
 </head>
-
 <body>
-    <div class="navbar navbar-fixed-top navbar-default">
-        <div class="container">
-            <div class="navbar-header"><a class="navbar-brand" href="#">Traversal360</a>
-                <a class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="glyphicon glyphicon-bar"></span>
-                    <span class="glyphicon glyphicon-bar"></span>
-                    <span class="glyphicon glyphicon-bar"></span>
-                </a>
-            </div>
-            <div class="navbar-collapse">
-                <ul class="nav navbar-nav">
-                    <li class="active"><a href="#">Editor</a>
-                    </li>
-                </ul>
-                <div class="navbar-right">
-                    <label class="checkbox-inline">
-                        <input id="toggle-event" type="checkbox" data-toggle="toggle"> Editor Mode
-                    </label>
-                </div>
-            </div>
-            <!--/.navbar-collapse -->
-        </div>
+	<header class="main_header">
+    <header class="main_header">
+      <% include header %>
+      </header>
+    </header>
+
+    <div class="fullscreen_block fw_background bg_video">
+    	<iframe src="http://www.youtube.com/embed/iAJncW1Qj9w?controls=0&amp;autoplay=1&amp;showinfo=0&amp;modestbranding=1&amp;wmode=opaque&amp;rel=0" allowfullscreen></iframe>
     </div>
-    <div class="container">
-        <div id="wrapper" class="row">
-            <div class="col-md-2">
-                <div class="sidebar-nav-fixed affix">
-                    <div class="well">
-                        <ul class="nav">
-                            <li class="nav-header">Shape</li>
-                            <li class="active" onclick="create('box')"><a>Box</a></li>
-                            <li onclick="create('sphere')"><a>Sphere</a></li>
-                            <li onclick="create('cylinder')"><a>Cylinder</a></li>
-                            <li onclick="create('plane')"><a>Plane</a></li>
-                            </li>
-                            <li class="nav-header">Primitive</li>
-                            <li class="active" onclick="create('image')"><a>Image</a></li>
-                            <li onclick="create('teleport')"><a>Teleport</a></li>
-                            <li onclick="setMiniMap()"><a>minimap</a></li>
-                            </li>
-                        </ul>
-                    </div>
-                    <!--/.well -->
-                    <form id="image_form" name="image_form" action="/upload/image" method="post" enctype="multipart/form-data" target="uploader_iframe">
-                    	<input id="image_file" type="file" name="image_file" size="30" />
-                    </form>
-                    <!-- Hidden iframe which will interact with the server, do not forget to give both name and id values same -->
-                    <iframe id="uploader_iframe" name="uploader_iframe" style="display: none;"></iframe>
-                </div>
-                <!--/sidebar-nav-fixed -->
-            </div>
-            <!--/span-->
-            <div id="main-canvas" class="col-md-8">
-              <div id="upload_before">
-                <form action="/upload/background" class="dropzone needsclick dz-clickable" id="my" method="post" enctype="multipart/form-data">
-                  <input type="file" name="file" id="file" class="dz-hidden-input" style="visibility:hidden;"/>
-                  <div class="dz-message needsclick">
-                    "Drop files or click to upload"
-                  </div>
-                </form>
-              </div>
-              <div id="upload_after" style="height:100%;display:none;">
-                <iframe id="main_scene" class="main_scene" width="100%" height="100%" allowfullscreen="yes" scrolling="no" allowvr="yes" src="static/html/canvas.html"></iframe>
-              </div>
-            </div>
-            <!--/span-->
-            <div class="col-md-2">
-                <div class="sidebar-nav-fixed pull-right affix">
-                    <div class="well">
-                        <table class="nav object-list">
-                            <thead>
-                                <h4>Properties</h4>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td><b>Id</b></td>
-                                    <td class='list-value object-id'>none</td>
-                                </tr>
-                                <tr>
-                                    <td><b>Shape</b></td>
-                                    <td class='list-value object-shape'>none</td>
-                                </tr>
-                                <tr>
-                                    <td><b>Position</b></td>
-                                    <td class='list-value object-position'>none</td>
-                                </tr>
-                                <tr>
-                                    <td><b>Rotation</b></td>
-                                    <td class='list-value object-rotation'>none</td>
-                                </tr>
-                                <tr>
-                                    <td><b>Scale</b></td>
-                                    <td class='list-value object-scale'>none</td>
-                                </tr>
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    <td>
-                                        <button id="delete-btn">Delete</button>
-                                    </td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                    <!--/.well -->
-                    <div class="well">
-                        <table class="nav object-list">
-                            <thead>
-                                <h4>Events</h4>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td class='list-value object-id'>
-                                        <div class="dropdown">
-                                            <button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Dropdown Example
-                                                <span class="caret"></span></button>
-                                            <ul class="dropdown-menu">
-                                            </ul>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <input id="eventArg" type="text" name="">
-                                    </td>
-                                </tr>
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    <td>
-                                    </td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                    <div class="well">
-                        <table class="nav object-list">
-                            <thead>
-                                <h4>Loads</h4>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td>
-                                        <input id="loadInput" type="text" name="">
-                                        <button id="saveBtn">Save</button>
-                                        <button id="loadBtn">Load</button>
-                                    </td>
-                                </tr>
-                            </tbody>
-                            <tfoot>
-                                <tr>
-                                    <td>
-                                    </td>
-                                </tr>
-                            </tfoot>
-                        </table>
-                    </div>
-                    <!--/.well -->
-                </div>
-                <!--/sidebar-nav-fixed -->
-            </div>
-            <!--/span-->
-        </div>
-        <!--/row-->
-        <footer>
-        </footer>
-    </div>
-    <!--/.fluid-container-->
+
+	<div class="content_bg"></div>
+	<script type="text/javascript" src="../static/js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="../static/js/modules.js"></script>
+	<script type="text/javascript" src="../static/js/theme.js"></script>
+    <script type="text/javascript" src="../static/js/bootstrap.min.js"></script>
+    <script>
+		jQuery(document).ready(function() {
+			"use strict";
+			jQuery('.fw_background').height(jQuery(window).height());
+			jQuery('.main_header').removeClass('hided');
+			jQuery('.fullscreen_block').addClass('loaded');
+			if (jQuery(window).width() > 1024) {
+				if (jQuery('.bg_video').size() > 0) {
+					if (((jQuery(window).height()+150)/9)*16 > jQuery(window).width()) {
+						jQuery('iframe').height(jQuery(window).height()+150).width(((jQuery(window).height()+150)/9)*16);
+						jQuery('iframe').css({'margin-left' : (-1*jQuery('iframe').width()/2)+'px', 'top' : "-75px", 'margin-top' : '0px'});
+					} else {
+						jQuery('iframe').width(jQuery(window).width()).height(((jQuery(window).width())/16)*9);
+						jQuery('iframe').css({'margin-left' : (-1*jQuery('iframe').width()/2)+'px', 'margin-top' : (-1*jQuery('iframe').height()/2)+'px', 'top' : '50%'});
+					}
+				}
+			} else if (jQuery(window).width() < 760) {
+				jQuery('.bg_video').height(jQuery(window).height()-jQuery('.main_header').height());
+				jQuery('iframe').height(jQuery(window).height()-jQuery('.main_header').height());
+			} else {
+				jQuery('.bg_video').height(jQuery(window).height() - jQuery('.main_header').height());
+				jQuery('.bg_video').css({'margin-top': jQuery('.main_header').height()+'px'});
+				jQuery('iframe').height(jQuery(window).height() - jQuery('.main_header').height());
+			}
+			jQuery('html').addClass('without_border');
+		});
+		jQuery(window).resize(function() {
+			"use strict";
+			jQuery('.fw_background').height(jQuery(window).height());
+			if (jQuery(window).width() > 1024	) {
+				if (jQuery('.bg_video').size() > 0) {
+					if (((jQuery(window).height()+150)/9)*16 > jQuery(window).width()) {
+						jQuery('iframe').height(jQuery(window).height()+150).width(((jQuery(window).height()+150)/9)*16);
+						jQuery('iframe').css({'margin-left' : (-1*jQuery('iframe').width()/2)+'px', 'top' : "-75px", 'margin-top' : '0px'});
+					} else {
+						jQuery('iframe').width(jQuery(window).width()).height(((jQuery(window).width())/16)*9);
+						jQuery('iframe').css({'margin-left' : (-1*jQuery('iframe').width()/2)+'px', 'margin-top' : (-1*jQuery('iframe').height()/2)+'px', 'top' : '50%'});
+					}
+				}
+			} else if (jQuery(window).width() < 760) {
+				jQuery('.bg_video').height(jQuery(window).height()-jQuery('.main_header').height());
+				jQuery('iframe').height(jQuery(window).height()-jQuery('.main_header').height());
+			} else {
+				jQuery('.bg_video').height(jQuery(window).height() - jQuery('.main_header').height());
+				jQuery('.bg_video').css({'margin-top': jQuery('.main_header').height()+'px'});
+				jQuery('iframe').height(jQuery(window).height() - jQuery('.main_header').height());
+			}
+		});
+	</script>
 </body>
-
 </html>
-<script type="text/javascript">
-  $(function() {
-    $("#image_file").change(function() {
-      $("#image_form").submit();  // Submits the form on change event, you consider this code as the start point of your request (to show loader)
-      $("#uploader_iframe").unbind().on('load', function() {  // This block of code will execute when the response is sent from the server.
-        result = JSON.parse($(this).contents().text());  // Content of the iframe will be the response sent from the server. Parse the response as the JSON object
-        createImage('image', result.result);
-      });
-    });
-  });
-
-  Dropzone.options.my = {
-      paramName: "photo", // The name that will be used to transfer the file
-      maxFilesize: 1024, // MB
-      url: "/upload/background",
-      success : function(file, res){
-        console.log('backgroudn : ' + res);
-        $("#upload_before").css("display", "none");
-        $("#upload_after").css("display", "");
-        setBackground(res);
-      }
-    };
-</script>

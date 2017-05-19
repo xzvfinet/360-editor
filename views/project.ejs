@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html class="fullscreen_page sticky_menu">
+<head>
 <% include head %>
 </head>
 <body>
@@ -7,15 +8,22 @@
     <% include header %>
     </header>
     <div class="fullscreen_block hided">
-		<ul class="optionset" data-option-key="filter">
-        	<li class="selected"><a href="#filter" data-option-value="*">All Works</a></li>
-            <li><a data-option-value=".advertisement" href="#filter" title="View all post filed under advertisement">Advertisement</a></li>
-            <li><a data-option-value=".cities" href="#filter" title="View all post filed under cities">Cities</a></li>
-            <li><a data-option-value=".fashion" href="#filter" title="View all post filed under fashion">Fashion</a></li>
-            <li><a data-option-value=".nature" href="#filter" title="View all post filed under nature">Nature</a></li>
-            <li><a data-option-value=".portrait" href="#filter" title="View all post filed under portrait">Portrait</a></li>
-            <li><a data-option-value=".stuff" href="#filter" title="View all post filed under stuff">Stuff</a></li>
+      <div style="display:flow-root;">
+        <div style="float:left;">
+    		<ul class="optionset" data-option-key="filter" style="width:500px;">
+            	<li class="selected"><a href="#filter" data-option-value="*">All Works</a></li>
+                <li><a data-option-value=".advertisement" href="#filter" title="View all post filed under advertisement">Advertisement</a></li>
+                <li><a data-option-value=".cities" href="#filter" title="View all post filed under cities">Cities</a></li>
+                <li><a data-option-value=".fashion" href="#filter" title="View all post filed under fashion">Fashion</a></li>
+                <li><a data-option-value=".nature" href="#filter" title="View all post filed under nature">Nature</a></li>
+                <li><a data-option-value=".portrait" href="#filter" title="View all post filed under portrait">Portrait</a></li>
+                <li><a data-option-value=".stuff" href="#filter" title="View all post filed under stuff">Stuff</a></li>
         </ul>
+        </div>
+        <div style="margin-right:30px;float:right;">
+          <a href="/project/new" class="hasIcon shortcode_button btn_normal btn_type5"><i class="icon-star-o"></i>New Project</a>
+        </div>
+      </div>
         <% if(result.length > 0){ %>
           <div class="fs_blog_module image-grid">
               <% result.forEach(function(scene){ %>

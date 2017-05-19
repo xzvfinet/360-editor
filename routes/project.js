@@ -17,6 +17,10 @@ router.get('/', function(req, res){
     });
 });
 
+router.get('/new', function(req, res){
+  res.render('editor');
+});
+
 // read json file
 router.get('/test', function(req, res){
   var data = fs.readFileSync('./uploads/test.json', 'utf8');
