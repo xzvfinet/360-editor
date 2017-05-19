@@ -84,18 +84,7 @@ router.post('/upload/image', upload.array('image_file', 1), function(req, res){
 });
 
 router.get('/login', function(req, res){
-  var query = 'SELECT * FROM user';
-
-  connection.query(query, function (error, rows) {
-      if(error) {
-          console.log("error : " + error);
-      }else{
-        for(var i=0; i<rows.length; i++)
-          console.log(rows[i].iduser);
-
-        res.render('login');
-      }
-  });
+    res.render('login');
 });
 
 module.exports = router;

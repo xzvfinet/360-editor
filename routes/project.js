@@ -39,7 +39,7 @@ router.get('/:id', function(req, res){
     if(err){
       res.status(500);
     }else{
-      res.render('project', {result : info});
+      res.render('editor', {result : info});
     }
   });
 });

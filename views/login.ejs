@@ -1,117 +1,58 @@
 <!DOCTYPE html>
 <html class="fullscreen_page sticky_menu">
 <% include head %>
+
+<style>
+    .colored {
+        background-color: rgb(210, 210, 210);
+    }
+</style>
+<!-- Login Options - END -->
+
 </head>
-<body>
+<body style="background-color:#e9e9e9">
 	<header class="main_header">
     <% include header %>
-    </header>
-
-    <div class="fw_content_wrapper">
-        <div class="fw_content_padding">
-            <div class="content_wrapper noTitle">
-                <div class="container">
-                    <div class="content_block row no-sidebar">
-                        <div class="fl-container ">
-                            <div class="row">
-                                <div class="col-sm-12">
-                                    <div class="posts-block ">
-                                        <div class="contentarea">
-                                            <div class="row">
-                                                <div class="col-sm-8 first-module module_number_1 module_cont pb0 pr25 module_html">
-                                                    <div class="bg_title"><h4 class="headInModule">Get In Touch with Us</h4></div>
-                                                    <div class="module_content contact_form">
-                                                        <div id="note"></div>
-                                                        <div id="fields">
-                                                            <form id="ajax-contact-form" action="#">
-                                                                <div class="w50 pr7"><input type="text" name="name" value="" placeholder="Name *" /></div>
-                                                                <div class="w50"><input type="text" name="email" value="" placeholder="Email *" /></div>
-                                                                <div class="clear"></div>
-                                                                <input type="text" name="subject" value="" placeholder="Subject" />
-                                                                <textarea name="message" id="message" placeholder="Message *"></textarea>
-                                                                <input type="submit" value="Send a message">
-                                                            </form>
-                                                        </div>
-                                                    </div>
-                                                </div><!-- .module_cont -->
-                                                <div class="col-sm-4 module_number_2 module_cont no_bg pb0 pl25 module_contact_info">
-                                                    <div class="bg_title"><h4 class="headInModule">Contact Information</h4></div>
-                                                    <ul class="contact_info_list contact_icons">
-                                                        <li class="contact_info_item">
-                                                            <div class="contact_info_wrapper">
-                                                                <span class="contact_info_icon"><i class="icon-home"></i></span>
-                                                                <div class="contact_info_text">5512 Lorem Vestibulum 666/13</div>
-                                                            </div>
-                                                        </li>
-                                                        <li class="contact_info_item">
-                                                            <div class="contact_info_wrapper">
-                                                                <span class="contact_info_icon"><i class="icon-phone"></i></span>
-                                                                <div class="contact_info_text">+1 800 789 50 12</div>
-                                                            </div>
-                                                        </li>
-                                                        <li class="contact_info_item">
-                                                            <div class="contact_info_wrapper">
-                                                                <span class="contact_info_icon"><i class="icon-envelope"></i></span>
-                                                                <div class="contact_info_text"><a href="#">mail@oyster.com</a></div>
-                                                            </div>
-                                                        </li>
-                                                        <li class="contact_info_item">
-                                                            <div class="contact_info_wrapper">
-                                                                <span class="contact_info_icon"><i class="icon-skype"></i></span>
-                                                                <div class="contact_info_text">Skype</div>
-                                                            </div>
-                                                        </li>
-                                                        <li class="contact_info_item">
-                                                            <div class="contact_info_wrapper">
-                                                                <span class="contact_info_icon"><i class="icon-twitter"></i></span>
-                                                                <div class="contact_info_text"><a href="#">Twitter</a></div>
-                                                            </div>
-                                                        </li>
-                                                        <li class="contact_info_item">
-                                                            <div class="contact_info_wrapper">
-                                                                <span class="contact_info_icon"><i class="icon-facebook-square"></i></span>
-                                                                <div class="contact_info_text"><a href="#">Facebook</a></div>
-                                                            </div>
-                                                        </li>
-                                                        <li class="contact_info_item">
-                                                            <div class="contact_info_wrapper">
-                                                                <span class="contact_info_icon"><i class="icon-dribbble"></i></span>
-                                                                <div class="contact_info_text"><a href="#">Dribbble</a></div>
-                                                            </div>
-                                                        </li>
-                                                        <li class="contact_info_item">
-                                                            <div class="contact_info_wrapper">
-                                                                <span class="contact_info_icon"><i class="icon-flickr"></i></span>
-                                                                <div class="contact_info_text"><a href="#">Flickr</a></div>
-                                                            </div>
-                                                        </li>
-                                                        <li class="contact_info_item">
-                                                            <div class="contact_info_wrapper">
-                                                                <span class="contact_info_icon"><i class="icon-youtube-play"></i></span>
-                                                                <div class="contact_info_text"><a href="#">YouTube</a></div>
-                                                            </div>
-                                                        </li>
-                                                        <li class="contact_info_item">
-                                                            <div class="contact_info_wrapper">
-                                                                <span class="contact_info_icon"><i class="icon-pinterest"></i></span>
-                                                                <div class="contact_info_text"><a href="#">Pinterest</a></div>
-                                                            </div>
-                                                        </li>
-                                                    </ul>
-                                                </div><!-- .module_cont -->
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+	</header>
+	<div class="container" style="margin-top:80px;">
+		<div class="container" >
+		 <div class="col-md-4"></div>
+		    <div class="col-md-4">
+		        <div class="container" style="margin-top: 30px">
+		            <div class="col-md-4">
+		                <div class="panel panel-default">
+		                    <div class="panel-heading">
+		                        <h1 class="panel-title"><strong>Sign In </strong></h1>
+		                    </div>
+		                    <div class="panel-body">
+		                        <form>
+		                            <div class="form-group" style="text-align:left">
+		                                <label for="email">Username or Email</label>
+		                                <input type="email" class="form-control" id="email" placeholder="Enter email" required="required"/>
+		                            </div>
+		                            <div class="form-group" style="text-align:left">
+		                                <label for="pwd">Password <a href="/sessions/forgot_password">(forgot password)</a></label>
+		                                <input type="password" class="form-control" id="pwd" placeholder="Password" required="required"/>
+		                            </div>
+		                            <button type="submit" class="hasIcon shortcode_button btn_normal btn_type5">Sign in</button>
+		                        </form>
+		                    </div>
+		                </div>
+		            </div>
+		        </div>
+						<div class="container" style="margin-top: 20px;">
+            <div class="col-md-4">
+                <div class="login-panel panel panel-default">
+                    <div class="panel-heading" style="background-color:white;">
+                        New to Traverser360? <a href="/signup" style="margin-left:10px;"><b>Create an acount.</b></a>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-
-    <div class="fixed_bg map_bg"></div>
+		    </div>
+		    <div class="col-md-4"></div>
+		 </div>
+	</div>
 
 	<div class="content_bg"></div>
 	<script type="text/javascript" src="../static/js/jquery-ui.min.js"></script>
