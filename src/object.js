@@ -1,20 +1,22 @@
 var objects = [];
 
 function Objct(el, obj) {
-    this.el = el;
-    this.type = "";
-    this.shape = "";
-    this.transform = {};
-    this.material = {};
+    if (obj) {
+        // copy all properties of obj to this
+        for (var prop in obj) {
+            this[prop] = obj[prop];
+        }
+    } else {
+        this.el = el;
+        this.type = "";
+        this.shape = "";
+        this.transform = {};
+        this.material = {};
 
-    this.clickListener = "";
-    this.eventList = [];
+        this.clickListener = "";
+        this.eventList = [];
 
-    this.lookat = "";
-
-    // copy all properties of obj to this
-    for (var prop in obj) {
-        this[prop] = obj[prop];
+        this.lookat = "";
     }
 
     objects.push(this);
