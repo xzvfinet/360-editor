@@ -42,7 +42,7 @@ var upload = multer({
         bucket: 'traverser360',
         acl: 'public-read',
         key: function (req, file, cb) {
-            cb(null, ''+Date.now());
+            cb(null, Date.now() + "." + file.originalname.split('.').pop());
         }
     })
 });
