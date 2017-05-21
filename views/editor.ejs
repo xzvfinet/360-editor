@@ -1,51 +1,37 @@
+
 <!DOCTYPE html>
 <html>
 
 <head>
-    <meta name="google" content="notranslate" />
-    <link rel="stylesheet" href="../static/css/bootstrap.min.css">
-    <link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
-    <script type="text/javascript" src="../static/js/jquery-3.1.1.min.js"></script>
-    <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
-    <script type="text/javascript" src="../static/js/bundle.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-    <script type="text/javascript" src="../static/js/dropzone.js"></script>
-    <script type="text/javascript" src="../static/js/jquery.ui.widget.js"></script>
-    <script type="text/javascript" src="../static/js/jquery.iframe-transport.js"></script>
-    <script type="text/javascript" src="../static/js/jquery.fileupload.js"></script>
-    <script type="text/javascript" src="../static/js/jquery.cloudinary.js"></script>
-    <link rel="stylesheet" type="text/css" href="../static/css/editor.css">
-    <link rel="stylesheet" type="text/css" href="../static/css/dropzone.css">
+<% include head %>
+<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.2/css/bootstrap-toggle.min.css" rel="stylesheet">
+<link rel="stylesheet" href="../static/css/editor.css" type="text/css">
+<link rel="stylesheet" type="text/css" href="../static/css/dropzone.css">
+<script type="text/javascript" src="../static/js/dropzone.js"></script>
+<script type="text/javascript" src="../static/js/bundle.js"></script>
+<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
 </head>
-
 <body>
-    <div class="navbar navbar-fixed-top navbar-default">
-        <div class="container">
-            <div class="navbar-header"><a class="navbar-brand" href="#">Traversal360</a>
-                <a class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
-                    <span class="glyphicon glyphicon-bar"></span>
-                    <span class="glyphicon glyphicon-bar"></span>
-                    <span class="glyphicon glyphicon-bar"></span>
-                </a>
-            </div>
-            <div class="navbar-collapse">
-                <ul class="nav navbar-nav">
-                    <li class="active"><a href="#">Editor</a>
-                    </li>
-                </ul>
-                <div class="navbar-right">
-                    <label class="checkbox-inline">
-                        <input id="toggle-event" type="checkbox" data-toggle="toggle"> Editor Mode
-                    </label>
-                </div>
-            </div>
-            <!--/.navbar-collapse -->
+    <header class="main_header">
+        <% include header %>
+    </header>
+    <div class="fs_fadder hided"></div>
+	<div class="fs_sharing_wrapper hided">
+		<div class="fs_sharing">
+            <a href="http://www.facebook.com/share.php?u=http://www.gt3themes.com/website-templates/oyster/" class="share_facebook" target="_blank"><i class="icon-facebook-square"></i></a>
+            <a href="http://pinterest.com/pin/create/button/?url=http://www.gt3themes.com/website-templates/oyster/&media=http://www.gt3themes.com/website-templates/oyster/img/logo.png" class="share_pinterest" target="_blank"><i class="icon-pinterest"></i></a>
+            <a href="https://twitter.com/intent/tweet?text=Fullscreen Slider&amp;url=http://www.gt3themes.com/website-templates/oyster/" class="share_tweet" target="_blank"><i class="icon-twitter"></i></a>
+            <a href="https://plus.google.com/share?url=http://www.gt3themes.com/website-templates/oyster/" class="share_gplus" target="_blank"><i class="icon-google-plus-square"></i></a>
+            <a class="fs_share_close hided" href="javascript:void(0)"></a>
         </div>
+    </div>
+    <div id="upload_after" class="fs_gallery_container fade" style="height:100%;display:none;">
+        <iframe id="main_scene" class="main_scene" width="100%" height="100%" allowfullscreen="yes" scrolling="no" allowvr="yes" src="../static/html/canvas.html"></iframe>
     </div>
     <div class="container">
         <div id="wrapper" class="row">
             <div class="col-md-2">
-                <div class="sidebar-nav-fixed affix">
+                <div>
                     <div class="well">
                         <ul class="nav">
                             <li class="nav-header">Shape</li>
@@ -55,18 +41,13 @@
                             <li onclick="create('plane')"><a>Plane</a></li>
                             </li>
                             <li class="nav-header">Primitive</li>
-                            <li class="active" onclick="create('image')"><a>Image</a></li>
+                            <li class="active" data-toggle="modal" data-target="#myModal"><a>Image</a></li>
                             <li onclick="create('teleport')"><a>Teleport</a></li>
                             <li onclick="setMiniMap()"><a>minimap</a></li>
                             </li>
                         </ul>
                     </div>
                     <!--/.well -->
-                    <form id="image_form" name="image_form" action="/project/new/image" method="post" enctype="multipart/form-data" target="uploader_iframe">
-                    	<input id="image_file" type="file" name="image_file" size="30" />
-                    </form>
-                    <!-- Hidden iframe which will interact with the server, do not forget to give both name and id values same -->
-                    <iframe id="uploader_iframe" name="uploader_iframe" style="display: none;"></iframe>
                 </div>
                 <!--/sidebar-nav-fixed -->
             </div>
@@ -80,13 +61,10 @@
                   </div>
                 </form>
               </div>
-              <div id="upload_after" style="height:100%;display:none;">
-                <iframe id="main_scene" class="main_scene" width="100%" height="100%" allowfullscreen="yes" scrolling="no" allowvr="yes" src="../static/html/canvas.html"></iframe>
-              </div>
             </div>
             <!--/span-->
-            <div class="col-md-2">
-                <div class="sidebar-nav-fixed pull-right affix">
+            <div id="right-toolbar" class="col-md-2">
+                <div>
                     <div class="well">
                         <table class="nav object-list">
                             <thead>
@@ -187,27 +165,147 @@
         </footer>
     </div>
     <!--/.fluid-container-->
+    <!-- Modal -->
+    <div id="myModal" class="modal fade" role="dialog">
+        <form id="image_form" action="/project/new/image" method="post" enctype="multipart/form-data" target="uploader_iframe">
+            <input type="submit" style="position: absolute; left: -9999px" />
+            <div class="modal-dialog">
+                <!-- Modal content-->
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal">&times;</button>
+                        <h4 class="modal-title">Image</h4>
+                    </div>
+                    <div class="modal-body">
+                      <fieldset>
+                        <div class="form-group">
+                         <div class="col-lg-12">
+                          <div class="radio" style="display:flex;">
+                           <label>
+                            <input id="inlineradio1" name="sampleinlineradio" value="option1" type="radio" checked/>URL :
+                          </label>
+                          <input id="img-url" type="" name="" style="width:400px;margin-left:50px"/>
+                          </div>
+                          <div class="radio" style="display:flex;">
+                           <label>
+                      		  <input id="inlineradio2" name="sampleinlineradio" value="option2" type="radio"/>File : </label>
+                              <input id="image_file" type="file" name="image_file" size="30" style="display:inline-flex;margin-left:50px;margin-top:3px" disabled="true"/>
+                              <iframe id="uploader_iframe" name="uploader_iframe" style="display: none;"></iframe>
+                      	  </label>
+                          </div>
+                         </div>
+                        </div>
+                      </fieldset>
+                    <div class="modal-footer">
+                        <button type="button" id="modal-close" class="btn btn-default" data-dismiss="modal" onClick="resetForm()">Close</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal" value="OK" onClick="submitImage();">OK</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+    <script type="text/javascript" src="../static/js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="../static/js/modules.js"></script>
+	<script type="text/javascript" src="../static/js/theme.js"></script>
+    <script type="text/javascript" src="../static/js/bootstrap.min.js"></script>
+    <script>
+		gallery_set = []
+
+		jQuery(document).ready(function(){
+			"use strict";
+			jQuery('html').addClass('hasPag');
+			jQuery('body').fs_gallery({
+				fx: 'fade', /*fade, zoom, slide_left, slide_right, slide_top, slide_bottom*/
+				fit: 'no_fit',
+				slide_time: 3300, /*This time must be < then time in css*/
+				autoplay: 0,
+				show_controls: 1,
+				slides: gallery_set
+			});
+			jQuery('.fs_share').click(function(){
+				jQuery('.fs_fadder').removeClass('hided');
+				jQuery('.fs_sharing_wrapper').removeClass('hided');
+				jQuery('.fs_share_close').removeClass('hided');
+			});
+			jQuery('.fs_share_close').click(function(){
+				jQuery('.fs_fadder').addClass('hided');
+				jQuery('.fs_sharing_wrapper').addClass('hided');
+				jQuery('.fs_share_close').addClass('hided');
+			});
+			jQuery('.fs_fadder').click(function(){
+				jQuery('.fs_fadder').addClass('hided');
+				jQuery('.fs_sharing_wrapper').addClass('hided');
+				jQuery('.fs_share_close').addClass('hided');
+			});
+
+			jQuery('.close_controls').click(function(){
+				if (jQuery(this).hasClass('open_controls')) {
+					jQuery('.fs_controls').removeClass('hide_me');
+					jQuery('.fs_title_wrapper ').removeClass('hide_me');
+					jQuery('.fs_thmb_viewport').removeClass('hide_me');
+					jQuery('header.main_header').removeClass('hide_me');
+					jQuery(this).removeClass('open_controls');
+				} else {
+					jQuery('header.main_header').addClass('hide_me');
+					jQuery('.fs_controls').addClass('hide_me');
+					jQuery('.fs_title_wrapper ').addClass('hide_me');
+					jQuery('.fs_thmb_viewport').addClass('hide_me');
+					jQuery(this).addClass('open_controls');
+				}
+			});
+
+			jQuery('.main_header').removeClass('hided');
+			jQuery('html').addClass('without_border');
+		});
+	</script>
+
+    <script type="text/javascript" src="../static/js/fs_gallery.js"></script>
 </body>
 
 </html>
 <script type="text/javascript">
-  $(function() {
-    $("#image_file").change(function() {
-      $("#image_form").submit();  // Submits the form on change event, you consider this code as the start point of your request (to show loader)
+
+  $(document).ready(function () {
+    $('#inlineradio1').click(function () {
+      $("#img-url").prop('disabled', false);
+      $("#image_file").prop('disabled', true);
+    });
+    $('#inlineradio2').click(function () {
+      $("#img-url").prop('disabled', true);
+      $("#image_file").prop('disabled', false);
+    });
+
+    $('#image_form').submit(function(){
       $("#uploader_iframe").unbind().on('load', function() {  // This block of code will execute when the response is sent from the server.
         result = JSON.parse($(this).contents().text());  // Content of the iframe will be the response sent from the server. Parse the response as the JSON object
-        createImage('image', result.result);
+        $("#img-url").val(""+result.result);
+        create('image');
+        resetForm();
       });
     });
   });
+
+  function submitImage(){
+    if($("#inlineradio1:checked").val()){
+      create('image');
+      $("#modal-close").click();
+      return;
+    }
+    $("#image_form").submit();
+  }
+
+  function resetForm(){
+    $("#img-url").val("");
+    $("#image_file").val("");
+  }
 
   Dropzone.options.my = {
       paramName: "photo", // The name that will be used to transfer the file
       maxFilesize: 1024, // MB
       url: "/project/new/background",
       success : function(file, res){
-        console.log('backgroudn : ' + res);
-        $("#upload_before").css("display", "none");
+        $("#right-toolbar").addClass("col-md-offset-8")
+        $("#main-canvas").css("display", "none");
         $("#upload_after").css("display", "");
         setBackground(res);
       }

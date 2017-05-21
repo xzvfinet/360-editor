@@ -1,4 +1,4 @@
-/* 
+/*
  Gallery Slider Script
  Version : 1.0.1
  Site	: under construction
@@ -26,14 +26,14 @@ jQuery.fn.fs_gallery = function (fs_options) {
 		show_class = '';
 		controls_class = '';
 	}
-    jQuery('body').append('<div class="fs_gallery_wrapper"><ul class="' + fs_options.fit + ' fs_gallery_container ' + fs_options.fx + '"/></div>');
+    //jQuery('body').append('<div class="fs_gallery_wrapper"><ul class="' + fs_options.fit + ' fs_gallery_container ' + fs_options.fx + '"/></div>');
     $fs_container = jQuery('.fs_gallery_container');
-    jQuery('body').append('<div class="fs_title_wrapper ' + show_class + '"><h1 class="fs_title"></h1><h3 class="fs_descr"></h3></div>');
-    jQuery('body').append('<div class="fs_controls ' + show_class + '"><a href="javascript:void(0)" class="fs_share"></a><a href="javascript:void(0)" class="fs_slider_prev"/><a href="javascript:void(0)" id="fs_play-pause" class="'+playpause+'"></a><a href="javascript:void(0)" class="fs_slider_next"/><a href="javascript:void(0)" class="close_controls ' + controls_class + '"></a></div><div class="fs_thmb_viewport ' + show_class + '"><div class="fs_thmb_wrapper"><ul class="fs_thmb_list" style="width:' + fs_options.slides.length * 128 + 'px"></ul></div></div>');
-    $fs_thmb = jQuery('.fs_thmb_list');	
+    //jQuery('body').append('<div class="fs_title_wrapper ' + show_class + '"><h1 class="fs_title"></h1><h3 class="fs_descr"></h3></div>');
+    jQuery('body').append('<div class="fs_controls ' + show_class + '"><a href="javascript:void(0)" class="fs_share"></a><a href="javascript:void(0)"></a><a href="javascript:void(0)""/><a href="javascript:void(0)" class="close_controls ' + controls_class + '"></a></div><div class="fs_thmb_viewport ' + show_class + '"><div class="fs_thmb_wrapper"><ul class="fs_thmb_list" style="width:' + fs_options.slides.length * 128 + 'px"></ul></div></div>');
+    $fs_thmb = jQuery('.fs_thmb_list');
 	if (fs_options.autoplay == 0) {
 		$fs_thmb.addClass('paused');
-	}	
+	}
     $fs_thmb_viewport = jQuery('.fs_thmb_viewport');
     $fs_title = jQuery('.fs_title');
     $fs_descr = jQuery('.fs_descr');
@@ -46,9 +46,9 @@ jQuery.fn.fs_gallery = function (fs_options) {
     }
     $fs_container.find('li.slide0').addClass('current-slide').attr('style', 'background:url(' + $fs_container.find('li.slide0').attr('data-src') + ') no-repeat;');
     $fs_container.find('li.slide1').attr('style', 'background:url(' + $fs_container.find('li.slide1').attr('data-src') + ') no-repeat;');
-    $fs_title.html(fs_options.slides[0].title).css('color', fs_options.slides[0].titleColor);
-    $fs_descr.html(fs_options.slides[0].description).css('color', fs_options.slides[0].descriptionColor);
-	
+    //$fs_title.html(fs_options.slides[0].title).css('color', fs_options.slides[0].titleColor);
+    //$fs_descr.html(fs_options.slides[0].description).css('color', fs_options.slides[0].descriptionColor);
+
    	$fs_thmb_viewport.width(jQuery(window).width());
 
     jQuery('.fs_slide_thmb').click(function () {
@@ -67,7 +67,7 @@ jQuery.fn.fs_gallery = function (fs_options) {
 		// Right Arrow or Up Arrow
 		} else if ((event.keyCode == 39) || (event.keyCode == 38)) {
 			nextSlide();
-		}	
+		}
 	});
 	jQuery('.fs_slide').on("swipeleft",function(){
 		nextSlide();
@@ -75,7 +75,7 @@ jQuery.fn.fs_gallery = function (fs_options) {
 	jQuery('.fs_slide').on("swiperight",function(){
 		prevSlide();
 	});
-	
+
     jQuery('#fs_play-pause').click(function () {
         if (jQuery(this).hasClass('fs_pause')) {
             $fs_thmb.addClass('paused');

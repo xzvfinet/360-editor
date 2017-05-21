@@ -63,7 +63,6 @@ router.get('/', function(req, res){
 
 router.get('/:id', function(req, res){
   var id = req.params.id;
-  console.log(id);
   var detailSQL = 'SELECT * FROM scene WHERE idscene=?';
   connection.query(detailSQL, id, function(err, info){
     if(err){
@@ -92,24 +91,15 @@ router.post('/upload/image', fileParser, function(req, res){
    });
 });
 */
+
 router.post('/new/background', upload.array('photo', 1), function(req,res){
-  /*
-  var imageFile = req.files.photo;
-   cloudinary.uploader.upload(imageFile.path, function(result){
-     if (result.url) {
-        console.log(result.url);
-       res.end(result.url);
-     } else {
-       console.log('Error uploading to cloudinary: ',result);
-     }
-   });*/
+   console.log("background : " + req.files[0].location);
    res.end(req.files[0].location);
 });
 
 router.post('/new/image', upload.array('image_file', 1), function(req, res){
   res.json({result : req.files[0].location});
 });
-
 
 // read json file
 router.get('/test', function(req, res){
