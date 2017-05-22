@@ -59,6 +59,10 @@ window.onLoadCanvas = function(frame) {
     initCanvas();
 }
 
+window.setBackground = function(url) {
+    scnry.Controller.getCurrentScenery().setBackgroundImageUrl(url);
+}
+
 function initEditor() {
     mainCanvas = $('#main-canvas')[0];
     menuElList = document.getElementsByClassName('well');
