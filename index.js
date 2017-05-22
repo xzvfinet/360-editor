@@ -1,5 +1,6 @@
 var express = require('express');
 var main = require('./routes/main')
+var project = require('./routes/project');
 var bodyParser = require('body-parser');
 var path = require('path');
 var app = express();
@@ -11,9 +12,10 @@ app.set('view engine', 'ejs');
 
 app.listen(8000);
 
-app.use('/', main);
-
-app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+
+app.use('/', main);
+app.use('/project', project);
 
 module.exports = app;

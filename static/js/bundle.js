@@ -1,4 +1,924 @@
 (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
+// Constants
+var PRIMITIVE_DEFINITIONS = ['box', 'sphere', 'cylinder', 'plane', 'image'];
+var OBJECT_DEFINITIONS = ['teleport', 'minimap'];
+var OBJECT_LISTENER = 'object-listener';
+var EVENT_LIST = ['teleport', 'link', 'page', 'image', 'video', 'sound', 'variable'];
+var BACKGROUND_PREFIX = "../img/";
+var SOUND_PREFIX = "../sound/";
+var EVENT_DICTIONARY = {
+    'teleport': teleportEvent,
+    'link': linkEvent,
+    'image': imageEvent,
+    'sound': soundEvent,
+    'variable': variableEvent
+}
+var BASE_WIDTH = 300;
+
+var util = require('./util.js');
+var nodeUtil = require('util');
+var obj = require('./object.js');
+
+// Editor Dom Elements
+var mainCanvas;
+var menuElList;
+var idEl;
+var shapeEl;
+var positionEl;
+var rotationEl;
+var scaleEl;
+var deleteBtn;
+var editorToggle;
+var eventArgEl;
+var loadTextEl;
+var saveBtnEl;
+var loadBtnEl;
+var variableEl = {};
+var imageUrlInputEl;
+
+// Aframe Dom Elements
+var mainFrame;
+var sceneEl = null;
+var cameraEl = null;
+var background = null;
+var mover = null;
+
+var miniMap = null;
+var miniMapDirector = null;
+
+// State Variables
+var editorMode = true;
+var currentSelectedObject = null;
+var isDown = false;
+var currentSelectedArrowEl = null;
+
+window.onLoadCanvas = function(frame) {
+    mainFrame = frame;
+
+    initEditor();
+    initCanvas();
+}
+
+window.create = function(type) {
+    if (PRIMITIVE_DEFINITIONS.includes(type)) {
+        createPrimitive(type);
+    } else if (OBJECT_DEFINITIONS.includes(type)) {
+        createObject(type);
+    }
+}
+
+window.createImage = function(type, src) {
+    newObject('primitive', type, src);
+}
+
+window.setBackground = function(src) {
+    //background.setMaterial({'src' : src});
+    background.setAttribute('material', 'src', src);
+}
+
+function initEditor() {
+    mainCanvas = $('#main-canvas')[0];
+    menuElList = document.getElementsByClassName('well');
+    idEl = document.getElementsByClassName('object-id')[0];
+    shapeEl = document.getElementsByClassName('object-shape')[0];
+    positionEl = document.getElementsByClassName('object-position')[0];
+    rotationEl = document.getElementsByClassName('object-rotation')[0];
+    scaleEl = document.getElementsByClassName('object-scale')[0];
+    deleteBtn = document.getElementById('delete-btn');
+    deleteBtn.addEventListener('click', function(evt) {
+        if (currentSelectedObject == null)
+            console.log('Not selected');
+        else {
+            obj.Controller.remove(currentSelectedObject);
+        }
+    });
+    editorToggle = $('#toggle-event');
+    // Initially the editor mode is enabled.
+    editorToggle.bootstrapToggle('on');
+    editorMode = true;
+    editorToggle.change(function() {
+        editorMode = !editorMode;
+        for (var i = 0; i < menuElList.length; ++i) {
+            menuElList[i].style.visibility = (editorMode) ? 'visible' : 'hidden';
+        }
+
+        mainCanvas.style.width = (editorMode) ? '' : '100%';
+
+    });
+    eventArgEl = document.getElementById('eventArg');
+    loadTextEl = document.getElementById('loadInput');
+    saveBtnEl = document.getElementById('saveBtn');
+    saveBtnEl.addEventListener('click', function(evt) {
+        var sceneryObject = {};
+        var objectsJson = obj.Controller.objectsToJson();
+
+        sceneryObject.bgUrl = background.getAttribute('src');
+        sceneryObject.objects = objectsJson;
+
+        loadTextEl.value = JSON.stringify(sceneryObject);
+    });
+    loadBtnEl = document.getElementById('loadBtn');
+    loadBtnEl.addEventListener('click', function(evt) {
+        var sceneryObject = JSON.parse(loadTextEl.value);
+
+        loadObjectsFromJson(sceneryObject.objects);
+
+        background.setAttribute('src', sceneryObject.bgUrl);
+    });
+
+    for (var i = 0; i < EVENT_LIST.length; ++i) {
+        var li = document.createElement("li");
+        var a = document.createElement("a");
+        a.appendChild(document.createTextNode(EVENT_LIST[i]));
+        a.setAttribute('href', '#');
+        li.appendChild(a);
+        $(".dropdown-menu")[0].appendChild(li);
+    }
+
+    $(".dropdown-menu").on("click", "li", function(event) {
+        if (currentSelectedObject != null) {
+            var eventName = this.children[0].innerHTML;
+            currentSelectedObject.eventList = [];
+            currentSelectedObject.eventList.push({ 'type': eventName, 'arg': eventArgEl.value });
+            // currentSelectedObject.eventList.push([eventName, eventArgEl.value]);
+        }
+    });
+
+    $("#image-form").submit(function() {
+        return false;
+    });
+
+
+    imageUrlInputEl = document.getElementById('img-url');
+}
+
+function initCanvas() {
+    sceneEl = mainFrame.document.querySelector('a-scene');
+    cameraEl = mainFrame.document.querySelector('[camera]');
+    background = mainFrame.document.querySelector('a-sky');
+
+    mainFrame.AFRAME.registerComponent(OBJECT_LISTENER, {
+        schema: {
+            id: {
+                default: "shape"
+            }
+        },
+        init: function() {
+            this.el.addEventListener('click', onObjectSelect);
+        },
+        tick: function(time, timeDelta) {}
+    });
+    mainFrame.AFRAME.registerComponent('mover-listener', {
+        schema: {},
+        init: function() {
+            var initialPos = null;
+            var prevPos = null;
+            var radius = 6;
+
+            var parentObject = obj.Controller.findByEl(this.el.parentEl);
+
+            var originalScale = this.el.getAttribute('scale');
+            var parentScale = this.el.parentEl.getAttribute('scale');
+
+            var initialScale = {
+                x: originalScale.x / parentScale.x,
+                y: originalScale.y / parentScale.y,
+                z: 1
+            };
+            this.el.setAttribute('scale', initialScale);
+
+            var factor = 2;
+            var xFactor = factor / parentScale.x;
+            var yFactor = factor / parentScale.y;
+
+            this.el.addEventListener('mouseenter', function() {
+                var newScale = {
+                    x: originalScale.x * xFactor,
+                    y: originalScale.y * yFactor,
+                    z: 1
+                };
+                this.setAttribute('scale', newScale);
+            });
+            this.el.addEventListener('mouseleave', function() {
+                var newScale = {
+                    x: initialScale.x,
+                    y: initialScale.y,
+                    z: 1
+                };
+                this.setAttribute('scale', newScale);
+                this.emit('mouseup');
+            });
+            this.el.addEventListener('mousedown', function(evt) {
+                this.setAttribute('material', 'color', "#FFFFFF");
+                cameraEl.removeAttribute('look-controls');
+                isDown = true;
+                currentSelectedArrowEl = this;
+
+                var pos = cameraEl.components['mouse-cursor'].__raycaster.ray.direction;
+                initialPos = { x: pos.x * radius, y: pos.y * radius, z: pos.z * radius };
+                prevPos = initialPos;
+            });
+            this.el.addEventListener('mouseup', function(evt) {
+                this.setAttribute('material', 'color', "#000000");
+                cameraEl.setAttribute('look-controls', "");
+                isDown = false;
+                currentSelectedArrowEl = null;
+            });
+            this.el.addEventListener('mymousemove', function(evt) {
+                if (isDown) {
+                    var direction = cameraEl.components['mouse-cursor'].__raycaster.ray.direction;
+                    var newPos = {
+                        x: direction.x * radius,
+                        y: direction.y * radius,
+                        z: direction.z * radius
+                    };
+                    parentObject.setPosition(newPos);
+                }
+            });
+        },
+        tick: function(time, timeDelta) {
+            // console.log(time + ', ' + timeDelta);
+            // console.log(cameraEl.getAttribute('rotation'));
+        }
+    });
+
+    mainFrame.AFRAME.registerComponent('minimap-direction', {
+
+        init: function() {
+            var mouseDown = false;
+            // Mouse Events
+            mainFrame.window.addEventListener('mousedown', this.onMouseDown, false);
+            mainFrame.window.addEventListener('mousemove', this.onMouseMove, false);
+            mainFrame.window.addEventListener('mouseup', this.releaseMouse, false);
+
+            // Touch events
+            sceneEl.addEventListener('touchstart', this.onTouchStart);
+            sceneEl.addEventListener('touchmove', this.onTouchMove);
+            sceneEl.addEventListener('touchend', this.onTouchEnd);
+        },
+        onMouseDown: function(event) {
+            this.mouseDown = true;
+        },
+        releaseMouse: function(event) {
+            this.mouseDown = false;
+        },
+        onMouseMove: function(event) {
+            if (this.mouseDown) {
+                miniMapDirector.setAttribute('rotation', { x: 0, y: 0, z: cameraEl.getAttribute('rotation').y });
+            }
+        }
+    });
+
+    var isMiniClick = false;
+    var transparentEl;
+    mainFrame.AFRAME.registerComponent('minimap-object', {
+        init: function() {
+            this.el.addEventListener('click', tempCameraMove);
+        },
+        tick: function() {
+            console.log(isMiniClick);
+            if (isMiniClick) {
+                miniMapDirector.setAttribute('rotation', { x: 0, y: 0, z: cameraEl.getAttribute('rotation').y });
+                //console.log("DO");
+            }
+        }
+    });
+}
+
+function loadRoom(data) {
+    var bgSrc = data.bgSrc;
+    var objects = data.objects;
+}
+
+function createPrimitive(shape) {
+    if (!PRIMITIVE_DEFINITIONS.includes(shape)) {
+        console.log('Not valid shape:' + shape);
+        return;
+    }
+    newObject('primitive', shape);
+}
+
+function createObject(type) {
+    if (!OBJECT_DEFINITIONS.includes(type)) {
+        console.log('Not valid type:' + type);
+        return;
+    }
+    newObject(type, 'plane');
+}
+
+function makeArrayAsString() {
+    var result = "";
+    for (var i = 0; i < arguments.length - 1; ++i) {
+        result += arguments[i] + ", ";
+    }
+    result += arguments[arguments.length - 1];
+    return result;
+}
+
+function onObjectSelect() {
+    var selected = obj.Controller.findByEl(this);
+    if (currentSelectedObject == selected) {
+        return;
+    }
+    currentSelectedObject = selected;
+
+    if (editorMode) {
+        shapeEl.innerHTML = currentSelectedObject.getShape();
+        var position = currentSelectedObject.transform.position;
+        positionEl.innerHTML = makeArrayAsString(
+            util.floorTwo(position.x),
+            util.floorTwo(position.y),
+            util.floorTwo(position.z));
+        var rotation = currentSelectedObject.transform.rotation;
+        rotationEl.innerHTML = makeArrayAsString(
+            util.floorTwo(rotation.x),
+            util.floorTwo(rotation.y));
+        scale = currentSelectedObject.transform.scale;
+        scaleEl.innerHTML = makeArrayAsString(scale.x, scale.y, scale.z);
+
+        // append mover element
+        mover = newMover();
+        this.appendChild(mover);
+    } else {
+        // Execute events assigned to object.
+        for (var i = 0; i < currentSelectedObject.eventList.length; ++i) {
+            var event = currentSelectedObject.eventList[i];
+            var eventType = event['type'];
+            var func = EVENT_DICTIONARY[eventType];
+            var arg = event['arg'];
+            func(arg);
+        }
+    }
+}
+
+function onObjectUnselect() {
+    currentSelectedObject = null;
+    shapeEl.innerHTML = "";
+    positionEl.innerHTML = "";
+    rotationEl.innerHTML = "";
+    scaleEl.innerHTML = "";
+}
+
+function newMover() {
+    if (mover)
+        mover.parentEl.removeChild(mover);
+    var newMover;
+    newMover = mainFrame.document.createElement('a-plane');
+    newMover.setAttribute('position', { x: 0, y: 0, z: 5 });
+    newMover.setAttribute('scale', { x: 0.1, y: 0.1, z: 1 });
+    newMover.setAttribute('material', "color:#000000");
+    newMover.setAttribute('mover-listener', "");
+
+    return newMover;
+}
+
+function newObject(type, shape, position, rotation, scale) {
+    var tag = 'a-' + shape;
+    var newEl = mainFrame.document.createElement(tag);
+    var newObj = new obj.Objct(newEl);
+
+    newObj.type = type;
+    newObj.shape = shape;
+    position = util.getForwardPosition(cameraEl.getAttribute('rotation'));
+    newObj.setPosition(position);
+    rotation = cameraEl.getAttribute('rotation');
+    newObj.setRotation(rotation);
+    scale = { x: 1, y: 1, z: 1 };
+    newObj.setScale(scale);
+
+    if (shape == 'image') {
+        var url = imageUrlInputEl.value;
+        util.getImageSize(url, function() {
+            newObj.setScale({ x: this.width / BASE_WIDTH, y: this.height / BASE_WIDTH });
+        });
+        newObj.setMaterial({ 'src': url });
+    } else {
+        newObj.setMaterial({ 'color': util.getRandomHexColor() });
+    }
+    newObj.setClickListener(OBJECT_LISTENER);
+
+    newObj.eventList = [];
+    newObj.eventList.push({ 'type': type, 'arg': 'bg1.jpg' });
+
+    // Make object face at camera origin by default.
+    newObj.setLookAt('#camera');
+
+    sceneEl.appendChild(newEl);
+
+    setObjectOnMiniMap(position);
+}
+
+function teleportEvent(arg) {
+    console.log('teleport! to:' + arg);
+    var imageUrl = BACKGROUND_PREFIX + arg;
+    background.setAttribute('src', imageUrl);
+}
+
+function linkEvent(arg) {
+    console.log('link! to:' + arg);
+    window.open("http://" + arg, 'newWindow');
+}
+
+function imageEvent(arg) {
+    console.log('image popup! to:' + arg);
+    var imageEl = mainFrame.document.createElement('a-image');
+    cameraEl.appendChild(imageEl);
+    imageEl.setAttribute('id', 'popup');
+    imageEl.setAttribute('geometry', {
+        primitive: 'plane',
+        height: 1.2,
+        width: 2
+    });
+    imageEl.setAttribute('material', 'src', BACKGROUND_PREFIX + arg);
+    imageEl.setAttribute('position', { x: 0, y: 0, z: -1 });
+}
+
+function soundEvent(arg) {
+    console.log('sound played :' + arg);
+    //var soundEl = mainFrame.document.createElement('a-sound');
+    var soundUrl = SOUND_PREFIX + arg;
+    currentSelectedObject.setSoundSrc(soundUrl);
+    //soundEl.setAttribute('src',soundUrl);
+    //sceneEl.appendChild(soundEl);
+    //soundEl.components.sound.playSound();
+}
+
+function variableEvent(arg) {
+    var str = arg.split(' ');
+    if (str[1] == '=') {
+        variableEl[str[0]] = Number(str[2]);
+    } else if (str[1] == '+') {
+        variableEl[str[0]] += Number(str[2]);
+    } else if (str[1] == '-') {
+        variableEl[str[0]] -= Number(str[2]);
+    } else if (str[1] == '*') {
+        variableEl[str[0]] *= Number(str[2]);
+    } else if (str[1] == '/') {
+        variableEl[str[0]] /= Number(str[2]);
+    }
+    console.log(str[0] + "=" + variableEl[str[0]]);
+}
+
+
+function loadObjectsFromJson(json) {
+    var objects = obj.Controller.objectsFromJson(json);
+    for (var i = 0; i < objects.length; ++i) {
+        var el = obj.Controller.createElFromObj(mainFrame, objects[i]);
+        sceneEl.appendChild(el);
+    }
+}
+
+//minimap
+
+window.setMiniMap = function() {
+    if (miniMap == null) {
+        miniMap = mainFrame.document.createElement('a-image');
+        miniMapDirector = mainFrame.document.createElement('a-image');
+
+        miniMap.setAttribute('id', 'minimap');
+        miniMap.setAttribute('material', 'opacity', 0);
+
+        miniMapDirector.setAttribute('id', 'minimap-director');
+        miniMapDirector.setAttribute('material', 'src', '/static/img/Minimap_Director.png');
+        miniMapDirector.setAttribute('minimap-direction', "")
+            //var newObj = new obj.Objct(miniMap);
+
+        rotation = { x: 0, y: 0, z: cameraEl.getAttribute('rotation').y }
+        miniMapDirector.setAttribute('rotation', rotation);
+
+        position = { x: -4, y: -3.5, z: -5 };
+        miniMap.setAttribute('position', position);
+
+        //newObj.setPosition(position);
+
+        miniMap.appendChild(miniMapDirector);
+        cameraEl.appendChild(miniMap);
+
+        var objects = obj.Controller.getObjects();
+
+        for (var i = 0; i < obj.Controller.getNum(); i++) {
+            setObjectOnMiniMap(objects[i].transform.position);
+        }
+    } else {
+        console.log('already has minimap');
+    }
+}
+
+window.setObjectOnMiniMap = function(position) {
+    if (miniMap != null) {
+        var x = position.x / 10 + 0.8;
+        var y = position.z / -10 + 0.8;
+        var newEl = mainFrame.document.createElement('a-plane');
+        //var newObj = new obj.Objct(newEl);
+        newEl.setAttribute('realPos', position.x + " " + position.y + " " + position.z);
+
+        position = { x: x, y: y, z: 1 };
+        newEl.setAttribute('position', position);
+
+        position = { x: x, y: y, z: 1 };
+        newEl.setAttribute('position', position);
+        //newObj.setPosition(position);
+        size = 0.2
+        scale = { x: size, y: size, z: size };
+        newEl.setAttribute('scale', scale);
+        newEl.setAttribute('minimap-object', "");
+        //newObj.setScale(scale);
+
+        miniMap.appendChild(newEl);
+    }
+}
+
+},{"./object.js":2,"./util.js":3,"util":7}],2:[function(require,module,exports){
+var objects = [];
+
+function Objct(el, obj) {
+    this.el = el;
+    this.type = "";
+    this.shape = "";
+    this.transform = {};
+    this.material = {};
+
+    this.clickListener = "";
+    this.eventList = [];
+
+    this.lookat = "";
+
+    // copy all properties of obj to this
+    for (var prop in obj) {
+        this[prop] = obj[prop];
+    }
+
+    objects.push(this);
+}
+
+Objct.prototype.getShape = function() {
+    if (this.el)
+        return this.el.getAttribute('geometry').primitive;
+    else
+        return this.shape;
+}
+
+Objct.prototype.setPosition = function(newX, newY, newZ) {
+    var newPos = newX;
+    if (typeof newPos == "number") {
+        newPos = { x: newX, y: newY, z: newZ };
+    }
+    if (this.el)
+        this.el.setAttribute('position', newPos);
+    this.transform.position = newPos;
+}
+
+Objct.prototype.setRotation = function(newRotation) {
+    if (this.el)
+        this.el.setAttribute('rotation', newRotation);
+    this.transform.rotation = newRotation;
+}
+
+Objct.prototype.setScale = function(newX, newY, newZ) {
+    var newScale = newX;
+    if (typeof newScale == "number") {
+        newScale = { x: newX, y: newY, z: newZ };
+    }
+    if (this.el)
+        this.el.setAttribute('scale', newScale);
+    this.transform.scale = newScale;
+}
+
+Objct.prototype.setMaterial = function(newMaterial) {
+    this.material = newMaterial;
+    for (var key in newMaterial) {
+        this.el.setAttribute(key, newMaterial[key]);
+    }
+}
+
+Objct.prototype.setSoundSrc = function(soundUrl) {
+    sound = {
+        src: soundUrl,
+        on: 'click'
+    }
+    this.el.setAttribute('sound', sound);
+}
+
+Objct.prototype.setClickListener = function(listener) {
+    if (this.el)
+        this.el.setAttribute(listener, "");
+    this.clickListener = listener;
+}
+
+Objct.prototype.toObj = function() {
+    return null;
+}
+
+Objct.prototype.getSaveForm = function() {
+    var tmp = this.el;
+    this.el = null;
+    var copyObj = JSON.parse(JSON.stringify(this));
+    this.el = tmp;
+    return copyObj;
+}
+
+Objct.prototype.setLookAt = function(target) {
+    if (this.el)
+        this.el.setAttribute('look-at', target);
+    this.lookat = target;
+}
+
+function Controller() {}
+
+Controller.prototype.objectsFromJson = function(json) {
+    var loadedObjects;
+    loadedObjects = JSON.parse(json);
+    var loadedObjectsWithPrototype = [];
+    for (var i = 0; i < loadedObjects.length; ++i) {
+        var newObj = new Objct(null, loadedObjects[i]);
+        loadedObjectsWithPrototype.push(newObj);
+    }
+    return loadedObjectsWithPrototype;
+}
+
+Controller.prototype.objectsToJson = function() {
+    var saveObjects = [];
+    for (var i = 0; i < objects.length; ++i) {
+        saveObjects.push(objects[i].getSaveForm());
+    }
+    var json = JSON.stringify(saveObjects);
+    return json;
+}
+
+Controller.prototype.createElFromObj = function(frame, obj) {
+    var newEl = frame.document.createElement("a-" + obj.shape);
+    obj.el = newEl;
+    obj.setPosition(obj.transform.position);
+    obj.setRotation(obj.transform.rotation);
+    obj.setScale(obj.transform.scale);
+    obj.setMaterial(obj.material);
+    obj.setClickListener(obj.clickListener);
+    obj.setLookAt(obj.lookat);
+
+    return newEl;
+}
+
+Controller.prototype.getNum = function() {
+    return objects.length;
+}
+
+Controller.prototype.getObjects = function() {
+    return objects;
+}
+
+Controller.prototype.remove = function(obj) {
+    if (obj.el) {
+        obj.el.parentElement.removeChild(obj.el);
+    }
+}
+
+Controller.prototype.findByEl = function(el) {
+    var objs = objects.filter(function(obj) {
+        return obj.el == el;
+    });
+    return objs[0];
+}
+
+module.exports = {
+    Objct: Objct,
+    Controller: new Controller()
+};
+
+},{}],3:[function(require,module,exports){
+function getRandomIntRange(min, max) {
+    return Math.floor(Math.random() * (max - min) + min);
+}
+
+module.exports.getRandomHexColor = function() {
+    var color = "#";
+    for (var i = 0; i < 6; ++i) {
+        var randomCode1 = getRandomIntRange("A".charCodeAt(0), "F".charCodeAt(0));
+        var randomCode2 = getRandomIntRange("0".charCodeAt(0), "9".charCodeAt(0));
+        var randomSelect = getRandomIntRange(0, 1);
+        color += String.fromCharCode((randomSelect) ? randomCode1 : randomCode2);
+    }
+    return color;
+}
+
+function toRadians(angle) {
+    return angle * (Math.PI / 180);
+}
+
+function toDegree(radians) {
+    return radians * (180 / Math.PI);
+}
+
+module.exports.getForwardPosition = function(rotation, radius) {
+    if (radius == undefined) radius = 6;
+
+    console.log(rotation);
+
+    var theta = rotation.x;
+    var pi = rotation.y + 90;
+
+    var thetaRad = toRadians(theta);
+    var piRad = toRadians(pi);
+
+    var x = radius * Math.cos(thetaRad) * Math.cos(piRad);
+    var y = radius * Math.sin(thetaRad);
+    var z = -radius * Math.cos(thetaRad) * Math.sin(piRad);
+
+    return { x: x, y: y, z: z };
+}
+
+module.exports.floorTwo = function(val) {
+    return Math.round(val * 100) / 100;
+}
+
+module.exports.getImageSize = function(url, callback) {
+    var img = new Image();
+    img.onload = callback;
+    img.src = url;
+}
+
+},{}],4:[function(require,module,exports){
+// shim for using process in browser
+var process = module.exports = {};
+
+// cached from whatever global is present so that test runners that stub it
+// don't break things.  But we need to wrap it in a try catch in case it is
+// wrapped in strict mode code which doesn't define any globals.  It's inside a
+// function because try/catches deoptimize in certain engines.
+
+var cachedSetTimeout;
+var cachedClearTimeout;
+
+function defaultSetTimout() {
+    throw new Error('setTimeout has not been defined');
+}
+function defaultClearTimeout () {
+    throw new Error('clearTimeout has not been defined');
+}
+(function () {
+    try {
+        if (typeof setTimeout === 'function') {
+            cachedSetTimeout = setTimeout;
+        } else {
+            cachedSetTimeout = defaultSetTimout;
+        }
+    } catch (e) {
+        cachedSetTimeout = defaultSetTimout;
+    }
+    try {
+        if (typeof clearTimeout === 'function') {
+            cachedClearTimeout = clearTimeout;
+        } else {
+            cachedClearTimeout = defaultClearTimeout;
+        }
+    } catch (e) {
+        cachedClearTimeout = defaultClearTimeout;
+    }
+} ())
+function runTimeout(fun) {
+    if (cachedSetTimeout === setTimeout) {
+        //normal enviroments in sane situations
+        return setTimeout(fun, 0);
+    }
+    // if setTimeout wasn't available but was latter defined
+    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
+        cachedSetTimeout = setTimeout;
+        return setTimeout(fun, 0);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedSetTimeout(fun, 0);
+    } catch(e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
+            return cachedSetTimeout.call(null, fun, 0);
+        } catch(e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
+            return cachedSetTimeout.call(this, fun, 0);
+        }
+    }
+
+
+}
+function runClearTimeout(marker) {
+    if (cachedClearTimeout === clearTimeout) {
+        //normal enviroments in sane situations
+        return clearTimeout(marker);
+    }
+    // if clearTimeout wasn't available but was latter defined
+    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
+        cachedClearTimeout = clearTimeout;
+        return clearTimeout(marker);
+    }
+    try {
+        // when when somebody has screwed with setTimeout but no I.E. maddness
+        return cachedClearTimeout(marker);
+    } catch (e){
+        try {
+            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
+            return cachedClearTimeout.call(null, marker);
+        } catch (e){
+            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
+            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
+            return cachedClearTimeout.call(this, marker);
+        }
+    }
+
+
+
+}
+var queue = [];
+var draining = false;
+var currentQueue;
+var queueIndex = -1;
+
+function cleanUpNextTick() {
+    if (!draining || !currentQueue) {
+        return;
+    }
+    draining = false;
+    if (currentQueue.length) {
+        queue = currentQueue.concat(queue);
+    } else {
+        queueIndex = -1;
+    }
+    if (queue.length) {
+        drainQueue();
+    }
+}
+
+function drainQueue() {
+    if (draining) {
+        return;
+    }
+    var timeout = runTimeout(cleanUpNextTick);
+    draining = true;
+
+    var len = queue.length;
+    while(len) {
+        currentQueue = queue;
+        queue = [];
+        while (++queueIndex < len) {
+            if (currentQueue) {
+                currentQueue[queueIndex].run();
+            }
+        }
+        queueIndex = -1;
+        len = queue.length;
+    }
+    currentQueue = null;
+    draining = false;
+    runClearTimeout(timeout);
+}
+
+process.nextTick = function (fun) {
+    var args = new Array(arguments.length - 1);
+    if (arguments.length > 1) {
+        for (var i = 1; i < arguments.length; i++) {
+            args[i - 1] = arguments[i];
+        }
+    }
+    queue.push(new Item(fun, args));
+    if (queue.length === 1 && !draining) {
+        runTimeout(drainQueue);
+    }
+};
+
+// v8 likes predictible objects
+function Item(fun, array) {
+    this.fun = fun;
+    this.array = array;
+}
+Item.prototype.run = function () {
+    this.fun.apply(null, this.array);
+};
+process.title = 'browser';
+process.browser = true;
+process.env = {};
+process.argv = [];
+process.version = ''; // empty string to avoid regexp issues
+process.versions = {};
+
+function noop() {}
+
+process.on = noop;
+process.addListener = noop;
+process.once = noop;
+process.off = noop;
+process.removeListener = noop;
+process.removeAllListeners = noop;
+process.emit = noop;
+
+process.binding = function (name) {
+    throw new Error('process.binding is not supported');
+};
+
+process.cwd = function () { return '/' };
+process.chdir = function (dir) {
+    throw new Error('process.chdir is not supported');
+};
+process.umask = function() { return 0; };
+
+},{}],5:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -23,14 +943,14 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],2:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],3:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -620,924 +1540,4 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":2,"_process":4,"inherits":1}],4:[function(require,module,exports){
-// shim for using process in browser
-var process = module.exports = {};
-
-// cached from whatever global is present so that test runners that stub it
-// don't break things.  But we need to wrap it in a try catch in case it is
-// wrapped in strict mode code which doesn't define any globals.  It's inside a
-// function because try/catches deoptimize in certain engines.
-
-var cachedSetTimeout;
-var cachedClearTimeout;
-
-function defaultSetTimout() {
-    throw new Error('setTimeout has not been defined');
-}
-function defaultClearTimeout () {
-    throw new Error('clearTimeout has not been defined');
-}
-(function () {
-    try {
-        if (typeof setTimeout === 'function') {
-            cachedSetTimeout = setTimeout;
-        } else {
-            cachedSetTimeout = defaultSetTimout;
-        }
-    } catch (e) {
-        cachedSetTimeout = defaultSetTimout;
-    }
-    try {
-        if (typeof clearTimeout === 'function') {
-            cachedClearTimeout = clearTimeout;
-        } else {
-            cachedClearTimeout = defaultClearTimeout;
-        }
-    } catch (e) {
-        cachedClearTimeout = defaultClearTimeout;
-    }
-} ())
-function runTimeout(fun) {
-    if (cachedSetTimeout === setTimeout) {
-        //normal enviroments in sane situations
-        return setTimeout(fun, 0);
-    }
-    // if setTimeout wasn't available but was latter defined
-    if ((cachedSetTimeout === defaultSetTimout || !cachedSetTimeout) && setTimeout) {
-        cachedSetTimeout = setTimeout;
-        return setTimeout(fun, 0);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedSetTimeout(fun, 0);
-    } catch(e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't trust the global object when called normally
-            return cachedSetTimeout.call(null, fun, 0);
-        } catch(e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error
-            return cachedSetTimeout.call(this, fun, 0);
-        }
-    }
-
-
-}
-function runClearTimeout(marker) {
-    if (cachedClearTimeout === clearTimeout) {
-        //normal enviroments in sane situations
-        return clearTimeout(marker);
-    }
-    // if clearTimeout wasn't available but was latter defined
-    if ((cachedClearTimeout === defaultClearTimeout || !cachedClearTimeout) && clearTimeout) {
-        cachedClearTimeout = clearTimeout;
-        return clearTimeout(marker);
-    }
-    try {
-        // when when somebody has screwed with setTimeout but no I.E. maddness
-        return cachedClearTimeout(marker);
-    } catch (e){
-        try {
-            // When we are in I.E. but the script has been evaled so I.E. doesn't  trust the global object when called normally
-            return cachedClearTimeout.call(null, marker);
-        } catch (e){
-            // same as above but when it's a version of I.E. that must have the global object for 'this', hopfully our context correct otherwise it will throw a global error.
-            // Some versions of I.E. have different rules for clearTimeout vs setTimeout
-            return cachedClearTimeout.call(this, marker);
-        }
-    }
-
-
-
-}
-var queue = [];
-var draining = false;
-var currentQueue;
-var queueIndex = -1;
-
-function cleanUpNextTick() {
-    if (!draining || !currentQueue) {
-        return;
-    }
-    draining = false;
-    if (currentQueue.length) {
-        queue = currentQueue.concat(queue);
-    } else {
-        queueIndex = -1;
-    }
-    if (queue.length) {
-        drainQueue();
-    }
-}
-
-function drainQueue() {
-    if (draining) {
-        return;
-    }
-    var timeout = runTimeout(cleanUpNextTick);
-    draining = true;
-
-    var len = queue.length;
-    while(len) {
-        currentQueue = queue;
-        queue = [];
-        while (++queueIndex < len) {
-            if (currentQueue) {
-                currentQueue[queueIndex].run();
-            }
-        }
-        queueIndex = -1;
-        len = queue.length;
-    }
-    currentQueue = null;
-    draining = false;
-    runClearTimeout(timeout);
-}
-
-process.nextTick = function (fun) {
-    var args = new Array(arguments.length - 1);
-    if (arguments.length > 1) {
-        for (var i = 1; i < arguments.length; i++) {
-            args[i - 1] = arguments[i];
-        }
-    }
-    queue.push(new Item(fun, args));
-    if (queue.length === 1 && !draining) {
-        runTimeout(drainQueue);
-    }
-};
-
-// v8 likes predictible objects
-function Item(fun, array) {
-    this.fun = fun;
-    this.array = array;
-}
-Item.prototype.run = function () {
-    this.fun.apply(null, this.array);
-};
-process.title = 'browser';
-process.browser = true;
-process.env = {};
-process.argv = [];
-process.version = ''; // empty string to avoid regexp issues
-process.versions = {};
-
-function noop() {}
-
-process.on = noop;
-process.addListener = noop;
-process.once = noop;
-process.off = noop;
-process.removeListener = noop;
-process.removeAllListeners = noop;
-process.emit = noop;
-
-process.binding = function (name) {
-    throw new Error('process.binding is not supported');
-};
-
-process.cwd = function () { return '/' };
-process.chdir = function (dir) {
-    throw new Error('process.chdir is not supported');
-};
-process.umask = function() { return 0; };
-
-},{}],5:[function(require,module,exports){
-// Constants
-var PRIMITIVE_DEFINITIONS = ['box', 'sphere', 'cylinder', 'plane', 'image'];
-var OBJECT_DEFINITIONS = ['teleport', 'minimap'];
-var OBJECT_LISTENER = 'object-listener';
-var EVENT_LIST = ['teleport', 'link', 'page', 'image', 'video', 'sound', 'variable'];
-var BACKGROUND_PREFIX = "../img/";
-var SOUND_PREFIX = "../sound/";
-var EVENT_DICTIONARY = {
-    'teleport': teleportEvent,
-    'link': linkEvent,
-    'image': imageEvent,
-    'sound': soundEvent,
-    'variable': variableEvent
-}
-var BASE_WIDTH = 300;
-
-var util = require('./util.js');
-var nodeUtil = require('util');
-var obj = require('./object.js');
-
-// Editor Dom Elements
-var mainCanvas;
-var menuElList;
-var idEl;
-var shapeEl;
-var positionEl;
-var rotationEl;
-var scaleEl;
-var deleteBtn;
-var editorToggle;
-var eventArgEl;
-var loadTextEl;
-var saveBtnEl;
-var loadBtnEl;
-var variableEl = {};
-var imageUrlInputEl;
-
-// Aframe Dom Elements
-var mainFrame;
-var sceneEl = null;
-var cameraEl = null;
-var background = null;
-var mover = null;
-
-var miniMap = null;
-var miniMapDirector = null;
-
-// State Variables
-var editorMode = true;
-var currentSelectedObject = null;
-var isDown = false;
-var currentSelectedArrowEl = null;
-
-window.onLoadCanvas = function(frame) {
-    mainFrame = frame;
-
-    initEditor();
-    initCanvas();
-}
-
-window.create = function(type) {
-    if (PRIMITIVE_DEFINITIONS.includes(type)) {
-        createPrimitive(type);
-    } else if (OBJECT_DEFINITIONS.includes(type)) {
-        createObject(type);
-    }
-}
-
-window.createImage = function(type, src) {
-    newObject('primitive', type, src);
-}
-
-window.setBackground = function(src) {
-    //background.setMaterial({'src' : src});
-    background.setAttribute('material', 'src', src);
-}
-
-function initEditor() {
-    mainCanvas = $('#main-canvas')[0];
-    menuElList = document.getElementsByClassName('well');
-    idEl = document.getElementsByClassName('object-id')[0];
-    shapeEl = document.getElementsByClassName('object-shape')[0];
-    positionEl = document.getElementsByClassName('object-position')[0];
-    rotationEl = document.getElementsByClassName('object-rotation')[0];
-    scaleEl = document.getElementsByClassName('object-scale')[0];
-    deleteBtn = document.getElementById('delete-btn');
-    deleteBtn.addEventListener('click', function(evt) {
-        if (currentSelectedObject == null)
-            console.log('Not selected');
-        else {
-            obj.Controller.remove(currentSelectedObject);
-        }
-    });
-    editorToggle = $('#toggle-event');
-    // Initially the editor mode is enabled.
-    editorToggle.bootstrapToggle('on');
-    editorMode = true;
-    editorToggle.change(function() {
-        editorMode = !editorMode;
-        for (var i = 0; i < menuElList.length; ++i) {
-            menuElList[i].style.visibility = (editorMode) ? 'visible' : 'hidden';
-        }
-
-        mainCanvas.style.width = (editorMode) ? '' : '100%';
-
-    });
-    eventArgEl = document.getElementById('eventArg');
-    loadTextEl = document.getElementById('loadInput');
-    saveBtnEl = document.getElementById('saveBtn');
-    saveBtnEl.addEventListener('click', function(evt) {
-        var sceneryObject = {};
-        var objectsJson = obj.Controller.objectsToJson();
-
-        sceneryObject.bgUrl = background.getAttribute('src');
-        sceneryObject.objects = objectsJson;
-
-        loadTextEl.value = JSON.stringify(sceneryObject);
-    });
-    loadBtnEl = document.getElementById('loadBtn');
-    loadBtnEl.addEventListener('click', function(evt) {
-        var sceneryObject = JSON.parse(loadTextEl.value);
-
-        loadObjectsFromJson(sceneryObject.objects);
-
-        background.setAttribute('src', sceneryObject.bgUrl);
-    });
-
-    for (var i = 0; i < EVENT_LIST.length; ++i) {
-        var li = document.createElement("li");
-        var a = document.createElement("a");
-        a.appendChild(document.createTextNode(EVENT_LIST[i]));
-        a.setAttribute('href', '#');
-        li.appendChild(a);
-        $(".dropdown-menu")[0].appendChild(li);
-    }
-
-    $(".dropdown-menu").on("click", "li", function(event) {
-        if (currentSelectedObject != null) {
-            var eventName = this.children[0].innerHTML;
-            currentSelectedObject.eventList = [];
-            currentSelectedObject.eventList.push({ 'type': eventName, 'arg': eventArgEl.value });
-            // currentSelectedObject.eventList.push([eventName, eventArgEl.value]);
-        }
-    });
-
-    $("#image-form").submit(function() {
-        return false;
-    });
-
-
-    imageUrlInputEl = document.getElementById('img-url');
-}
-
-function initCanvas() {
-    sceneEl = mainFrame.document.querySelector('a-scene');
-    cameraEl = mainFrame.document.querySelector('[camera]');
-    background = mainFrame.document.querySelector('a-sky');
-
-    mainFrame.AFRAME.registerComponent(OBJECT_LISTENER, {
-        schema: {
-            id: {
-                default: "shape"
-            }
-        },
-        init: function() {
-            this.el.addEventListener('click', onObjectSelect);
-        },
-        tick: function(time, timeDelta) {}
-    });
-    mainFrame.AFRAME.registerComponent('mover-listener', {
-        schema: {},
-        init: function() {
-            var initialPos = null;
-            var prevPos = null;
-            var radius = 6;
-
-            var parentObject = obj.Controller.findByEl(this.el.parentEl);
-
-            var originalScale = this.el.getAttribute('scale');
-            var parentScale = this.el.parentEl.getAttribute('scale');
-
-            var initialScale = {
-                x: originalScale.x / parentScale.x,
-                y: originalScale.y / parentScale.y,
-                z: 1
-            };
-            this.el.setAttribute('scale', initialScale);
-
-            var factor = 2;
-            var xFactor = factor / parentScale.x;
-            var yFactor = factor / parentScale.y;
-
-            this.el.addEventListener('mouseenter', function() {
-                var newScale = {
-                    x: originalScale.x * xFactor,
-                    y: originalScale.y * yFactor,
-                    z: 1
-                };
-                this.setAttribute('scale', newScale);
-            });
-            this.el.addEventListener('mouseleave', function() {
-                var newScale = {
-                    x: initialScale.x,
-                    y: initialScale.y,
-                    z: 1
-                };
-                this.setAttribute('scale', newScale);
-                this.emit('mouseup');
-            });
-            this.el.addEventListener('mousedown', function(evt) {
-                this.setAttribute('material', 'color', "#FFFFFF");
-                cameraEl.removeAttribute('look-controls');
-                isDown = true;
-                currentSelectedArrowEl = this;
-
-                var pos = cameraEl.components['mouse-cursor'].__raycaster.ray.direction;
-                initialPos = { x: pos.x * radius, y: pos.y * radius, z: pos.z * radius };
-                prevPos = initialPos;
-            });
-            this.el.addEventListener('mouseup', function(evt) {
-                this.setAttribute('material', 'color', "#000000");
-                cameraEl.setAttribute('look-controls', "");
-                isDown = false;
-                currentSelectedArrowEl = null;
-            });
-            this.el.addEventListener('mymousemove', function(evt) {
-                if (isDown) {
-                    var direction = cameraEl.components['mouse-cursor'].__raycaster.ray.direction;
-                    var newPos = {
-                        x: direction.x * radius,
-                        y: direction.y * radius,
-                        z: direction.z * radius
-                    };
-                    parentObject.setPosition(newPos);
-                }
-            });
-        },
-        tick: function(time, timeDelta) {
-            // console.log(time + ', ' + timeDelta);
-            // console.log(cameraEl.getAttribute('rotation'));
-        }
-    });
-
-    mainFrame.AFRAME.registerComponent('minimap-direction', {
-
-        init: function() {
-            var mouseDown = false;
-            // Mouse Events
-            mainFrame.window.addEventListener('mousedown', this.onMouseDown, false);
-            mainFrame.window.addEventListener('mousemove', this.onMouseMove, false);
-            mainFrame.window.addEventListener('mouseup', this.releaseMouse, false);
-
-            // Touch events
-            sceneEl.addEventListener('touchstart', this.onTouchStart);
-            sceneEl.addEventListener('touchmove', this.onTouchMove);
-            sceneEl.addEventListener('touchend', this.onTouchEnd);
-        },
-        onMouseDown: function(event) {
-            this.mouseDown = true;
-        },
-        releaseMouse: function(event) {
-            this.mouseDown = false;
-        },
-        onMouseMove: function(event) {
-            if (this.mouseDown) {
-                miniMapDirector.setAttribute('rotation', { x: 0, y: 0, z: cameraEl.getAttribute('rotation').y });
-            }
-        }
-    });
-
-    var isMiniClick = false;
-    var transparentEl;
-    mainFrame.AFRAME.registerComponent('minimap-object', {
-        init: function() {
-            this.el.addEventListener('click', tempCameraMove);
-        },
-        tick: function() {
-            console.log(isMiniClick);
-            if (isMiniClick) {
-                miniMapDirector.setAttribute('rotation', { x: 0, y: 0, z: cameraEl.getAttribute('rotation').y });
-                //console.log("DO");
-            }
-        }
-    });
-}
-
-function loadRoom(data) {
-    var bgSrc = data.bgSrc;
-    var objects = data.objects;
-}
-
-function createPrimitive(shape) {
-    if (!PRIMITIVE_DEFINITIONS.includes(shape)) {
-        console.log('Not valid shape:' + shape);
-        return;
-    }
-    newObject('primitive', shape);
-}
-
-function createObject(type) {
-    if (!OBJECT_DEFINITIONS.includes(type)) {
-        console.log('Not valid type:' + type);
-        return;
-    }
-    newObject(type, 'plane');
-}
-
-function makeArrayAsString() {
-    var result = "";
-    for (var i = 0; i < arguments.length - 1; ++i) {
-        result += arguments[i] + ", ";
-    }
-    result += arguments[arguments.length - 1];
-    return result;
-}
-
-function onObjectSelect() {
-    var selected = obj.Controller.findByEl(this);
-    if (currentSelectedObject == selected) {
-        return;
-    }
-    currentSelectedObject = selected;
-
-    if (editorMode) {
-        shapeEl.innerHTML = currentSelectedObject.getShape();
-        var position = currentSelectedObject.transform.position;
-        positionEl.innerHTML = makeArrayAsString(
-            util.floorTwo(position.x),
-            util.floorTwo(position.y),
-            util.floorTwo(position.z));
-        var rotation = currentSelectedObject.transform.rotation;
-        rotationEl.innerHTML = makeArrayAsString(
-            util.floorTwo(rotation.x),
-            util.floorTwo(rotation.y));
-        scale = currentSelectedObject.transform.scale;
-        scaleEl.innerHTML = makeArrayAsString(scale.x, scale.y, scale.z);
-
-        // append mover element
-        mover = newMover();
-        this.appendChild(mover);
-    } else {
-        // Execute events assigned to object.
-        for (var i = 0; i < currentSelectedObject.eventList.length; ++i) {
-            var event = currentSelectedObject.eventList[i];
-            var eventType = event['type'];
-            var func = EVENT_DICTIONARY[eventType];
-            var arg = event['arg'];
-            func(arg);
-        }
-    }
-}
-
-function onObjectUnselect() {
-    currentSelectedObject = null;
-    shapeEl.innerHTML = "";
-    positionEl.innerHTML = "";
-    rotationEl.innerHTML = "";
-    scaleEl.innerHTML = "";
-}
-
-function newMover() {
-    if (mover)
-        mover.parentEl.removeChild(mover);
-    var newMover;
-    newMover = mainFrame.document.createElement('a-plane');
-    newMover.setAttribute('position', { x: 0, y: 0, z: 5 });
-    newMover.setAttribute('scale', { x: 0.1, y: 0.1, z: 1 });
-    newMover.setAttribute('material', "color:#000000");
-    newMover.setAttribute('mover-listener', "");
-
-    return newMover;
-}
-
-function newObject(type, shape, position, rotation, scale) {
-    var tag = 'a-' + shape;
-    var newEl = mainFrame.document.createElement(tag);
-    var newObj = new obj.Objct(newEl);
-
-    newObj.type = type;
-    newObj.shape = shape;
-    position = util.getForwardPosition(cameraEl.getAttribute('rotation'));
-    newObj.setPosition(position);
-    rotation = cameraEl.getAttribute('rotation');
-    newObj.setRotation(rotation);
-    scale = { x: 1, y: 1, z: 1 };
-    newObj.setScale(scale);
-
-    if (shape == 'image') {
-        var url = imageUrlInputEl.value;
-        util.getImageSize(url, function() {
-            newObj.setScale({ x: this.width / BASE_WIDTH, y: this.height / BASE_WIDTH });
-        });
-        newObj.setMaterial({ 'src': url });
-    } else {
-        newObj.setMaterial({ 'color': util.getRandomHexColor() });
-    }
-    newObj.setClickListener(OBJECT_LISTENER);
-
-    newObj.eventList = [];
-    newObj.eventList.push({ 'type': type, 'arg': 'bg1.jpg' });
-
-    // Make object face at camera origin by default.
-    newObj.setLookAt('#camera');
-
-    sceneEl.appendChild(newEl);
-
-    setObjectOnMiniMap(position);
-}
-
-function teleportEvent(arg) {
-    console.log('teleport! to:' + arg);
-    var imageUrl = BACKGROUND_PREFIX + arg;
-    background.setAttribute('src', imageUrl);
-}
-
-function linkEvent(arg) {
-    console.log('link! to:' + arg);
-    window.open("http://" + arg, 'newWindow');
-}
-
-function imageEvent(arg) {
-    console.log('image popup! to:' + arg);
-    var imageEl = mainFrame.document.createElement('a-image');
-    cameraEl.appendChild(imageEl);
-    imageEl.setAttribute('id', 'popup');
-    imageEl.setAttribute('geometry', {
-        primitive: 'plane',
-        height: 1.2,
-        width: 2
-    });
-    imageEl.setAttribute('material', 'src', BACKGROUND_PREFIX + arg);
-    imageEl.setAttribute('position', { x: 0, y: 0, z: -1 });
-}
-
-function soundEvent(arg) {
-    console.log('sound played :' + arg);
-    //var soundEl = mainFrame.document.createElement('a-sound');
-    var soundUrl = SOUND_PREFIX + arg;
-    currentSelectedObject.setSoundSrc(soundUrl);
-    //soundEl.setAttribute('src',soundUrl);
-    //sceneEl.appendChild(soundEl);
-    //soundEl.components.sound.playSound();
-}
-
-function variableEvent(arg) {
-    var str = arg.split(' ');
-    if (str[1] == '=') {
-        variableEl[str[0]] = Number(str[2]);
-    } else if (str[1] == '+') {
-        variableEl[str[0]] += Number(str[2]);
-    } else if (str[1] == '-') {
-        variableEl[str[0]] -= Number(str[2]);
-    } else if (str[1] == '*') {
-        variableEl[str[0]] *= Number(str[2]);
-    } else if (str[1] == '/') {
-        variableEl[str[0]] /= Number(str[2]);
-    }
-    console.log(str[0] + "=" + variableEl[str[0]]);
-}
-
-
-function loadObjectsFromJson(json) {
-    var objects = obj.Controller.objectsFromJson(json);
-    for (var i = 0; i < objects.length; ++i) {
-        var el = obj.Controller.createElFromObj(mainFrame, objects[i]);
-        sceneEl.appendChild(el);
-    }
-}
-
-//minimap
-
-window.setMiniMap = function() {
-    if (miniMap == null) {
-        miniMap = mainFrame.document.createElement('a-image');
-        miniMapDirector = mainFrame.document.createElement('a-image');
-
-        miniMap.setAttribute('id', 'minimap');
-        miniMap.setAttribute('material', 'opacity', 0);
-
-        miniMapDirector.setAttribute('id', 'minimap-director');
-        miniMapDirector.setAttribute('material', 'src', '/static/img/Minimap_Director.png');
-        miniMapDirector.setAttribute('minimap-direction', "")
-            //var newObj = new obj.Objct(miniMap);
-
-        rotation = { x: 0, y: 0, z: cameraEl.getAttribute('rotation').y }
-        miniMapDirector.setAttribute('rotation', rotation);
-
-        position = { x: -4, y: -3.5, z: -5 };
-        miniMap.setAttribute('position', position);
-
-        //newObj.setPosition(position);
-
-        miniMap.appendChild(miniMapDirector);
-        cameraEl.appendChild(miniMap);
-
-        var objects = obj.Controller.getObjects();
-
-        for (var i = 0; i < obj.Controller.getNum(); i++) {
-            setObjectOnMiniMap(objects[i].transform.position);
-        }
-    } else {
-        console.log('already has minimap');
-    }
-}
-
-window.setObjectOnMiniMap = function(position) {
-    if (miniMap != null) {
-        var x = position.x / 10 + 0.8;
-        var y = position.z / -10 + 0.8;
-        var newEl = mainFrame.document.createElement('a-plane');
-        //var newObj = new obj.Objct(newEl);
-        newEl.setAttribute('realPos', position.x + " " + position.y + " " + position.z);
-
-        position = { x: x, y: y, z: 1 };
-        newEl.setAttribute('position', position);
-
-        position = { x: x, y: y, z: 1 };
-        newEl.setAttribute('position', position);
-        //newObj.setPosition(position);
-        size = 0.2
-        scale = { x: size, y: size, z: size };
-        newEl.setAttribute('scale', scale);
-        newEl.setAttribute('minimap-object', "");
-        //newObj.setScale(scale);
-
-        miniMap.appendChild(newEl);
-    }
-}
-
-},{"./object.js":6,"./util.js":7,"util":3}],6:[function(require,module,exports){
-var objects = [];
-
-function Objct(el, obj) {
-    this.el = el;
-    this.type = "";
-    this.shape = "";
-    this.transform = {};
-    this.material = {};
-
-    this.clickListener = "";
-    this.eventList = [];
-
-    this.lookat = "";
-
-    // copy all properties of obj to this
-    for (var prop in obj) {
-        this[prop] = obj[prop];
-    }
-
-    objects.push(this);
-}
-
-Objct.prototype.getShape = function() {
-    if (this.el)
-        return this.el.getAttribute('geometry').primitive;
-    else
-        return this.shape;
-}
-
-Objct.prototype.setPosition = function(newX, newY, newZ) {
-    var newPos = newX;
-    if (typeof newPos == "number") {
-        newPos = { x: newX, y: newY, z: newZ };
-    }
-    if (this.el)
-        this.el.setAttribute('position', newPos);
-    this.transform.position = newPos;
-}
-
-Objct.prototype.setRotation = function(newRotation) {
-    if (this.el)
-        this.el.setAttribute('rotation', newRotation);
-    this.transform.rotation = newRotation;
-}
-
-Objct.prototype.setScale = function(newX, newY, newZ) {
-    var newScale = newX;
-    if (typeof newScale == "number") {
-        newScale = { x: newX, y: newY, z: newZ };
-    }
-    if (this.el)
-        this.el.setAttribute('scale', newScale);
-    this.transform.scale = newScale;
-}
-
-Objct.prototype.setMaterial = function(newMaterial) {
-    this.material = newMaterial;
-    for (var key in newMaterial) {
-        this.el.setAttribute(key, newMaterial[key]);
-    }
-}
-
-Objct.prototype.setSoundSrc = function(soundUrl) {
-    sound = {
-        src: soundUrl,
-        on: 'click'
-    }
-    this.el.setAttribute('sound', sound);
-}
-
-Objct.prototype.setClickListener = function(listener) {
-    if (this.el)
-        this.el.setAttribute(listener, "");
-    this.clickListener = listener;
-}
-
-Objct.prototype.toObj = function() {
-    return null;
-}
-
-Objct.prototype.getSaveForm = function() {
-    var tmp = this.el;
-    this.el = null;
-    var copyObj = JSON.parse(JSON.stringify(this));
-    this.el = tmp;
-    return copyObj;
-}
-
-Objct.prototype.setLookAt = function(target) {
-    if (this.el)
-        this.el.setAttribute('look-at', target);
-    this.lookat = target;
-}
-
-function Controller() {}
-
-Controller.prototype.objectsFromJson = function(json) {
-    var loadedObjects;
-    loadedObjects = JSON.parse(json);
-    var loadedObjectsWithPrototype = [];
-    for (var i = 0; i < loadedObjects.length; ++i) {
-        var newObj = new Objct(null, loadedObjects[i]);
-        loadedObjectsWithPrototype.push(newObj);
-    }
-    return loadedObjectsWithPrototype;
-}
-
-Controller.prototype.objectsToJson = function() {
-    var saveObjects = [];
-    for (var i = 0; i < objects.length; ++i) {
-        saveObjects.push(objects[i].getSaveForm());
-    }
-    var json = JSON.stringify(saveObjects);
-    return json;
-}
-
-Controller.prototype.createElFromObj = function(frame, obj) {
-    var newEl = frame.document.createElement("a-" + obj.shape);
-    obj.el = newEl;
-    obj.setPosition(obj.transform.position);
-    obj.setRotation(obj.transform.rotation);
-    obj.setScale(obj.transform.scale);
-    obj.setMaterial(obj.material);
-    obj.setClickListener(obj.clickListener);
-    obj.setLookAt(obj.lookat);
-
-    return newEl;
-}
-
-Controller.prototype.getNum = function() {
-    return objects.length;
-}
-
-Controller.prototype.getObjects = function() {
-    return objects;
-}
-
-Controller.prototype.remove = function(obj) {
-    if (obj.el) {
-        obj.el.parentElement.removeChild(obj.el);
-    }
-}
-
-Controller.prototype.findByEl = function(el) {
-    var objs = objects.filter(function(obj) {
-        return obj.el == el;
-    });
-    return objs[0];
-}
-
-module.exports = {
-    Objct: Objct,
-    Controller: new Controller()
-};
-
-},{}],7:[function(require,module,exports){
-function getRandomIntRange(min, max) {
-    return Math.floor(Math.random() * (max - min) + min);
-}
-
-module.exports.getRandomHexColor = function() {
-    var color = "#";
-    for (var i = 0; i < 6; ++i) {
-        var randomCode1 = getRandomIntRange("A".charCodeAt(0), "F".charCodeAt(0));
-        var randomCode2 = getRandomIntRange("0".charCodeAt(0), "9".charCodeAt(0));
-        var randomSelect = getRandomIntRange(0, 1);
-        color += String.fromCharCode((randomSelect) ? randomCode1 : randomCode2);
-    }
-    return color;
-}
-
-function toRadians(angle) {
-    return angle * (Math.PI / 180);
-}
-
-function toDegree(radians) {
-    return radians * (180 / Math.PI);
-}
-
-module.exports.getForwardPosition = function(rotation, radius) {
-    if (radius == undefined) radius = 6;
-
-    console.log(rotation);
-
-    var theta = rotation.x;
-    var pi = rotation.y + 90;
-
-    var thetaRad = toRadians(theta);
-    var piRad = toRadians(pi);
-
-    var x = radius * Math.cos(thetaRad) * Math.cos(piRad);
-    var y = radius * Math.sin(thetaRad);
-    var z = -radius * Math.cos(thetaRad) * Math.sin(piRad);
-
-    return { x: x, y: y, z: z };
-}
-
-module.exports.floorTwo = function(val) {
-    return Math.round(val * 100) / 100;
-}
-
-module.exports.getImageSize = function(url, callback) {
-    var img = new Image();
-    img.onload = callback;
-    img.src = url;
-}
-
-},{}]},{},[5]);
+},{"./support/isBuffer":6,"_process":4,"inherits":5}]},{},[1]);
