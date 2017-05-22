@@ -17,6 +17,7 @@ var BASE_WIDTH = 300;
 var util = require('./util.js');
 var nodeUtil = require('util');
 var obj = require('./object.js');
+var scnry = require('./scenery.js');
 
 // Editor Dom Elements
 var mainCanvas;
@@ -58,23 +59,6 @@ window.onLoadCanvas = function(frame) {
     initCanvas();
 }
 
-window.create = function(type) {
-    if (PRIMITIVE_DEFINITIONS.includes(type)) {
-        createPrimitive(type);
-    } else if (OBJECT_DEFINITIONS.includes(type)) {
-        createObject(type);
-    }
-}
-
-window.createImage = function(type, src) {
-    newObject('primitive', type, src);
-}
-
-window.setBackground = function(src) {
-    //background.setMaterial({'src' : src});
-    background.setAttribute('material', 'src', src);
-}
-
 function initEditor() {
     mainCanvas = $('#main-canvas')[0];
     menuElList = document.getElementsByClassName('well');
@@ -89,6 +73,7 @@ function initEditor() {
             console.log('Not selected');
         else {
             obj.Controller.remove(currentSelectedObject);
+            mover = null;
         }
     });
     editorToggle = $('#toggle-event');
@@ -101,28 +86,40 @@ function initEditor() {
             menuElList[i].style.visibility = (editorMode) ? 'visible' : 'hidden';
         }
 
+        if (!editorMode && mover) {
+            mover.parentEl.removeChild(mover);
+            mover = null;
+        }
+
         mainCanvas.style.width = (editorMode) ? '' : '100%';
+        onObjectUnselect();
 
     });
     eventArgEl = document.getElementById('eventArg');
     loadTextEl = document.getElementById('loadInput');
     saveBtnEl = document.getElementById('saveBtn');
     saveBtnEl.addEventListener('click', function(evt) {
-        var sceneryObject = {};
+        var sceneriesJson = scnry.Controller.sceneriesToJson();
         var objectsJson = obj.Controller.objectsToJson();
 
-        sceneryObject.bgUrl = background.getAttribute('src');
-        sceneryObject.objects = objectsJson;
+        // sceneryObject.bgUrl = background.getAttribute('src');
+        // sceneryObject.objects = objectsJson;
+        var saveObject = {
+            'sceneriesJson': sceneriesJson,
+            'objectsJson': objectsJson
+        }
 
-        loadTextEl.value = JSON.stringify(sceneryObject);
+        loadTextEl.value = JSON.stringify(saveObject);
     });
     loadBtnEl = document.getElementById('loadBtn');
     loadBtnEl.addEventListener('click', function(evt) {
-        var sceneryObject = JSON.parse(loadTextEl.value);
+        var json = JSON.parse(loadTextEl.value);
+        var sceneriesJson = json.sceneriesJson;
+        var objectsJson = json.objectsJson;
 
-        loadObjectsFromJson(sceneryObject.objects);
-
-        background.setAttribute('src', sceneryObject.bgUrl);
+        load(sceneriesJson, objectsJson);
+        // loadObjectsFromJson(sceneryObject.objects);
+        // background.setAttribute('src', sceneryObject.bgUrl);
     });
 
     for (var i = 0; i < EVENT_LIST.length; ++i) {
@@ -282,11 +279,38 @@ function initCanvas() {
             }
         }
     });
+
+    scenery = new scnry.Scenery(background);
 }
 
-function loadRoom(data) {
-    var bgSrc = data.bgSrc;
-    var objects = data.objects;
+function load(sceneriesJson, objectsJson) {
+    loadSceneriesFromJson(sceneriesJson);
+    loadObjectsFromJson(objectsJson);
+}
+
+function loadSceneriesFromJson(json) {
+    var sceneries = scnry.Controller.sceneriesFromJson(json);
+    sceneries[0].setBgEl(background);
+}
+
+function loadObjectsFromJson(json) {
+    var objects = obj.Controller.objectsFromJson(json);
+    for (var i = 0; i < objects.length; ++i) {
+        var el = obj.Controller.createElFromObj(mainFrame, objects[i]);
+        sceneEl.appendChild(el);
+    }
+}
+
+window.create = function(type) {
+    if (PRIMITIVE_DEFINITIONS.includes(type)) {
+        createPrimitive(type);
+    } else if (OBJECT_DEFINITIONS.includes(type)) {
+        createObject(type);
+    }
+}
+
+window.createImage = function(type, src) {
+    newObject('primitive', type, src);
 }
 
 function createPrimitive(shape) {
@@ -305,35 +329,28 @@ function createObject(type) {
     newObject(type, 'plane');
 }
 
-function makeArrayAsString() {
-    var result = "";
-    for (var i = 0; i < arguments.length - 1; ++i) {
-        result += arguments[i] + ", ";
-    }
-    result += arguments[arguments.length - 1];
-    return result;
-}
-
 function onObjectSelect() {
     var selected = obj.Controller.findByEl(this);
-    if (currentSelectedObject == selected) {
+
+    if (editorMode && currentSelectedObject == selected) {
         return;
     }
+
     currentSelectedObject = selected;
 
     if (editorMode) {
         shapeEl.innerHTML = currentSelectedObject.getShape();
         var position = currentSelectedObject.transform.position;
-        positionEl.innerHTML = makeArrayAsString(
+        positionEl.innerHTML = util.makeArrayAsString(
             util.floorTwo(position.x),
             util.floorTwo(position.y),
             util.floorTwo(position.z));
         var rotation = currentSelectedObject.transform.rotation;
-        rotationEl.innerHTML = makeArrayAsString(
+        rotationEl.innerHTML = util.makeArrayAsString(
             util.floorTwo(rotation.x),
             util.floorTwo(rotation.y));
         scale = currentSelectedObject.transform.scale;
-        scaleEl.innerHTML = makeArrayAsString(scale.x, scale.y, scale.z);
+        scaleEl.innerHTML = util.makeArrayAsString(scale.x, scale.y, scale.z);
 
         // append mover element
         mover = newMover();
@@ -458,15 +475,6 @@ function variableEvent(arg) {
     console.log(str[0] + "=" + variableEl[str[0]]);
 }
 
-
-function loadObjectsFromJson(json) {
-    var objects = obj.Controller.objectsFromJson(json);
-    for (var i = 0; i < objects.length; ++i) {
-        var el = obj.Controller.createElFromObj(mainFrame, objects[i]);
-        sceneEl.appendChild(el);
-    }
-}
-
 //minimap
 
 window.setMiniMap = function() {
@@ -480,7 +488,6 @@ window.setMiniMap = function() {
         miniMapDirector.setAttribute('id', 'minimap-director');
         miniMapDirector.setAttribute('material', 'src', '/static/img/Minimap_Director.png');
         miniMapDirector.setAttribute('minimap-direction', "")
-            //var newObj = new obj.Objct(miniMap);
 
         rotation = { x: 0, y: 0, z: cameraEl.getAttribute('rotation').y }
         miniMapDirector.setAttribute('rotation', rotation);
@@ -508,7 +515,6 @@ window.setObjectOnMiniMap = function(position) {
         var x = position.x / 10 + 0.8;
         var y = position.z / -10 + 0.8;
         var newEl = mainFrame.document.createElement('a-plane');
-        //var newObj = new obj.Objct(newEl);
         newEl.setAttribute('realPos', position.x + " " + position.y + " " + position.z);
 
         position = { x: x, y: y, z: 1 };

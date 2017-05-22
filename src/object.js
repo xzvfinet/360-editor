@@ -1,20 +1,22 @@
 var objects = [];
 
 function Objct(el, obj) {
-    this.el = el;
-    this.type = "";
-    this.shape = "";
-    this.transform = {};
-    this.material = {};
+    if (obj) {
+        // copy all properties of obj to this
+        for (var prop in obj) {
+            this[prop] = obj[prop];
+        }
+    } else {
+        this.el = el;
+        this.type = "";
+        this.shape = "";
+        this.transform = {};
+        this.material = {};
 
-    this.clickListener = "";
-    this.eventList = [];
+        this.clickListener = "";
+        this.eventList = [];
 
-    this.lookat = "";
-
-    // copy all properties of obj to this
-    for (var prop in obj) {
-        this[prop] = obj[prop];
+        this.lookat = "";
     }
 
     objects.push(this);
@@ -92,7 +94,15 @@ Objct.prototype.setLookAt = function(target) {
     this.lookat = target;
 }
 
+Objct.prototype.addEvent = function(eventType, eventArgs) {
+    this.eventList.push({ 'type': eventType, 'arg': eventArgs });
+}
+
 function Controller() {}
+
+Controller.prototype.createObject = function(el) {
+    return new Objct(el);
+}
 
 Controller.prototype.objectsFromJson = function(json) {
     var loadedObjects;
@@ -138,6 +148,12 @@ Controller.prototype.getObjects = function() {
 Controller.prototype.remove = function(obj) {
     if (obj.el) {
         obj.el.parentElement.removeChild(obj.el);
+    }
+
+    // remove object from list
+    var index = objects.indexOf(obj);
+    if (index > -1) {
+        objects.splice(index, 1);
     }
 }
 
