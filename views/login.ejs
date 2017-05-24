@@ -18,7 +18,18 @@
 		<div class="container" >
 		 <div class="col-md-4"></div>
 		    <div class="col-md-4">
-		        <div class="container" style="margin-top: 30px">
+              <% if(login == -1){ %>
+              <div class="container">
+                <div class="col-md-4">
+                    <div class="login-panel panel panel-default">
+                        <div class="panel-heading" style="background-color:lightpink;">
+                            Incorrect email or password.
+                        </div>
+                    </div>
+                </div>
+              </div>
+              <% } %>
+              <div class="container" >
 		            <div class="col-md-4">
 		                <div class="panel panel-default">
 		                    <div class="panel-heading">
@@ -41,14 +52,14 @@
 		            </div>
 		        </div>
 						<div class="container" style="margin-top: 20px;">
-            <div class="col-md-4">
-                <div class="login-panel panel panel-default">
-                    <div class="panel-heading" style="background-color:white;">
-                        New to Traverser360? <a href="/signup" style="margin-left:10px;"><b>Create an acount.</b></a>
-                    </div>
-                </div>
+              <div class="col-md-4">
+                  <div class="login-panel panel panel-default">
+                      <div class="panel-heading" style="background-color:white;">
+                          New to Traverser360? <a href="/signup" style="margin-left:10px;"><b>Create an acount.</b></a>
+                      </div>
+                  </div>
+              </div>
             </div>
-        </div>
 		    </div>
 		    <div class="col-md-4"></div>
 		 </div>

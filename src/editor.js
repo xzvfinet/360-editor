@@ -72,7 +72,17 @@ window.createImage = function(type, src) {
 
 window.setBackground = function(src) {
     //background.setMaterial({'src' : src});
-    background.setAttribute('material', 'src', src);
+    background.setAttribute('src', src);
+}
+
+window.saveProject = function(userID, sceneID){
+  var sceneryObject = {};
+  var objectsJson = obj.Controller.objectsToJson();
+
+  sceneryObject.bgUrl = background.getAttribute('src');
+  sceneryObject.objects = objectsJson;
+
+  saveJsontoServer(JSON.stringify(sceneryObject), userID, sceneID);
 }
 
 function initEditor() {
@@ -115,6 +125,7 @@ function initEditor() {
         sceneryObject.objects = objectsJson;
 
         loadTextEl.value = JSON.stringify(sceneryObject);
+        saveJsontoServer(JSON.stringify(sceneryObject));
     });
     loadBtnEl = document.getElementById('loadBtn');
     loadBtnEl.addEventListener('click', function(evt) {
@@ -465,6 +476,24 @@ function loadObjectsFromJson(json) {
         var el = obj.Controller.createElFromObj(mainFrame, objects[i]);
         sceneEl.appendChild(el);
     }
+}
+
+function saveJsontoServer(json, userID, sceneID){
+  $.ajax({
+    url : 'http://localhost:8000/project/save',
+    method : 'post',
+    data : {
+        user : userID,
+        json : json,
+        scene : sceneID
+    },
+    success : function (data) {
+      alert("Save success");
+    },
+    error : function (err) {
+      alert("Save fail." + err.toString());
+    }
+  });
 }
 
 //minimap

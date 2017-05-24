@@ -8,7 +8,11 @@
             <div class="menu-main-menu-container">
               <ul id="menu-main-menu" class="menu">
                   <li class="menu-item-has-children">
+                    <% if(user==-1){ %>
                       <a href="/login"><span>Login</span></a>
+                    <% }else{ %>
+                      <a href="/logout"><span>Logout</span></a>
+                    <% } %>
                   </li>
                     <li class="menu-item-has-children">
                       <a href="/"><span>Home</span></a>

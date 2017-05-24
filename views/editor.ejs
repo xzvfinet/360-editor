@@ -11,10 +11,11 @@
 <script type="text/javascript" src="../static/js/bundle.js"></script>
 <script src="https://gitcdn.github.io/bootstrap-toggle/2.2.2/js/bootstrap-toggle.min.js"></script>
 </head>
-<body>
+<body style="background-color:white;">
     <header class="main_header">
         <% include header %>
     </header>
+    <!--
     <div class="fs_fadder hided"></div>
 	<div class="fs_sharing_wrapper hided">
 		<div class="fs_sharing">
@@ -24,11 +25,14 @@
             <a href="https://plus.google.com/share?url=http://www.gt3themes.com/website-templates/oyster/" class="share_gplus" target="_blank"><i class="icon-google-plus-square"></i></a>
             <a class="fs_share_close hided" href="javascript:void(0)"></a>
         </div>
+    </div>-->
+    <div style="padding-right:15px;text-align:right;z-index:1">
+      <div class="hasIcon shortcode_button btn_normal btn_type5" onClick="saveProject(<%= user.userID %>, <%= scene.idscene %>);" style="width:80px;">Save</div>
     </div>
-    <div id="upload_after" class="fs_gallery_container fade" style="height:100%;display:none;">
+    <div id="upload_after" class="fs_gallery_container fade" style="height:100%;display:none;z-index:-1">
         <iframe id="main_scene" class="main_scene" width="100%" height="100%" allowfullscreen="yes" scrolling="no" allowvr="yes" src="../static/html/canvas.html"></iframe>
     </div>
-    <div class="container">
+    <div class="container" style="padding-top:10px;">
         <div id="wrapper" class="row">
             <div class="col-md-2">
                 <div>
@@ -167,7 +171,7 @@
     <!--/.fluid-container-->
     <!-- Modal -->
     <div id="myModal" class="modal fade" role="dialog">
-        <form id="image_form" action="/project/new/image" method="post" enctype="multipart/form-data" target="uploader_iframe">
+        <form id="image_form" action="/project/<%= scene.idscene %>/image" method="post" enctype="multipart/form-data" target="uploader_iframe">
             <input type="submit" style="position: absolute; left: -9999px" />
             <div class="modal-dialog">
                 <!-- Modal content-->
@@ -302,7 +306,7 @@
   Dropzone.options.my = {
       paramName: "photo", // The name that will be used to transfer the file
       maxFilesize: 1024, // MB
-      url: "/project/new/background",
+      url: "/project/<%= scene.idscene %>/background",
       success : function(file, res){
         $("#right-toolbar").addClass("col-md-offset-8")
         $("#main-canvas").css("display", "none");

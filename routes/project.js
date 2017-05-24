@@ -15,18 +15,6 @@ cloudinary.config({
   api_secret: 'hX3KhluDt51J760bHhWgPVMoVZU'
 });
 
-var _storage = multer.diskStorage({
-    destination: function(req, file, cb){   //디렉토리 위치
-        cb(null, './uploads');
-    },
-    filename: function(req, file, cb){  //파일명
-        cb(null, Date.now() + "." + file.originalname.split('.').pop());
-    }
-});
-
-var uploadImage = multer({ storage: _storage}).single('image_file');
-var uploadBackground = multer({ storage: _storage}).single('photo');
-
 AWS.config.update({
     accessKeyId: "AKIAJHEDGWLON4GFJNTQ",
     secretAccessKey: "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",
@@ -35,14 +23,15 @@ AWS.config.update({
 });
 
 var s3 = new AWS.S3();
+var host = "https://s3.ap-northeast-2.amazonaws.com/traverser360";
 
-var upload = multer({
+var uploadImage = multer({
     storage: multerS3({
         s3: s3,
         bucket: 'traverser360',
         acl: 'public-read',
         key: function (req, file, cb) {
-            cb(null, Date.now() + "." + file.originalname.split('.').pop());
+            cb(null,  + "/" + Date.now() + "." + file.originalname.split('.').pop());
         }
     })
 });
@@ -52,29 +41,46 @@ router.get('/', function(req, res){
     connection.query(projectSQL, function (error, info) {
         if(error) {
             res.status(500).json({
-                result: 'false',
-                info: info[0]
+                scenes: -1,
             });
         } else {
-          res.render('project', {result : info});
+          var temp;
+          req.session.userID == null ? temp = -1 : temp = req.session;
+          console.log("user : " + temp + ", scenes : " + info);
+          res.render('project', {user : temp, scenes : info });
         }
     });
 });
 
 router.get('/:id', function(req, res){
   var id = req.params.id;
-  var detailSQL = 'SELECT * FROM scene WHERE idscene=?';
-  connection.query(detailSQL, id, function(err, info){
-    if(err){
-      res.status(500);
+  if(id == "new"){
+    if(req.session.userID==null){
+      res.redirect('/login');
     }else{
-      res.render('editor', {result : info});
+      var query = "insert into scene(userID, title, thumbnail) values(?, ?, ?)";
+      var params = [1, "no title", host + "/default.jpg"];
+      connection.query(query, params, function (error, info) {
+          if(error) {
+            throw error;
+          } else {
+            console.log("insert " + info.insertId);
+            res.redirect('/project/' + info.insertId);
+          }
+      });
     }
-  });
-});
-
-router.get('/new', function(req, res){
-  res.render('editor');
+  }else{
+    var query = 'SELECT * FROM scene WHERE idscene=?';
+    connection.query(query, id, function(err, info){
+      if(err){
+        res.status(500);
+      }else{
+        var temp;
+        req.session.userID == null ? temp = -1 : temp = req.session;
+        res.render('editor', {user : temp, scene : info[0]});
+      }
+    });
+  }
 });
 
 /*
@@ -92,17 +98,45 @@ router.post('/upload/image', fileParser, function(req, res){
 });
 */
 
-router.post('/new/background', upload.array('photo', 1), function(req,res){
-   console.log("background : " + req.files[0].location);
+router.post('/:id/background', uploadImage.array('photo', 1), function(req,res){
    res.end(req.files[0].location);
 });
 
-router.post('/new/image', upload.array('image_file', 1), function(req, res){
+router.post('/:id/image', uploadImage.array('image_file', 1), function(req, res){
   res.json({result : req.files[0].location});
 });
 
-// read json file
-router.get('/test', function(req, res){
+router.post('/save', function(req, res){
+  var data = req.body
+  var base64data = new Buffer(data.json, 'binary');
+
+  s3.upload({
+    Bucket: 'traverser360',
+    Key: data.scene + "/" + Date.now() + ".json",
+    Body: base64data,
+    ACL: 'public-read'
+  }, function (err, result) {
+    if(err){
+      console.log(err);
+    }else{
+      var query = "update scene set path=? where idscene=?"
+      var params = [host + "/" + result.key, data.scene];
+      connection.query(query, params, function (error, info) {
+        var temp;
+        req.session.userID == null ? temp = -1 : temp = req.session;
+          if(error) {
+            console.log("err : " + error);
+            res.json({user : temp, saveResult : 0});
+          } else {
+            console.log("save success : " + info[0]);
+            res.json({user : temp, saveResult : 1});
+          }
+      });
+    }
+  });
+});
+
+router.get('/load', function(req, res){
   var data = fs.readFileSync('./uploads/test.json', 'utf8');
   var json = JSON.parse(data);
   for(var i=0; i<json.length; i++){
