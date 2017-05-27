@@ -18,7 +18,7 @@
 		                        <h1 class="panel-title"><strong>Sign Up </strong></h1>
 		                    </div>
 		                    <div class="panel-body">
-		                        <form id="body" action="/signup" method="post" onSubmit="return formValidation();">
+		                        <form id="body" action="/signup" method="post" onsubmit="return formValidation()">
 		                            <div class="form-group" style="text-align:left">
 		                                <label for="email">Username or Email</label>
 		                                <input type="email" class="form-control" id="email" name="email" placeholder="Enter email" required="required"/>
@@ -90,7 +90,7 @@
       if(!pwd_check(pwd, cpwd))
         return false;
 
-      return true;
+			return true;
     }
 
     function pwd_check(pwd, cpwd){

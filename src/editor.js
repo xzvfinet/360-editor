@@ -85,6 +85,15 @@ window.saveProject = function(userID, sceneID){
   saveJsontoServer(JSON.stringify(sceneryObject), userID, sceneID);
 }
 
+window.loadJson = function(json){
+  var sceneryObject = JSON.parse(json);
+  console.log(sceneryObject);
+
+  loadObjectsFromJson(sceneryObject.objects);
+
+  background.setAttribute('src', sceneryObject.bgUrl);
+}
+
 function initEditor() {
     mainCanvas = $('#main-canvas')[0];
     menuElList = document.getElementsByClassName('well');

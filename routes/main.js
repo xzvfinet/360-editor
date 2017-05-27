@@ -45,17 +45,25 @@ router.post('/login', function(req, res){
   });
 });
 
-router.get('/signup', function(req, res){
-  res.render('signup', {user : -1});
-});
-
 router.post('/signup', function(req, res){
   var email = req.body.email;
   var pwd = req.body.pwd;
   var cpwd = req.body.cpwd;
+  var query = "insert into user(email, password) values(?, ?)";
+  var params = [email, pwd];
 
-  console.log(email + ", " + pwd + ", " + cpwd);
-  res.render('index');
+  connection.query(query, params, function(err, info){
+    if(err){
+      res.status(500);
+      console.log("err : " + err);
+    }else{
+      res.redirect('/login');
+    }
+  });
+});
+
+router.get('/signup', function(req, res){
+  res.render('signup', {user : -1});
 });
 
 module.exports = router;

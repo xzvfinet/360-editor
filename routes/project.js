@@ -31,7 +31,7 @@ var uploadImage = multer({
         bucket: 'traverser360',
         acl: 'public-read',
         key: function (req, file, cb) {
-            cb(null,  + "/" + Date.now() + "." + file.originalname.split('.').pop());
+            cb(null,  + Date.now() + "." + file.originalname.split('.').pop());
         }
     })
 });
@@ -46,7 +46,6 @@ router.get('/', function(req, res){
         } else {
           var temp;
           req.session.userID == null ? temp = -1 : temp = req.session;
-          console.log("user : " + temp + ", scenes : " + info);
           res.render('project', {user : temp, scenes : info });
         }
     });
@@ -64,24 +63,42 @@ router.get('/:id', function(req, res){
           if(error) {
             throw error;
           } else {
-            console.log("insert " + info.insertId);
             res.redirect('/project/' + info.insertId);
           }
       });
     }
   }else{
-    var query = 'SELECT * FROM scene WHERE idscene=?';
-    connection.query(query, id, function(err, info){
-      if(err){
-        res.status(500);
-      }else{
-        var temp;
-        req.session.userID == null ? temp = -1 : temp = req.session;
-        res.render('editor', {user : temp, scene : info[0]});
-      }
-    });
+    var temp, json;
+    req.session.userID == null ? temp = -1 : temp = req.session;
+    res.render('editor', {user : temp, sceneID : id});
   }
 });
+
+router.get('/load/:id', function(req, res){
+  var id = req.params.id
+  var query = 'SELECT * FROM scene WHERE idscene=?';
+  var json;
+  connection.query(query, id, function(err, info){
+    if(err){
+      res.status(500);
+    }else{
+      if(info[0].path == null){
+        json = '';
+      }else{
+        var key = (info[0].path).split('traverser360/')[1];
+        var params = {Bucket: 'traverser360', Key: key};
+        s3.getObject(params, function(err, data) {
+          if (err){
+            console.log(err, err.stack); // an error occurred
+          }else{
+            json = data.Body.toString();
+          }
+          res.end(json);
+        });
+      }
+    }
+  });
+})
 
 /*
 router.post('/upload/image', fileParser, function(req, res){
@@ -128,22 +145,11 @@ router.post('/save', function(req, res){
             console.log("err : " + error);
             res.json({user : temp, saveResult : 0});
           } else {
-            console.log("save success : " + info[0]);
             res.json({user : temp, saveResult : 1});
           }
       });
     }
   });
 });
-
-router.get('/load', function(req, res){
-  var data = fs.readFileSync('./uploads/test.json', 'utf8');
-  var json = JSON.parse(data);
-  for(var i=0; i<json.length; i++){
-    console.log(json[i]);
-    console.log(json[i].el);
-  }
-});
-
 
 module.exports = router;
