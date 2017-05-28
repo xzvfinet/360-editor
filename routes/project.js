@@ -57,8 +57,8 @@ router.get('/:id', function(req, res){
     if(req.session.userID==null){
       res.redirect('/login');
     }else{
-      var query = "insert into scene(userID, title, thumbnail) values(?, ?, ?)";
-      var params = [1, "no title", host + "/default.jpg"];
+      var query = "insert into scene(userID, title) values(?, ?)";
+      var params = [req.session.userID, "no title"];
       connection.query(query, params, function (error, info) {
           if(error) {
             throw error;
@@ -69,8 +69,17 @@ router.get('/:id', function(req, res){
     }
   }else{
     var temp, json;
-    req.session.userID == null ? temp = -1 : temp = req.session;
-    res.render('editor', {user : temp, sceneID : id});
+    var query = "update scene set view = view + 1 where idscene=?";
+    var params = [req.params.id];
+    connection.query(query, params, function(err, info){
+      if(err){
+        console.log("err : " + err);
+        res.status(500);
+      }else{
+        req.session.userID == null ? temp = -1 : temp = req.session;
+        res.render('editor', {user : temp, sceneID : id});
+      }
+    });
   }
 });
 
@@ -136,6 +145,7 @@ router.post('/save', function(req, res){
     if(err){
       console.log(err);
     }else{
+      saveThumbnail(data.scene, host + "/" + result.key);
       var query = "update scene set path=? where idscene=?"
       var params = [host + "/" + result.key, data.scene];
       connection.query(query, params, function (error, info) {
@@ -151,5 +161,36 @@ router.post('/save', function(req, res){
     }
   });
 });
+
+function saveThumbnail(id, path){
+  var path = path;
+  var id = id;
+  var key = path.split('traverser360/')[1];
+  var params = {Bucket: 'traverser360', Key: key};
+  s3.getObject(params, function(err, data) {
+    if (err){
+      console.log(err, err.stack); // an error occurred
+    }else{
+      var json = JSON.parse(data.Body.toString());
+      if(json.bgURL != ""){
+        console.log('has background');
+        cloudinary.uploader.upload(json.bgUrl, function(result){
+          if (result.url) {
+             console.log(result.url);
+             var q = 'update scene set thumbnail=? where idscene=?';
+             var p = [result.url, id];
+             connection.query(q, p, function(err, info){
+               if(err){
+                 console.log("err : " + err);
+               }
+             })
+          } else {
+            console.log('Error uploading to cloudinary: ',result);
+          }
+        });
+      }
+    }
+  });
+}
 
 module.exports = router;
