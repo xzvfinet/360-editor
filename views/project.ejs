@@ -21,12 +21,12 @@
         </ul>
         </div>
         <div style="margin-right:30px;float:right;">
-          <a href="/project/new" class="hasIcon shortcode_button btn_normal btn_type5"><i class="icon-star-o"></i>New Project</a>
+          <a href="/project/new" class="hasIcon shortcode_button btn_normal btn_type5" onClick="return newProject();"><i class="icon-star-o"></i>New Project</a>
         </div>
       </div>
-        <% if(result.length > 0){ %>
+        <% if(scenes.length > 0){ %>
           <div class="fs_blog_module image-grid">
-              <% result.forEach(function(scene){ %>
+              <% scenes.forEach(function(scene){ %>
               <div class="blogpost_preview_fw element stuff">
                   <div class="fw_preview_wrapper">
                         <div class="gallery_item_wrapper">
@@ -84,9 +84,18 @@
 			"use strict";
 			setTimeout(function(){
                 jQuery('.fullscreen_block').removeClass('hided');
-			},2500);
-			setTimeout("jQuery('.preloader').remove()", 2700);
+			},1500);
+			setTimeout("jQuery('.preloader').remove()", 1700);
 		});
+
+		function newProject(){
+			<% if(user==-1){ %>
+				alert('로그인이 필요한 기능입니다.');
+				return false;
+			<% }else{ %>
+			return true;
+			<% } %>
+		}
     </script>
 </body>
 </html>

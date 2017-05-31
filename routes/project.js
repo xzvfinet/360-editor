@@ -15,18 +15,6 @@ cloudinary.config({
   api_secret: 'hX3KhluDt51J760bHhWgPVMoVZU'
 });
 
-var _storage = multer.diskStorage({
-    destination: function(req, file, cb){   //디렉토리 위치
-        cb(null, './uploads');
-    },
-    filename: function(req, file, cb){  //파일명
-        cb(null, Date.now() + "." + file.originalname.split('.').pop());
-    }
-});
-
-var uploadImage = multer({ storage: _storage}).single('image_file');
-var uploadBackground = multer({ storage: _storage}).single('photo');
-
 AWS.config.update({
     accessKeyId: "AKIAJHEDGWLON4GFJNTQ",
     secretAccessKey: "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",
@@ -35,14 +23,15 @@ AWS.config.update({
 });
 
 var s3 = new AWS.S3();
+var host = "https://s3.ap-northeast-2.amazonaws.com/traverser360";
 
-var upload = multer({
+var uploadImage = multer({
     storage: multerS3({
         s3: s3,
         bucket: 'traverser360',
         acl: 'public-read',
         key: function (req, file, cb) {
-            cb(null, Date.now() + "." + file.originalname.split('.').pop());
+            cb(null,  + Date.now() + "." + file.originalname.split('.').pop());
         }
     })
 });
@@ -52,30 +41,73 @@ router.get('/', function(req, res){
     connection.query(projectSQL, function (error, info) {
         if(error) {
             res.status(500).json({
-                result: 'false',
-                info: info[0]
+                scenes: -1,
             });
         } else {
-          res.render('project', {result : info});
+          var temp;
+          req.session.userID == null ? temp = -1 : temp = req.session;
+          res.render('project', {user : temp, scenes : info });
         }
     });
 });
 
 router.get('/:id', function(req, res){
   var id = req.params.id;
-  var detailSQL = 'SELECT * FROM scene WHERE idscene=?';
-  connection.query(detailSQL, id, function(err, info){
+  if(id == "new"){
+    if(req.session.userID==null){
+      res.redirect('/login');
+    }else{
+      var query = "insert into scene(userID, title) values(?, ?)";
+      var params = [req.session.userID, "no title"];
+      connection.query(query, params, function (error, info) {
+          if(error) {
+            throw error;
+          } else {
+            res.redirect('/project/' + info.insertId);
+          }
+      });
+    }
+  }else{
+    var temp, json;
+    var query = "update scene set view = view + 1 where idscene=?";
+    var params = [req.params.id];
+    connection.query(query, params, function(err, info){
+      if(err){
+        console.log("err : " + err);
+        res.status(500);
+      }else{
+        req.session.userID == null ? temp = -1 : temp = req.session;
+        res.render('editor', {user : temp, sceneID : id});
+      }
+    });
+  }
+});
+
+router.get('/load/:id', function(req, res){
+  var id = req.params.id
+  var query = 'SELECT * FROM scene WHERE idscene=?';
+  var json;
+  connection.query(query, id, function(err, info){
     if(err){
       res.status(500);
     }else{
-      res.render('editor', {result : info});
+      if(info[0].path == null){
+        json = '';
+      }else{
+        var key = (info[0].path).split('traverser360/')[1];
+        var params = {Bucket: 'traverser360', Key: key};
+        s3.getObject(params, function(err, data) {
+          if (err){
+            console.log(err, err.stack); // an error occurred
+          }else{
+            json = data.Body.toString();
+          }
+          res.end(json);
+        });
+      }
     }
   });
-});
-
-router.get('/new', function(req, res){
-  res.render('editor');
-});
+})
 
 /*
 router.post('/upload/image', fileParser, function(req, res){
@@ -92,24 +124,73 @@ router.post('/upload/image', fileParser, function(req, res){
 });
 */
 
-router.post('/new/background', upload.array('photo', 1), function(req,res){
-   console.log("background : " + req.files[0].location);
+router.post('/:id/background', uploadImage.array('photo', 1), function(req,res){
    res.end(req.files[0].location);
 });
 
-router.post('/new/image', upload.array('image_file', 1), function(req, res){
+router.post('/:id/image', uploadImage.array('image_file', 1), function(req, res){
   res.json({result : req.files[0].location});
 });
 
-// read json file
-router.get('/test', function(req, res){
-  var data = fs.readFileSync('./uploads/test.json', 'utf8');
-  var json = JSON.parse(data);
-  for(var i=0; i<json.length; i++){
-    console.log(json[i]);
-    console.log(json[i].el);
-  }
+router.post('/save', function(req, res){
+  var data = req.body
+  var base64data = new Buffer(data.json, 'binary');
+
+  s3.upload({
+    Bucket: 'traverser360',
+    Key: data.scene + "/" + Date.now() + ".json",
+    Body: base64data,
+    ACL: 'public-read'
+  }, function (err, result) {
+    if(err){
+      console.log(err);
+    }else{
+      saveThumbnail(data.scene, host + "/" + result.key);
+      var query = "update scene set path=? where idscene=?"
+      var params = [host + "/" + result.key, data.scene];
+      connection.query(query, params, function (error, info) {
+        var temp;
+        req.session.userID == null ? temp = -1 : temp = req.session;
+          if(error) {
+            console.log("err : " + error);
+            res.json({user : temp, saveResult : 0});
+          } else {
+            res.json({user : temp, saveResult : 1});
+          }
+      });
+    }
+  });
 });
 
+function saveThumbnail(id, path){
+  var path = path;
+  var id = id;
+  var key = path.split('traverser360/')[1];
+  var params = {Bucket: 'traverser360', Key: key};
+  s3.getObject(params, function(err, data) {
+    if (err){
+      console.log(err, err.stack); // an error occurred
+    }else{
+      var json = JSON.parse(data.Body.toString());
+      if(json.bgURL != ""){
+        console.log('has background');
+        cloudinary.uploader.upload(json.bgUrl, function(result){
+          if (result.url) {
+             console.log(result.url);
+             var q = 'update scene set thumbnail=? where idscene=?';
+             var p = [result.url, id];
+             connection.query(q, p, function(err, info){
+               if(err){
+                 console.log("err : " + err);
+               }
+             })
+          } else {
+            console.log('Error uploading to cloudinary: ',result);
+          }
+        });
+      }
+    }
+  });
+}
 
 module.exports = router;
