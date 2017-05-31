@@ -64,6 +64,25 @@ window.setBackground = function(url) {
     scnry.Controller.getCurrentScenery().setBackgroundImageUrl(url);
 }
 
+window.saveProject = function(userID, sceneID){
+  var sceneryObject = {};
+  var objectsJson = obj.Controller.objectsToJson();
+
+  sceneryObject.bgUrl = background.getAttribute('src');
+  sceneryObject.objects = objectsJson;
+
+  saveJsontoServer(JSON.stringify(sceneryObject), userID, sceneID);
+}
+
+window.loadJson = function(json){
+  var sceneryObject = JSON.parse(json);
+  console.log(sceneryObject);
+
+  loadObjectsFromJson(sceneryObject.objects);
+
+  background.setAttribute('src', sceneryObject.bgUrl);
+}
+
 function initEditor() {
     mainCanvas = $('#main-canvas')[0];
     menuElList = document.getElementsByClassName('well');
@@ -107,14 +126,13 @@ function initEditor() {
         var sceneriesJson = scnry.Controller.sceneriesToJson();
         var objectsJson = obj.Controller.objectsToJson();
 
-        // sceneryObject.bgUrl = background.getAttribute('src');
-        // sceneryObject.objects = objectsJson;
         var saveObject = {
             'sceneriesJson': sceneriesJson,
             'objectsJson': objectsJson
         }
 
         loadTextEl.value = JSON.stringify(saveObject);
+        saveJsontoServer(JSON.stringify(saveObject));
     });
     loadBtnEl = document.getElementById('loadBtn');
     loadBtnEl.addEventListener('click', function(evt) {
@@ -480,8 +498,33 @@ function variableEvent(arg) {
     console.log(str[0] + "=" + variableEl[str[0]]);
 }
 
-//minimap
+function loadObjectsFromJson(json) {
+    var objects = obj.Controller.objectsFromJson(json);
+    for (var i = 0; i < objects.length; ++i) {
+        var el = obj.Controller.createElFromObj(mainFrame, objects[i]);
+        sceneEl.appendChild(el);
+    }
+}
 
+function saveJsontoServer(json, userID, sceneID){
+  $.ajax({
+    url : 'http://localhost:8000/project/save',
+    method : 'post',
+    data : {
+        user : userID,
+        json : json,
+        scene : sceneID
+    },
+    success : function (data) {
+      alert("Save success");
+    },
+    error : function (err) {
+      alert("Save fail." + err.toString());
+    }
+  });
+}
+
+//minimap
 window.setMiniMap = function() {
     if (miniMap == null) {
         miniMap = mainFrame.document.createElement('a-image');

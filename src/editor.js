@@ -507,7 +507,7 @@ function loadObjectsFromJson(json) {
 
 function saveJsontoServer(json, userID, sceneID){
   $.ajax({
-    url : 'http://localhost:8000/project/save',
+    url : '/project/save',
     method : 'post',
     data : {
         user : userID,
