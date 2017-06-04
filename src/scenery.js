@@ -1,5 +1,4 @@
-var currentIndex = 0;
-var sceneries = [];
+var objct = require('./object.js');
 
 function Scenery(bgEl, scenery) {
     if (scenery) {
@@ -7,12 +6,15 @@ function Scenery(bgEl, scenery) {
         for (var prop in scenery) {
             this[prop] = scenery[prop];
         }
-    } else {
+    } else if (bgEl) {
         this.bgEl = bgEl;
         this.bgUrl = this.bgEl.getAttribute('src');
+        this.objectList = [];
+    } else {
+        this.bgEl = null;
+        this.bgUrl = "";
+        this.objectList = [];
     }
-
-    sceneries.push(this);
 }
 
 Scenery.prototype.setBackgroundImageUrl = function(url) {
@@ -21,67 +23,73 @@ Scenery.prototype.setBackgroundImageUrl = function(url) {
 }
 
 Scenery.prototype.setBgEl = function(bgEl) {
+    console.log(bgEl);
+    console.log(bgUrl);
     this.bgEl = bgEl;
     bgEl.setAttribute('src', this.bgUrl);
 }
 
-Scenery.prototype.getSaveForm = function() {
-    var tmp = this.bgEl;
-    this.bgEl = null;
-    var copyScenery = JSON.parse(JSON.stringify(this));
-    this.bgEl = tmp;
-    return copyScenery;
+Scenery.prototype.addObject = function(object) {
+    this.objectList.push(object)
 }
 
-function Controller() {}
-
-Controller.prototype.addScenery = function(scenery) {
-    sceneries.push(scenery);
+Scenery.prototype.removeObject = function(object) {
+    var index = objectList.indexOf(object);
+    if (index > -1) {
+        objectList.splice(index, 1);
+    }
 }
 
-Controller.prototype.changeScenery = function(scenery) {
-    var bgEl = sceneries[currentIndex].bgEl;
-    sceneries[currentIndex].bgEl = null;
+Scenery.prototype.findObjectByEl = function(el) {
+    var objs = this.objectList.filter(function(obj) {
+        return obj.el == el;
+    });
+    return objs[0];
+}
 
-    if (typeof scenery == 'object') {
-        for (var i = sceneries.length - 1; i >= 0; i--) {
-            if (sceneries[i] == scenery) {
-                currentIndex = i;
-                break;
-            }
+Scenery.prototype.removeAllObject = function() {
+    for (var i in this.objectList) {
+        if (this.objectList[i].el) {
+            this.objectList[i].el.parentElement.removeChild(this.objectList[i].el);
         }
-    } else if (typeof scenery == 'number') {
-        currentIndex = number;
     }
 
-    sceneries[currentIndex].bgEl = bgEl;
+    this.objectList = [];
 }
 
-Controller.prototype.getCurrentScenery = function() {
-    return sceneries[currentIndex];
-}
-
-Controller.prototype.sceneriesToJson = function() {
-    var saveSceneries = [];
-    for (var i = 0; i < sceneries.length; ++i) {
-        saveSceneries.push(sceneries[i].getSaveForm());
+Scenery.prototype.removeObject = function(obj) {
+    if (obj.el) {
+        obj.el.parentElement.removeChild(obj.el);
     }
-    var json = JSON.stringify(saveSceneries);
-    return json;
+
+    // remove object from list
+    var index = this.objectList.indexOf(obj);
+    if (index > -1) {
+        this.objectList.splice(index, 1);
+    }
 }
 
-Controller.prototype.sceneriesFromJson = function(json) {
-    var loadedSceneries;
-    loadedSceneries = JSON.parse(json);
-    var loadedSceneriesWithPrototype = [];
-    for (var i = 0; i < loadedSceneries.length; ++i) {
-        var newScenery = new Scenery(null, loadedSceneries[i]);
-        loadedSceneriesWithPrototype.push(newScenery);
+Scenery.prototype.getSaveForm = function() {
+    var saveForm = {};
+    saveForm.bgUrl = this.bgUrl;
+    saveForm.objectList = [];
+    for (var i in this.objectList) {
+        var object = this.objectList[i];
+        saveForm.objectList.push(object.getSaveForm());
     }
-    return loadedSceneriesWithPrototype;
+    return saveForm;
+}
+
+Scenery.prototype.toJson = function() {
+    return JSON.stringify(this.getSaveForm());
+}
+
+Scenery.prototype.fromJson = function(json) {
+    var scenery = JSON.parse(json);
+    Scenery.call(this, null, scenery);
+    return this;
 }
 
 module.exports = {
-    Scenery: Scenery,
-    Controller: new Controller()
+    Scenery: Scenery
 };
