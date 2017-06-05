@@ -23,8 +23,6 @@ Scenery.prototype.setBackgroundImageUrl = function(url) {
 }
 
 Scenery.prototype.setBgEl = function(bgEl) {
-    console.log(bgEl);
-    console.log(bgUrl);
     this.bgEl = bgEl;
     bgEl.setAttribute('src', this.bgUrl);
 }
