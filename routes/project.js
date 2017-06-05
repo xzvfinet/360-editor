@@ -172,9 +172,9 @@ function saveThumbnail(id, path){
       console.log(err, err.stack); // an error occurred
     }else{
       var json = JSON.parse(data.Body.toString());
-      if(json.bgURL != ""){
-        console.log('has background');
-        cloudinary.uploader.upload(json.bgUrl, function(result){
+      var bgUrl = json.sceneryList[0].bgUrl;
+      if(bgUrl != ""){
+        cloudinary.uploader.upload(bgUrl, function(result){
           if (result.url) {
              console.log(result.url);
              var q = 'update scene set thumbnail=? where idscene=?';
