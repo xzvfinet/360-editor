@@ -176,9 +176,10 @@ function saveThumbnail(id, path){
       if(bgUrl != ""){
         cloudinary.uploader.upload(bgUrl, function(result){
           if (result.url) {
-             console.log(result.url);
+             var temp = (result.url).split("upload/");
+             var url = temp[0] + "upload/w_540,h_350/" + temp[1];
              var q = 'update scene set thumbnail=? where idscene=?';
-             var p = [result.url, id];
+             var p = [url, id];
              connection.query(q, p, function(err, info){
                if(err){
                  console.log("err : " + err);
