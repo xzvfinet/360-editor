@@ -16,8 +16,9 @@ var BASE_WIDTH = 300;
 
 var util = require('./util.js');
 var nodeUtil = require('util');
+var Project = require('./project.js').Project;
 var obj = require('./object.js');
-var scnry = require('./scenery.js');
+var Scenery = require('./scenery.js').Scenery;
 
 // Editor Dom Elements
 var mainCanvas;
@@ -47,6 +48,7 @@ var miniMap = null;
 var miniMapDirector = null;
 
 // State Variables
+var projectObject = null;
 var editorMode = true;
 var currentSelectedObject = null;
 var isDown = false;
@@ -57,29 +59,67 @@ window.onLoadCanvas = function(frame) {
 
     initEditor();
     initCanvas();
+
+    newProject();
 }
 
 window.setBackground = function(url) {
-    scnry.Controller.getCurrentScenery().setBackgroundImageUrl(url);
+    projectObject.getCurrentScenery().setBackgroundImageUrl(url);
 }
 
-window.saveProject = function(userID, sceneID){
-  var sceneryObject = {};
-  var objectsJson = obj.Controller.objectsToJson();
-
-  sceneryObject.bgUrl = background.getAttribute('src');
-  sceneryObject.objects = objectsJson;
-
-  saveJsontoServer(JSON.stringify(sceneryObject), userID, sceneID);
+window.newProject = function() {
+    projectObject = new Project();
+    var newScenery = new Scenery(background);
+    projectObject.addScenery(newScenery);
 }
 
-window.loadJson = function(json){
-  var sceneryObject = JSON.parse(json);
-  console.log(sceneryObject);
+window.saveProject = function(userID, sceneID) {
+    saveJsontoServer(projectObject.toJson(), userID, sceneID);
+}
 
-  loadObjectsFromJson(sceneryObject.objects);
+window.loadProject = function(projectJson) {
+    clearAllObject();
 
-  background.setAttribute('src', sceneryObject.bgUrl);
+    var loadedProject = new Project();
+    loadedProject.fromJson(projectJson);
+    for (var i in loadedProject.sceneryList) {
+        relateSceneryWithDomEl(loadedProject.sceneryList[i]);
+        for (var j in loadedProject.sceneryList[i].objectList) {
+            relateObjectWithDomEl(loadedProject.sceneryList[i].objectList[j]);
+        }
+    }
+    projectObject = loadedProject;
+}
+
+function relateSceneryWithDomEl(scenery) {
+    scenery.setBgEl(background);
+}
+
+function relateObjectWithDomEl(object) {
+    var newEl = obj.Controller.createElFromObj(mainFrame, object);
+    sceneEl.appendChild(newEl)
+}
+
+function clearAllObject(scenery) {
+    projectObject.getCurrentScenery().removeAllObject();
+}
+
+function saveJsontoServer(json, userID, sceneID) {
+    $.ajax({
+        url: '/project/save',
+        method: 'post',
+        data: {
+            user: userID,
+            json: json,
+            scene: sceneID
+        },
+        success: function(data) {
+            alert("Save success");
+        },
+        error: function(err) {
+            alert("Save fail." + err.toString());
+        }
+    });
 }
 
 function initEditor() {
@@ -122,26 +162,13 @@ function initEditor() {
     loadTextEl = document.getElementById('loadInput');
     saveBtnEl = document.getElementById('saveBtn');
     saveBtnEl.addEventListener('click', function(evt) {
-        var sceneriesJson = scnry.Controller.sceneriesToJson();
-        var objectsJson = obj.Controller.objectsToJson();
-
-        var saveObject = {
-            'sceneriesJson': sceneriesJson,
-            'objectsJson': objectsJson
-        }
-
-        loadTextEl.value = JSON.stringify(saveObject);
-        saveJsontoServer(JSON.stringify(saveObject));
+        var json = projectObject.toJson();
+        loadTextEl.value = json;
+        // saveJsontoServer(JSON.stringify(saveObject));
     });
     loadBtnEl = document.getElementById('loadBtn');
     loadBtnEl.addEventListener('click', function(evt) {
-        var json = JSON.parse(loadTextEl.value);
-        var sceneriesJson = json.sceneriesJson;
-        var objectsJson = json.objectsJson;
-
-        load(sceneriesJson, objectsJson);
-        // loadObjectsFromJson(sceneryObject.objects);
-        // background.setAttribute('src', sceneryObject.bgUrl);
+        loadProject(loadTextEl.value);
     });
 
     for (var i = 0; i < EVENT_LIST.length; ++i) {
@@ -193,7 +220,7 @@ function initCanvas() {
             var prevPos = null;
             var radius = 6;
 
-            var parentObject = obj.Controller.findByEl(this.el.parentEl);
+            var parentObject = projectObject.getCurrentScenery().findObjectByEl(this.el.parentEl);
 
             var originalScale = this.el.getAttribute('scale');
             var parentScale = this.el.parentEl.getAttribute('scale');
@@ -301,26 +328,6 @@ function initCanvas() {
             }
         }
     });
-
-    scenery = new scnry.Scenery(background);
-}
-
-function load(sceneriesJson, objectsJson) {
-    loadSceneriesFromJson(sceneriesJson);
-    loadObjectsFromJson(objectsJson);
-}
-
-function loadSceneriesFromJson(json) {
-    var sceneries = scnry.Controller.sceneriesFromJson(json);
-    sceneries[0].setBgEl(background);
-}
-
-function loadObjectsFromJson(json) {
-    var objects = obj.Controller.objectsFromJson(json);
-    for (var i = 0; i < objects.length; ++i) {
-        var el = obj.Controller.createElFromObj(mainFrame, objects[i]);
-        sceneEl.appendChild(el);
-    }
 }
 
 window.create = function(type) {
@@ -352,7 +359,7 @@ function createObject(type) {
 }
 
 function onObjectSelect() {
-    var selected = obj.Controller.findByEl(this);
+    var selected = projectObject.getCurrentScenery().findObjectByEl(this);
 
     if (editorMode && currentSelectedObject == selected) {
         return;
@@ -414,6 +421,7 @@ function newObject(type, shape, position, rotation, scale) {
     var tag = 'a-' + shape;
     var newEl = mainFrame.document.createElement(tag);
     var newObj = new obj.Objct(newEl);
+    projectObject.getCurrentScenery().addObject(newObj);
 
     newObj.type = type;
     newObj.shape = shape;
@@ -497,32 +505,6 @@ function variableEvent(arg) {
     console.log(str[0] + "=" + variableEl[str[0]]);
 }
 
-function loadObjectsFromJson(json) {
-    var objects = obj.Controller.objectsFromJson(json);
-    for (var i = 0; i < objects.length; ++i) {
-        var el = obj.Controller.createElFromObj(mainFrame, objects[i]);
-        sceneEl.appendChild(el);
-    }
-}
-
-function saveJsontoServer(json, userID, sceneID){
-  $.ajax({
-    url : '/project/save',
-    method : 'post',
-    data : {
-        user : userID,
-        json : json,
-        scene : sceneID
-    },
-    success : function (data) {
-      alert("Save success");
-    },
-    error : function (err) {
-      alert("Save fail." + err.toString());
-    }
-  });
-}
-
 //minimap
 window.setMiniMap = function() {
     if (miniMap == null) {
@@ -547,10 +529,10 @@ window.setMiniMap = function() {
         miniMap.appendChild(miniMapDirector);
         cameraEl.appendChild(miniMap);
 
-        var objects = obj.Controller.getObjects();
+        var objectList = obj.Controller.getObjects();
 
         for (var i = 0; i < obj.Controller.getNum(); i++) {
-            setObjectOnMiniMap(objects[i].transform.position);
+            setObjectOnMiniMap(objectList[i].transform.position);
         }
     } else {
         console.log('already has minimap');

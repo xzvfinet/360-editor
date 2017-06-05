@@ -66,7 +66,7 @@ window.setBackground = function(url) {
 
 window.saveProject = function(userID, sceneID){
   var sceneryObject = {};
-  var objectsJson = obj.Controller.objectsToJson();
+  var objectsJson = obj.Controller.toJson();
 
   sceneryObject.bgUrl = background.getAttribute('src');
   sceneryObject.objects = objectsJson;
@@ -123,8 +123,8 @@ function initEditor() {
     loadTextEl = document.getElementById('loadInput');
     saveBtnEl = document.getElementById('saveBtn');
     saveBtnEl.addEventListener('click', function(evt) {
-        var sceneriesJson = scnry.Controller.sceneriesToJson();
-        var objectsJson = obj.Controller.objectsToJson();
+        var sceneriesJson = scnry.Controller.toJson();
+        var objectsJson = obj.Controller.toJson();
 
         var saveObject = {
             'sceneriesJson': sceneriesJson,
@@ -312,12 +312,12 @@ function load(sceneriesJson, objectsJson) {
 }
 
 function loadSceneriesFromJson(json) {
-    var sceneries = scnry.Controller.sceneriesFromJson(json);
+    var sceneries = scnry.Controller.fromJson(json);
     sceneries[0].setBgEl(background);
 }
 
 function loadObjectsFromJson(json) {
-    var objects = obj.Controller.objectsFromJson(json);
+    var objects = obj.Controller.fromJson(json);
     for (var i = 0; i < objects.length; ++i) {
         var el = obj.Controller.createElFromObj(mainFrame, objects[i]);
         sceneEl.appendChild(el);
@@ -499,7 +499,7 @@ function variableEvent(arg) {
 }
 
 function loadObjectsFromJson(json) {
-    var objects = obj.Controller.objectsFromJson(json);
+    var objects = obj.Controller.fromJson(json);
     for (var i = 0; i < objects.length; ++i) {
         var el = obj.Controller.createElFromObj(mainFrame, objects[i]);
         sceneEl.appendChild(el);
@@ -508,7 +508,7 @@ function loadObjectsFromJson(json) {
 
 function saveJsontoServer(json, userID, sceneID){
   $.ajax({
-    url : 'http://localhost:8000/project/save',
+    url : '/project/save',
     method : 'post',
     data : {
         user : userID,
@@ -688,7 +688,7 @@ Controller.prototype.createObject = function(el) {
     return new Objct(el);
 }
 
-Controller.prototype.objectsFromJson = function(json) {
+Controller.prototype.fromJson = function(json) {
     var loadedObjects;
     loadedObjects = JSON.parse(json);
     var loadedObjectsWithPrototype = [];
@@ -699,7 +699,7 @@ Controller.prototype.objectsFromJson = function(json) {
     return loadedObjectsWithPrototype;
 }
 
-Controller.prototype.objectsToJson = function() {
+Controller.prototype.toJson = function() {
     var saveObjects = [];
     for (var i = 0; i < objects.length; ++i) {
         saveObjects.push(objects[i].getSaveForm());
@@ -817,7 +817,7 @@ Controller.prototype.getCurrentScenery = function() {
     return sceneries[currentIndex];
 }
 
-Controller.prototype.sceneriesToJson = function() {
+Controller.prototype.toJson = function() {
     var saveSceneries = [];
     for (var i = 0; i < sceneries.length; ++i) {
         saveSceneries.push(sceneries[i].getSaveForm());
@@ -826,7 +826,7 @@ Controller.prototype.sceneriesToJson = function() {
     return json;
 }
 
-Controller.prototype.sceneriesFromJson = function(json) {
+Controller.prototype.fromJson = function(json) {
     var loadedSceneries;
     loadedSceneries = JSON.parse(json);
     var loadedSceneriesWithPrototype = [];
