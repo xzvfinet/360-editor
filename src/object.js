@@ -1,23 +1,21 @@
-var objects = [];
-
 function Objct(el, obj) {
-    this.el = el;
-    this.type = "";
-    this.shape = "";
-    this.transform = {};
-    this.material = {};
+    if (obj) {
+        // copy all properties of obj to this
+        for (var prop in obj) {
+            this[prop] = obj[prop];
+        }
+    } else {
+        this.el = el;
+        this.type = "";
+        this.shape = "";
+        this.transform = {};
+        this.material = {};
 
-    this.clickListener = "";
-    this.eventList = [];
+        this.clickListener = "";
+        this.eventList = [];
 
-    this.lookat = "";
-
-    // copy all properties of obj to this
-    for (var prop in obj) {
-        this[prop] = obj[prop];
+        this.lookat = "";
     }
-
-    objects.push(this);
 }
 
 Objct.prototype.getShape = function() {
@@ -79,11 +77,12 @@ Objct.prototype.toObj = function() {
 }
 
 Objct.prototype.getSaveForm = function() {
-    var tmp = this.el;
-    this.el = null;
-    var copyObj = JSON.parse(JSON.stringify(this));
-    this.el = tmp;
-    return copyObj;
+    var saveForm = {};
+    for (var prop in this) {
+        saveForm[prop] = this[prop];
+    }
+    saveForm.el = null;
+    return saveForm;
 }
 
 Objct.prototype.setLookAt = function(target) {
@@ -92,9 +91,27 @@ Objct.prototype.setLookAt = function(target) {
     this.lookat = target;
 }
 
+Objct.prototype.addEvent = function(eventType, eventArgs) {
+    this.eventList.push({ 'type': eventType, 'arg': eventArgs });
+}
+
+Objct.prototype.toJson = function() {
+    return JSON.stringify(this.getSaveForm());
+}
+
+Objct.prototype.fromJson = function(json) {
+    var object = JSON.parse(json);
+    Objct.call(this, null, object);
+    return this;
+}
+
 function Controller() {}
 
-Controller.prototype.objectsFromJson = function(json) {
+Controller.prototype.createObject = function(el) {
+    return new Objct(el);
+}
+
+Controller.prototype.fromJson = function(json) {
     var loadedObjects;
     loadedObjects = JSON.parse(json);
     var loadedObjectsWithPrototype = [];
@@ -105,10 +122,10 @@ Controller.prototype.objectsFromJson = function(json) {
     return loadedObjectsWithPrototype;
 }
 
-Controller.prototype.objectsToJson = function() {
+Controller.prototype.toJson = function() {
     var saveObjects = [];
-    for (var i = 0; i < objects.length; ++i) {
-        saveObjects.push(objects[i].getSaveForm());
+    for (var i = 0; i < objectList.length; ++i) {
+        saveObjects.push(objectList[i].getSaveForm());
     }
     var json = JSON.stringify(saveObjects);
     return json;
@@ -128,24 +145,11 @@ Controller.prototype.createElFromObj = function(frame, obj) {
 }
 
 Controller.prototype.getNum = function() {
-    return objects.length;
+    return objectList.length;
 }
 
 Controller.prototype.getObjects = function() {
-    return objects;
-}
-
-Controller.prototype.remove = function(obj) {
-    if (obj.el) {
-        obj.el.parentElement.removeChild(obj.el);
-    }
-}
-
-Controller.prototype.findByEl = function(el) {
-    var objs = objects.filter(function(obj) {
-        return obj.el == el;
-    });
-    return objs[0];
+    return objectList;
 }
 
 module.exports = {

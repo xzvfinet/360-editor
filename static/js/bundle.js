@@ -18,6 +18,7 @@ var BASE_WIDTH = 300;
 var util = require('./util.js');
 var nodeUtil = require('util');
 var obj = require('./object.js');
+var scnry = require('./scenery.js');
 
 // Editor Dom Elements
 var mainCanvas;
@@ -59,21 +60,27 @@ window.onLoadCanvas = function(frame) {
     initCanvas();
 }
 
-window.create = function(type) {
-    if (PRIMITIVE_DEFINITIONS.includes(type)) {
-        createPrimitive(type);
-    } else if (OBJECT_DEFINITIONS.includes(type)) {
-        createObject(type);
-    }
+window.setBackground = function(url) {
+    scnry.Controller.getCurrentScenery().setBackgroundImageUrl(url);
 }
 
-window.createImage = function(type, src) {
-    newObject('primitive', type, src);
+window.saveProject = function(userID, sceneID){
+  var sceneryObject = {};
+  var objectsJson = obj.Controller.toJson();
+
+  sceneryObject.bgUrl = background.getAttribute('src');
+  sceneryObject.objects = objectsJson;
+
+  saveJsontoServer(JSON.stringify(sceneryObject), userID, sceneID);
 }
 
-window.setBackground = function(src) {
-    //background.setMaterial({'src' : src});
-    background.setAttribute('material', 'src', src);
+window.loadJson = function(json){
+  var sceneryObject = JSON.parse(json);
+  console.log(sceneryObject);
+
+  loadObjectsFromJson(sceneryObject.objects);
+
+  background.setAttribute('src', sceneryObject.bgUrl);
 }
 
 function initEditor() {
@@ -90,6 +97,7 @@ function initEditor() {
             console.log('Not selected');
         else {
             obj.Controller.remove(currentSelectedObject);
+            mover = null;
         }
     });
     editorToggle = $('#toggle-event');
@@ -102,28 +110,39 @@ function initEditor() {
             menuElList[i].style.visibility = (editorMode) ? 'visible' : 'hidden';
         }
 
+        if (!editorMode && mover) {
+            mover.parentEl.removeChild(mover);
+            mover = null;
+        }
+
         mainCanvas.style.width = (editorMode) ? '' : '100%';
+        onObjectUnselect();
 
     });
     eventArgEl = document.getElementById('eventArg');
     loadTextEl = document.getElementById('loadInput');
     saveBtnEl = document.getElementById('saveBtn');
     saveBtnEl.addEventListener('click', function(evt) {
-        var sceneryObject = {};
-        var objectsJson = obj.Controller.objectsToJson();
+        var sceneriesJson = scnry.Controller.toJson();
+        var objectsJson = obj.Controller.toJson();
 
-        sceneryObject.bgUrl = background.getAttribute('src');
-        sceneryObject.objects = objectsJson;
+        var saveObject = {
+            'sceneriesJson': sceneriesJson,
+            'objectsJson': objectsJson
+        }
 
-        loadTextEl.value = JSON.stringify(sceneryObject);
+        loadTextEl.value = JSON.stringify(saveObject);
+        saveJsontoServer(JSON.stringify(saveObject));
     });
     loadBtnEl = document.getElementById('loadBtn');
     loadBtnEl.addEventListener('click', function(evt) {
-        var sceneryObject = JSON.parse(loadTextEl.value);
+        var json = JSON.parse(loadTextEl.value);
+        var sceneriesJson = json.sceneriesJson;
+        var objectsJson = json.objectsJson;
 
-        loadObjectsFromJson(sceneryObject.objects);
-
-        background.setAttribute('src', sceneryObject.bgUrl);
+        load(sceneriesJson, objectsJson);
+        // loadObjectsFromJson(sceneryObject.objects);
+        // background.setAttribute('src', sceneryObject.bgUrl);
     });
 
     for (var i = 0; i < EVENT_LIST.length; ++i) {
@@ -283,11 +302,38 @@ function initCanvas() {
             }
         }
     });
+
+    scenery = new scnry.Scenery(background);
 }
 
-function loadRoom(data) {
-    var bgSrc = data.bgSrc;
-    var objects = data.objects;
+function load(sceneriesJson, objectsJson) {
+    loadSceneriesFromJson(sceneriesJson);
+    loadObjectsFromJson(objectsJson);
+}
+
+function loadSceneriesFromJson(json) {
+    var sceneries = scnry.Controller.fromJson(json);
+    sceneries[0].setBgEl(background);
+}
+
+function loadObjectsFromJson(json) {
+    var objects = obj.Controller.fromJson(json);
+    for (var i = 0; i < objects.length; ++i) {
+        var el = obj.Controller.createElFromObj(mainFrame, objects[i]);
+        sceneEl.appendChild(el);
+    }
+}
+
+window.create = function(type) {
+    if (PRIMITIVE_DEFINITIONS.includes(type)) {
+        createPrimitive(type);
+    } else if (OBJECT_DEFINITIONS.includes(type)) {
+        createObject(type);
+    }
+}
+
+window.createImage = function(type, src) {
+    newObject('primitive', type, src);
 }
 
 function createPrimitive(shape) {
@@ -306,35 +352,28 @@ function createObject(type) {
     newObject(type, 'plane');
 }
 
-function makeArrayAsString() {
-    var result = "";
-    for (var i = 0; i < arguments.length - 1; ++i) {
-        result += arguments[i] + ", ";
-    }
-    result += arguments[arguments.length - 1];
-    return result;
-}
-
 function onObjectSelect() {
     var selected = obj.Controller.findByEl(this);
-    if (currentSelectedObject == selected) {
+
+    if (editorMode && currentSelectedObject == selected) {
         return;
     }
+
     currentSelectedObject = selected;
 
     if (editorMode) {
         shapeEl.innerHTML = currentSelectedObject.getShape();
         var position = currentSelectedObject.transform.position;
-        positionEl.innerHTML = makeArrayAsString(
+        positionEl.innerHTML = util.makeArrayAsString(
             util.floorTwo(position.x),
             util.floorTwo(position.y),
             util.floorTwo(position.z));
         var rotation = currentSelectedObject.transform.rotation;
-        rotationEl.innerHTML = makeArrayAsString(
+        rotationEl.innerHTML = util.makeArrayAsString(
             util.floorTwo(rotation.x),
             util.floorTwo(rotation.y));
         scale = currentSelectedObject.transform.scale;
-        scaleEl.innerHTML = makeArrayAsString(scale.x, scale.y, scale.z);
+        scaleEl.innerHTML = util.makeArrayAsString(scale.x, scale.y, scale.z);
 
         // append mover element
         mover = newMover();
@@ -459,17 +498,33 @@ function variableEvent(arg) {
     console.log(str[0] + "=" + variableEl[str[0]]);
 }
 
-
 function loadObjectsFromJson(json) {
-    var objects = obj.Controller.objectsFromJson(json);
+    var objects = obj.Controller.fromJson(json);
     for (var i = 0; i < objects.length; ++i) {
         var el = obj.Controller.createElFromObj(mainFrame, objects[i]);
         sceneEl.appendChild(el);
     }
 }
 
-//minimap
+function saveJsontoServer(json, userID, sceneID){
+  $.ajax({
+    url : '/project/save',
+    method : 'post',
+    data : {
+        user : userID,
+        json : json,
+        scene : sceneID
+    },
+    success : function (data) {
+      alert("Save success");
+    },
+    error : function (err) {
+      alert("Save fail." + err.toString());
+    }
+  });
+}
 
+//minimap
 window.setMiniMap = function() {
     if (miniMap == null) {
         miniMap = mainFrame.document.createElement('a-image');
@@ -481,7 +536,6 @@ window.setMiniMap = function() {
         miniMapDirector.setAttribute('id', 'minimap-director');
         miniMapDirector.setAttribute('material', 'src', '/static/img/Minimap_Director.png');
         miniMapDirector.setAttribute('minimap-direction', "")
-            //var newObj = new obj.Objct(miniMap);
 
         rotation = { x: 0, y: 0, z: cameraEl.getAttribute('rotation').y }
         miniMapDirector.setAttribute('rotation', rotation);
@@ -509,7 +563,6 @@ window.setObjectOnMiniMap = function(position) {
         var x = position.x / 10 + 0.8;
         var y = position.z / -10 + 0.8;
         var newEl = mainFrame.document.createElement('a-plane');
-        //var newObj = new obj.Objct(newEl);
         newEl.setAttribute('realPos', position.x + " " + position.y + " " + position.z);
 
         position = { x: x, y: y, z: 1 };
@@ -528,24 +581,26 @@ window.setObjectOnMiniMap = function(position) {
     }
 }
 
-},{"./object.js":2,"./util.js":3,"util":7}],2:[function(require,module,exports){
+},{"./object.js":2,"./scenery.js":3,"./util.js":4,"util":8}],2:[function(require,module,exports){
 var objects = [];
 
 function Objct(el, obj) {
-    this.el = el;
-    this.type = "";
-    this.shape = "";
-    this.transform = {};
-    this.material = {};
+    if (obj) {
+        // copy all properties of obj to this
+        for (var prop in obj) {
+            this[prop] = obj[prop];
+        }
+    } else {
+        this.el = el;
+        this.type = "";
+        this.shape = "";
+        this.transform = {};
+        this.material = {};
 
-    this.clickListener = "";
-    this.eventList = [];
+        this.clickListener = "";
+        this.eventList = [];
 
-    this.lookat = "";
-
-    // copy all properties of obj to this
-    for (var prop in obj) {
-        this[prop] = obj[prop];
+        this.lookat = "";
     }
 
     objects.push(this);
@@ -623,9 +678,17 @@ Objct.prototype.setLookAt = function(target) {
     this.lookat = target;
 }
 
+Objct.prototype.addEvent = function(eventType, eventArgs) {
+    this.eventList.push({ 'type': eventType, 'arg': eventArgs });
+}
+
 function Controller() {}
 
-Controller.prototype.objectsFromJson = function(json) {
+Controller.prototype.createObject = function(el) {
+    return new Objct(el);
+}
+
+Controller.prototype.fromJson = function(json) {
     var loadedObjects;
     loadedObjects = JSON.parse(json);
     var loadedObjectsWithPrototype = [];
@@ -636,7 +699,7 @@ Controller.prototype.objectsFromJson = function(json) {
     return loadedObjectsWithPrototype;
 }
 
-Controller.prototype.objectsToJson = function() {
+Controller.prototype.toJson = function() {
     var saveObjects = [];
     for (var i = 0; i < objects.length; ++i) {
         saveObjects.push(objects[i].getSaveForm());
@@ -670,6 +733,12 @@ Controller.prototype.remove = function(obj) {
     if (obj.el) {
         obj.el.parentElement.removeChild(obj.el);
     }
+
+    // remove object from list
+    var index = objects.indexOf(obj);
+    if (index > -1) {
+        objects.splice(index, 1);
+    }
 }
 
 Controller.prototype.findByEl = function(el) {
@@ -685,6 +754,95 @@ module.exports = {
 };
 
 },{}],3:[function(require,module,exports){
+var currentIndex = 0;
+var sceneries = [];
+
+function Scenery(bgEl, scenery) {
+    if (scenery) {
+        // copy all properties of scenery to this
+        for (var prop in scenery) {
+            this[prop] = scenery[prop];
+        }
+    } else {
+        this.bgEl = bgEl;
+        this.bgUrl = this.bgEl.getAttribute('src');
+    }
+
+    sceneries.push(this);
+}
+
+Scenery.prototype.setBackgroundImageUrl = function(url) {
+    this.bgUrl = url;
+    this.bgEl.setAttribute('src', this.bgUrl);
+}
+
+Scenery.prototype.setBgEl = function(bgEl) {
+    this.bgEl = bgEl;
+    bgEl.setAttribute('src', this.bgUrl);
+}
+
+Scenery.prototype.getSaveForm = function() {
+    var tmp = this.bgEl;
+    this.bgEl = null;
+    var copyScenery = JSON.parse(JSON.stringify(this));
+    this.bgEl = tmp;
+    return copyScenery;
+}
+
+function Controller() {}
+
+Controller.prototype.addScenery = function(scenery) {
+    sceneries.push(scenery);
+}
+
+Controller.prototype.changeScenery = function(scenery) {
+    var bgEl = sceneries[currentIndex].bgEl;
+    sceneries[currentIndex].bgEl = null;
+
+    if (typeof scenery == 'object') {
+        for (var i = sceneries.length - 1; i >= 0; i--) {
+            if (sceneries[i] == scenery) {
+                currentIndex = i;
+                break;
+            }
+        }
+    } else if (typeof scenery == 'number') {
+        currentIndex = number;
+    }
+
+    sceneries[currentIndex].bgEl = bgEl;
+}
+
+Controller.prototype.getCurrentScenery = function() {
+    return sceneries[currentIndex];
+}
+
+Controller.prototype.toJson = function() {
+    var saveSceneries = [];
+    for (var i = 0; i < sceneries.length; ++i) {
+        saveSceneries.push(sceneries[i].getSaveForm());
+    }
+    var json = JSON.stringify(saveSceneries);
+    return json;
+}
+
+Controller.prototype.fromJson = function(json) {
+    var loadedSceneries;
+    loadedSceneries = JSON.parse(json);
+    var loadedSceneriesWithPrototype = [];
+    for (var i = 0; i < loadedSceneries.length; ++i) {
+        var newScenery = new Scenery(null, loadedSceneries[i]);
+        loadedSceneriesWithPrototype.push(newScenery);
+    }
+    return loadedSceneriesWithPrototype;
+}
+
+module.exports = {
+    Scenery: Scenery,
+    Controller: new Controller()
+};
+
+},{}],4:[function(require,module,exports){
 function getRandomIntRange(min, max) {
     return Math.floor(Math.random() * (max - min) + min);
 }
@@ -736,7 +894,16 @@ module.exports.getImageSize = function(url, callback) {
     img.src = url;
 }
 
-},{}],4:[function(require,module,exports){
+module.exports.makeArrayAsString = function() {
+    var result = "";
+    for (var i = 0; i < arguments.length - 1; ++i) {
+        result += arguments[i] + ", ";
+    }
+    result += arguments[arguments.length - 1];
+    return result;
+}
+
+},{}],5:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -918,7 +1085,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -943,14 +1110,14 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -1540,4 +1707,4 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":6,"_process":4,"inherits":5}]},{},[1]);
+},{"./support/isBuffer":7,"_process":5,"inherits":6}]},{},[1]);
