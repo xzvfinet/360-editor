@@ -330,6 +330,11 @@ function initCanvas() {
     });
 }
 
+window.createScene = function(){
+    var newScenery = new Scenery();
+    projectObject.addScenery(newScenery);
+}
+
 window.create = function(type) {
     if (PRIMITIVE_DEFINITIONS.includes(type)) {
         createPrimitive(type);
