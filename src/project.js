@@ -44,6 +44,9 @@ Project.prototype.changeScenery = function(scenery) {
 Project.prototype.getCurrentScenery = function() {
     return this.sceneryList[currentIndex];
 }
+Project.prototype.getCurrentIndex = function() {
+    return currentIndex;
+}
 Project.prototype.getSceneryListLength = function(){
     return this.sceneryList.length;
 }

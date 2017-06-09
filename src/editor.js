@@ -98,14 +98,26 @@ window.loadProject = function(projectJson) {
 
 function setSceneNumber() {
     sceneNum = $('#scene-list')[0];
-    
+    sceneDropdown = $('#scene-dropdown')[0];
+    //remove all child
     while ( sceneNum.hasChildNodes() ) { sceneNum.removeChild( sceneNum.firstChild ); } 
+    while ( sceneDropdown.hasChildNodes() ) { sceneDropdown.removeChild( sceneDropdown.firstChild ); } 
+    
     for (var i = 0; i < projectObject.getSceneryListLength(); i++) {
-        var a = document.createElement("a");
+        if(projectObject.getCurrentIndex() == i){
+            var a = document.createElement("b");
+        }else{
+            var a = document.createElement("a");
+        }
         a.innerHTML = (i + 1);
         if (i != projectObject.getSceneryListLength() - 1)
             a.innerHTML += "-";
         sceneNum.appendChild(a);
+
+        var op = document.createElement("option");
+        op.setAttribute("value",i);
+        op.innerHTML = "페이지 "+(i+1);
+        sceneDropdown.appendChild(op);
     }
 }
 
