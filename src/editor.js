@@ -71,6 +71,8 @@ window.newProject = function() {
     projectObject = new Project();
     var newScenery = new Scenery(background);
     projectObject.addScenery(newScenery);
+
+    
 }
 
 window.saveProject = function(userID, sceneID) {
@@ -89,6 +91,22 @@ window.loadProject = function(projectJson) {
         }
     }
     projectObject = loadedProject;
+
+    //scene number
+    setSceneNumber();
+}
+
+function setSceneNumber() {
+    sceneNum = $('#scene-list')[0];
+    
+    while ( sceneNum.hasChildNodes() ) { sceneNum.removeChild( sceneNum.firstChild ); } 
+    for (var i = 0; i < projectObject.getSceneryListLength(); i++) {
+        var a = document.createElement("a");
+        a.innerHTML = (i + 1);
+        if (i != projectObject.getSceneryListLength() - 1)
+            a.innerHTML += "-";
+        sceneNum.appendChild(a);
+    }
 }
 
 function relateSceneryWithDomEl(scenery) {
@@ -331,8 +349,9 @@ function initCanvas() {
 }
 
 window.createScene = function(){
-    var newScenery = new Scenery();
+    var newScenery = new Scenery(background);
     projectObject.addScenery(newScenery);
+    setSceneNumber();
 }
 
 window.create = function(type) {

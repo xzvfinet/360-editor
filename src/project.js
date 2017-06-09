@@ -44,7 +44,9 @@ Project.prototype.changeScenery = function(scenery) {
 Project.prototype.getCurrentScenery = function() {
     return this.sceneryList[currentIndex];
 }
-
+Project.prototype.getSceneryListLength = function(){
+    return this.sceneryList.length;
+}
 Project.prototype.toJson = function() {
     var saveForm = { title: this.title };
     saveForm.sceneryList = [];
