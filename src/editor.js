@@ -71,8 +71,6 @@ window.newProject = function() {
     projectObject = new Project();
     var newScenery = new Scenery(background);
     projectObject.addScenery(newScenery);
-
-    
 }
 
 window.saveProject = function(userID, sceneID) {
@@ -91,17 +89,24 @@ window.loadProject = function(projectJson) {
         }
     }
     projectObject = loadedProject;
-
     //scene number
     setSceneNumber();
+    setSceneDropDown();
 }
+
+function loadAllObjectOfScene(sceneNum) {
+    //clearAllObject();
+    for (var j in projectObject.sceneryList[sceneNum].objectList) {
+        relateObjectWithDomEl(projectObject.sceneryList[sceneNum].objectList[j]);
+    }
+    projectObject.changeScenery(projectObject.sceneryList[sceneNum]);
+    setSceneNumber();
+} 
 
 function setSceneNumber() {
     sceneNum = $('#scene-list')[0];
-    sceneDropdown = $('#scene-dropdown')[0];
     //remove all child
     while ( sceneNum.hasChildNodes() ) { sceneNum.removeChild( sceneNum.firstChild ); } 
-    while ( sceneDropdown.hasChildNodes() ) { sceneDropdown.removeChild( sceneDropdown.firstChild ); } 
     
     for (var i = 0; i < projectObject.getSceneryListLength(); i++) {
         if(projectObject.getCurrentIndex() == i){
@@ -113,7 +118,17 @@ function setSceneNumber() {
         if (i != projectObject.getSceneryListLength() - 1)
             a.innerHTML += "-";
         sceneNum.appendChild(a);
+    }
 
+     $('#scene-dropdown').change(function(){
+        loadAllObjectOfScene($(this).val());
+        //console.log($(this).val());
+    });
+}
+function setSceneDropDown(){
+    sceneDropdown = $('#scene-dropdown')[0];
+    while ( sceneDropdown.hasChildNodes() ) { sceneDropdown.removeChild( sceneDropdown.firstChild ); } 
+    for (var i = 0; i < projectObject.getSceneryListLength(); i++) {
         var op = document.createElement("option");
         op.setAttribute("value",i);
         op.innerHTML = "페이지 "+(i+1);
@@ -364,6 +379,7 @@ window.createScene = function(){
     var newScenery = new Scenery(background);
     projectObject.addScenery(newScenery);
     setSceneNumber();
+    setSceneDropDown();
 }
 
 window.create = function(type) {
