@@ -84,9 +84,9 @@ window.loadProject = function(projectJson) {
     loadedProject.fromJson(projectJson);
     for (var i in loadedProject.sceneryList) {
         relateSceneryWithDomEl(loadedProject.sceneryList[i]);
-        for (var j in loadedProject.sceneryList[i].objectList) {
-            relateObjectWithDomEl(loadedProject.sceneryList[i].objectList[j]);
-        }
+    }
+    for (var j in loadedProject.sceneryList[0].objectList) {
+        relateObjectWithDomEl(loadedProject.sceneryList[0].objectList[j]);
     }
     projectObject = loadedProject;
     //scene number
