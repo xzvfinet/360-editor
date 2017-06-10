@@ -526,9 +526,18 @@ function newObject(type, shape, position, rotation, scale) {
 }
 
 function teleportEvent(arg) {
+    eraseCanvas();
+    mainFrame.document.querySelector('#background').emit('fade-out');
+    teleportAfterFade(arg);
+    /*var imageUrl = BACKGROUND_PREFIX + arg;
+    background.setAttribute('src', imageUrl);*/
+}
+function teleportAfterFade(arg){
     console.log('teleport! to:' + arg);
-    var imageUrl = BACKGROUND_PREFIX + arg;
-    background.setAttribute('src', imageUrl);
+    projectObject.changeScenery(projectObject.sceneryList[arg-1]);
+    loadAllObjectOfScene(arg-1);
+
+    mainFrame.document.querySelector('#background').emit('fade-in');
 }
 
 function linkEvent(arg) {
