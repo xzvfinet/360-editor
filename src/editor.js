@@ -518,6 +518,7 @@ function newObject(type, shape, position, rotation, scale) {
 
     // Make object face at camera origin by default.
     newObj.setLookAt('#camera');
+    newEl.setAttribute("class","object");
 
     sceneEl.appendChild(newEl);
 

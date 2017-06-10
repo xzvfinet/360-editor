@@ -15,6 +15,7 @@ function Scenery(bgEl, scenery) {
         this.bgUrl = "";
         this.objectList = [];
     }
+    this.sceneryType = "";
 }
 
 Scenery.prototype.setBackgroundImageUrl = function(url) {
@@ -70,6 +71,7 @@ Scenery.prototype.removeObject = function(obj) {
 Scenery.prototype.getSaveForm = function() {
     var saveForm = {};
     saveForm.bgUrl = this.bgUrl;
+    saveForm.sceneryType = this.sceneryType;
     saveForm.objectList = [];
     for (var i in this.objectList) {
         var object = this.objectList[i];
