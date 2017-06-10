@@ -140,16 +140,13 @@ Controller.prototype.createElFromObj = function(frame, obj) {
     obj.setMaterial(obj.material);
     obj.setClickListener(obj.clickListener);
     obj.setLookAt(obj.lookat);
+    newEl.setAttribute("class","object");
 
     return newEl;
 }
 
 Controller.prototype.getNum = function() {
     return objectList.length;
-}
-
-Controller.prototype.getObjects = function() {
-    return objectList;
 }
 
 module.exports = {

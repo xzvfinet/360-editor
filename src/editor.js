@@ -95,7 +95,7 @@ window.loadProject = function(projectJson) {
 }
 
 function loadAllObjectOfScene(sceneNum) {
-    //clearAllObject();
+    eraseCanvas();
     for (var j in projectObject.sceneryList[sceneNum].objectList) {
         relateObjectWithDomEl(projectObject.sceneryList[sceneNum].objectList[j]);
     }
@@ -119,12 +119,8 @@ function setSceneNumber() {
             a.innerHTML += "-";
         sceneNum.appendChild(a);
     }
-
-     $('#scene-dropdown').change(function(){
-        loadAllObjectOfScene($(this).val());
-        //console.log($(this).val());
-    });
 }
+
 function setSceneDropDown(){
     sceneDropdown = $('#scene-dropdown')[0];
     while ( sceneDropdown.hasChildNodes() ) { sceneDropdown.removeChild( sceneDropdown.firstChild ); } 
@@ -147,6 +143,14 @@ function relateObjectWithDomEl(object) {
 
 function clearAllObject(scenery) {
     projectObject.getCurrentScenery().removeAllObject();
+}
+
+function eraseCanvas(){
+    var objects = mainFrame.document.querySelectorAll(".object");
+    console.log(objects);
+    for(var i = 0; i< objects.length;i++){
+        objects[i].parentNode.removeChild(objects[i]);
+    }
 }
 
 function saveJsontoServer(json, userID, sceneID) {
@@ -238,7 +242,11 @@ function initEditor() {
         return false;
     });
 
-
+    $('#scene-dropdown').change(function(){
+        loadAllObjectOfScene($(this).val());
+        //console.log(projectObject.getCurrentIndex());
+        //console.log($(this).val());
+    });
     imageUrlInputEl = document.getElementById('img-url');
 }
 
@@ -378,8 +386,18 @@ function initCanvas() {
 window.createScene = function(){
     var newScenery = new Scenery(background);
     projectObject.addScenery(newScenery);
+   
+   console.log(projectObject.sceneryList);
+    var op = document.createElement("option");
+    var length = projectObject.getSceneryListLength();
+    op.setAttribute("value",length-1);
+    op.innerHTML = "페이지 "+(length);
+    op.setAttribute("selected","");
+    $('#scene-dropdown')[0].appendChild(op);
+
+    projectObject.changeScenery(projectObject.sceneryList[length-1]);
+    eraseCanvas();
     setSceneNumber();
-    setSceneDropDown();
 }
 
 window.create = function(type) {
