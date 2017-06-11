@@ -537,7 +537,7 @@ function teleportEvent(arg) {
     setTimeout(function(){ 
         eraseCanvas();
         console.log('teleport! to:' + arg);
-        projectObject.changeScenery(projectObject.sceneryList[arg-1]);
+        //projectObject.changeScenery(projectObject.sceneryList[arg-1]);
         loadAllObjectOfScene(arg-1);
         fadeInOutAll('fade-in');
     }, 2000);
