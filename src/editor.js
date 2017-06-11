@@ -518,26 +518,36 @@ function newObject(type, shape, position, rotation, scale) {
 
     // Make object face at camera origin by default.
     newObj.setLookAt('#camera');
+    newObj.setFadeInOutAni(mainFrame);
     newEl.setAttribute("class","object");
 
     sceneEl.appendChild(newEl);
 
     setObjectOnMiniMap(position);
 }
-
+function fadeInOutAll(fade) {
+    var objects = mainFrame.document.querySelectorAll(".object");
+    mainFrame.document.querySelector('#background').emit(fade);
+    for (var i = 0; i < objects.length; i++) {
+        objects[i].emit(fade);
+    }
+}
 function teleportEvent(arg) {
-    eraseCanvas();
-    mainFrame.document.querySelector('#background').emit('fade-out');
-    teleportAfterFade(arg);
+    fadeInOutAll('fade-out');
+    setTimeout(function(){ 
+        eraseCanvas();
+        console.log('teleport! to:' + arg);
+        projectObject.changeScenery(projectObject.sceneryList[arg-1]);
+        loadAllObjectOfScene(arg-1);
+        fadeInOutAll('fade-in');
+    }, 2000);
+   
+    
     /*var imageUrl = BACKGROUND_PREFIX + arg;
     background.setAttribute('src', imageUrl);*/
 }
 function teleportAfterFade(arg){
-    console.log('teleport! to:' + arg);
-    projectObject.changeScenery(projectObject.sceneryList[arg-1]);
-    loadAllObjectOfScene(arg-1);
-
-    mainFrame.document.querySelector('#background').emit('fade-in');
+    
 }
 
 function linkEvent(arg) {
