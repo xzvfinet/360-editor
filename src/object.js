@@ -67,6 +67,9 @@ Objct.prototype.setFadeInOutAni = function(frame){
     fadeIn.setAttribute("begin","fade-in");
     fadeOut.setAttribute("begin","fade-out");
 
+    fadeIn.setAttribute("from","black");
+    fadeOut.setAttribute("from","white");
+
     fadeIn.setAttribute("to","white");
     fadeOut.setAttribute("to","black");
 
