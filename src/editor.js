@@ -232,7 +232,7 @@ function initEditor() {
     $(".dropdown-menu").on("click", "li", function(event) {
         if (currentSelectedObject != null) {
             var eventName = this.children[0].innerHTML;
-            currentSelectedObject.eventList = [];
+            //currentSelectedObject.eventList = [];
             currentSelectedObject.eventList.push({ 'type': eventName, 'arg': eventArgEl.value });
             // currentSelectedObject.eventList.push([eventName, eventArgEl.value]);
         }
@@ -456,6 +456,7 @@ function onObjectSelect() {
         this.appendChild(mover);
     } else {
         // Execute events assigned to object.
+        console.log(currentSelectedObject.eventList.length);
         for (var i = 0; i < currentSelectedObject.eventList.length; ++i) {
             var event = currentSelectedObject.eventList[i];
             var eventType = event['type'];
@@ -514,7 +515,7 @@ function newObject(type, shape, position, rotation, scale) {
     newObj.setClickListener(OBJECT_LISTENER);
 
     newObj.eventList = [];
-    newObj.eventList.push({ 'type': type, 'arg': 'bg1.jpg' });
+    //newObj.eventList.push({ 'type': type, 'arg': 'bg1.jpg' });
 
     // Make object face at camera origin by default.
     newObj.setLookAt('#camera');
