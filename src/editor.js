@@ -208,7 +208,7 @@ function initEditor() {
 
         mainCanvas.style.width = (editorMode) ? '' : '100%';
         onObjectUnselect();
-        projectObject.projectType = "find-hidden-pictures";
+        //projectObject.projectType = "find-hidden-pictures";
         templateFunc();
     });
     eventArgEl = document.getElementById('eventArg');
@@ -386,22 +386,22 @@ function initCanvas() {
         }
     });
 }
-function templateFunc(){
-    console.log(projectObject.projectType);
-    if(projectObject.projectType = "find-hidden-pictures"){
-        var objects = projectObject.sceneryList[0].objectList;
-        if(!editorMode){
-            objects.forEach(function(item){
-                item.setMaterial({opacity: 0});
-            });
-        }else{
-            objects.forEach(function(item){
-                item.setMaterial({opacity: 1});
-                
-                item.oneClick = false;
-                scoreVariable = 0;
-            });
-        }
+function templateFunc() {
+    switch (projectObject.projectType) {
+        case "find-hidden-pictures":
+            var objects = projectObject.sceneryList[0].objectList;
+            if (!editorMode) {
+                objects.forEach(function (item) {
+                    item.setMaterial({ opacity: 0 });
+                });
+            } else {
+                objects.forEach(function (item) {
+                    item.setMaterial({ opacity: 1 });
+
+                    item.oneClick = false;
+                    scoreVariable = 0;
+                });
+            } break;
     }
 }
 
@@ -487,7 +487,17 @@ function onObjectSelect() {
                 var arg = event['arg'];
                 func(arg);
             }
+            checkSocre();
         }
+    }
+}
+
+function checkSocre(){
+    switch(projectObject.projectType){
+        case "find-hidden-pictures":
+            if(scoreVariable == projectObject.sceneryList[0].objectList.length){
+                console.log("game set");
+            }
     }
 }
 
