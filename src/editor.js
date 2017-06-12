@@ -2,7 +2,7 @@
 var PRIMITIVE_DEFINITIONS = ['box', 'sphere', 'cylinder', 'plane', 'image'];
 var OBJECT_DEFINITIONS = ['teleport', 'minimap'];
 var OBJECT_LISTENER = 'object-listener';
-var EVENT_LIST = ['teleport', 'link', 'page', 'image', 'video', 'sound', 'variable'];
+var EVENT_LIST = ['teleport', 'link', 'page', 'image', 'video', 'sound', 'variable','onVisible','removeClick'];
 var BACKGROUND_PREFIX = "../img/";
 var SOUND_PREFIX = "../sound/";
 var EVENT_DICTIONARY = {
@@ -10,7 +10,9 @@ var EVENT_DICTIONARY = {
     'link': linkEvent,
     'image': imageEvent,
     'sound': soundEvent,
-    'variable': variableEvent
+    'variable': variableEvent,
+    'onVisible': onVisibleEvent,
+    'removeClick': removeClickEvent
 }
 var BASE_WIDTH = 300;
 
@@ -205,7 +207,7 @@ function initEditor() {
 
         mainCanvas.style.width = (editorMode) ? '' : '100%';
         onObjectUnselect();
-
+        templateFunc();
     });
     eventArgEl = document.getElementById('eventArg');
     loadTextEl = document.getElementById('loadInput');
@@ -382,6 +384,24 @@ function initCanvas() {
         }
     });
 }
+function templateFunc(){
+    console.log(projectObject.projectType);
+    if(projectObject.projectType = "find-hidden-pictures"){
+        var objects = projectObject.sceneryList[0].objectList;
+        if(!editorMode){
+            objects.forEach(function(item){
+                item.setMaterial(setOpacity(0));
+            });
+        }else{
+            objects.forEach(function(item){
+                item.setMaterial(setOpacity(1));
+            });
+        }
+    }
+}
+function setOpacity(num){
+    return {opacity: num};
+}
 
 window.createScene = function(){
     var newScenery = new Scenery(background);
@@ -547,9 +567,6 @@ function teleportEvent(arg) {
     /*var imageUrl = BACKGROUND_PREFIX + arg;
     background.setAttribute('src', imageUrl);*/
 }
-function teleportAfterFade(arg){
-    
-}
 
 function linkEvent(arg) {
     console.log('link! to:' + arg);
@@ -579,6 +596,13 @@ function soundEvent(arg) {
     //sceneEl.appendChild(soundEl);
     //soundEl.components.sound.playSound();
 }
+
+function onVisibleEvent(arg){
+    newMaterial = {opacity: 1}
+    currentSelectedObject.setMaterial(newMaterial);
+}
+
+function 
 
 function variableEvent(arg) {
     var str = arg.split(' ');

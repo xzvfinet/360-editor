@@ -168,10 +168,6 @@ Controller.prototype.createElFromObj = function(frame, obj) {
     return newEl;
 }
 
-Controller.prototype.getNum = function() {
-    return objectList.length;
-}
-
 module.exports = {
     Objct: Objct,
     Controller: new Controller()
