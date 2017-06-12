@@ -15,6 +15,7 @@ function Objct(el, obj) {
         this.eventList = [];
 
         this.lookat = "";
+        this.oneClick = false;
     }
 }
 

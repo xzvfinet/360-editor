@@ -2,7 +2,7 @@
 var PRIMITIVE_DEFINITIONS = ['box', 'sphere', 'cylinder', 'plane', 'image'];
 var OBJECT_DEFINITIONS = ['teleport', 'minimap'];
 var OBJECT_LISTENER = 'object-listener';
-var EVENT_LIST = ['teleport', 'link', 'page', 'image', 'video', 'sound', 'variable','onVisible','removeClick'];
+var EVENT_LIST = ['teleport', 'link', 'page', 'image', 'video', 'sound', 'variable','onVisible','oneClick'];
 var BACKGROUND_PREFIX = "../img/";
 var SOUND_PREFIX = "../sound/";
 var EVENT_DICTIONARY = {
@@ -12,7 +12,7 @@ var EVENT_DICTIONARY = {
     'sound': soundEvent,
     'variable': variableEvent,
     'onVisible': onVisibleEvent,
-    'removeClick': removeClickEvent
+    'oneClick': oneClickEvent
 }
 var BASE_WIDTH = 300;
 
@@ -207,6 +207,7 @@ function initEditor() {
 
         mainCanvas.style.width = (editorMode) ? '' : '100%';
         onObjectUnselect();
+        projectObject.projectType = "find-hidden-pictures";
         templateFunc();
     });
     eventArgEl = document.getElementById('eventArg');
@@ -390,17 +391,19 @@ function templateFunc(){
         var objects = projectObject.sceneryList[0].objectList;
         if(!editorMode){
             objects.forEach(function(item){
-                item.setMaterial(setOpacity(0));
+                item.setMaterial({opacity: 0});
             });
         }else{
             objects.forEach(function(item){
-                item.setMaterial(setOpacity(1));
+                item.setMaterial({opacity: 1});
+                item.setClickListener(OBJECT_LISTENER);
+
             });
         }
     }
-}
-function setOpacity(num){
-    return {opacity: num};
+    objects.forEach(function (item) {
+        item.oneClick = false;
+    });
 }
 
 window.createScene = function(){
@@ -476,13 +479,15 @@ function onObjectSelect() {
         this.appendChild(mover);
     } else {
         // Execute events assigned to object.
-        console.log(currentSelectedObject.eventList.length);
-        for (var i = 0; i < currentSelectedObject.eventList.length; ++i) {
-            var event = currentSelectedObject.eventList[i];
-            var eventType = event['type'];
-            var func = EVENT_DICTIONARY[eventType];
-            var arg = event['arg'];
-            func(arg);
+        if (!currentSelectedObject.oneClick) {
+            console.log(currentSelectedObject.eventList.length);
+            for (var i = 0; i < currentSelectedObject.eventList.length; ++i) {
+                var event = currentSelectedObject.eventList[i];
+                var eventType = event['type'];
+                var func = EVENT_DICTIONARY[eventType];
+                var arg = event['arg'];
+                func(arg);
+            }
         }
     }
 }
@@ -602,7 +607,9 @@ function onVisibleEvent(arg){
     currentSelectedObject.setMaterial(newMaterial);
 }
 
-function 
+function oneClickEvent(arg){
+    currentSelectedObject.oneClick = true;
+}
 
 function variableEvent(arg) {
     var str = arg.split(' ');
