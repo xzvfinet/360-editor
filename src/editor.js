@@ -2,7 +2,7 @@
 var PRIMITIVE_DEFINITIONS = ['box', 'sphere', 'cylinder', 'plane', 'image'];
 var OBJECT_DEFINITIONS = ['teleport', 'minimap'];
 var OBJECT_LISTENER = 'object-listener';
-var EVENT_LIST = ['teleport', 'link', 'page', 'image', 'video', 'sound', 'variable','onVisible','oneClick'];
+var EVENT_LIST = ['teleport', 'link', 'page', 'image', 'video', 'sound', 'addScore','onVisible','oneClick'];
 var BACKGROUND_PREFIX = "../img/";
 var SOUND_PREFIX = "../sound/";
 var EVENT_DICTIONARY = {
@@ -10,7 +10,7 @@ var EVENT_DICTIONARY = {
     'link': linkEvent,
     'image': imageEvent,
     'sound': soundEvent,
-    'variable': variableEvent,
+    'addScore': addScoreEvent,
     'onVisible': onVisibleEvent,
     'oneClick': oneClickEvent
 }
@@ -55,6 +55,7 @@ var editorMode = true;
 var currentSelectedObject = null;
 var isDown = false;
 var currentSelectedArrowEl = null;
+var scoreVariable = 0;
 
 window.onLoadCanvas = function(frame) {
     mainFrame = frame;
@@ -396,14 +397,12 @@ function templateFunc(){
         }else{
             objects.forEach(function(item){
                 item.setMaterial({opacity: 1});
-                item.setClickListener(OBJECT_LISTENER);
-
+                
+                item.oneClick = false;
+                scoreVariable = 0;
             });
         }
     }
-    objects.forEach(function (item) {
-        item.oneClick = false;
-    });
 }
 
 window.createScene = function(){
@@ -609,6 +608,11 @@ function onVisibleEvent(arg){
 
 function oneClickEvent(arg){
     currentSelectedObject.oneClick = true;
+}
+
+function addScoreEvent(arg){
+    scoreVariable += Number(arg);
+    console.log("Score"+scoreVariable);
 }
 
 function variableEvent(arg) {
