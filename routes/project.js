@@ -37,7 +37,7 @@ var uploadImage = multer({
 });
 
 router.get('/', function(req, res){
-  var projectSQL = 'SELECT * FROM scene';
+  var projectSQL = 'SELECT * FROM scene where path!=""';
     connection.query(projectSQL, function (error, info) {
         if(error) {
             res.status(500).json({
@@ -77,7 +77,8 @@ router.get('/:id', function(req, res){
         res.status(500);
       }else{
         req.session.userID == null ? temp = -1 : temp = req.session;
-        res.render('editor', {user : temp, sceneID : id});
+        //res.render('editor', {user : temp, sceneID : id});
+        res.render('tempEditor', {user : temp, sceneID : id});
       }
     });
   }
@@ -105,6 +106,7 @@ router.get('/load/:id', function(req, res){
           res.end(json);
         });
       }
+      res.end(json);
     }
   });
 })
@@ -123,9 +125,8 @@ router.post('/upload/image', fileParser, function(req, res){
    });
 });
 */
-
-router.post('/:id/background', uploadImage.array('photo', 1), function(req,res){
-   res.end(req.files[0].location);
+router.post('/:id/background', uploadImage.array('image_file', 1), function(req,res){
+   res.json({result : req.files[0].location});
 });
 
 router.post('/:id/image', uploadImage.array('image_file', 1), function(req, res){

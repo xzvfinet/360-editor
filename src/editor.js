@@ -130,7 +130,7 @@ function initEditor() {
     positionEl = document.getElementsByClassName('object-position')[0];
     rotationEl = document.getElementsByClassName('object-rotation')[0];
     scaleEl = document.getElementsByClassName('object-scale')[0];
-    deleteBtn = document.getElementById('delete-btn');
+    /*deleteBtn = document.getElementById('delete-btn');
     deleteBtn.addEventListener('click', function(evt) {
         if (currentSelectedObject == null)
             console.log('Not selected');
@@ -141,7 +141,7 @@ function initEditor() {
     });
     editorToggle = $('#toggle-event');
     // Initially the editor mode is enabled.
-    editorToggle.bootstrapToggle('on');
+    /*editorToggle.bootstrapToggle('on');
     editorMode = true;
     editorToggle.change(function() {
         editorMode = !editorMode;
@@ -188,7 +188,7 @@ function initEditor() {
             // currentSelectedObject.eventList.push([eventName, eventArgEl.value]);
         }
     });
-
+*/
     $("#image-form").submit(function() {
         return false;
     });
