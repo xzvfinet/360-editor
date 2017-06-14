@@ -392,11 +392,11 @@ function templateFunc() {
             var objects = projectObject.sceneryList[0].objectList;
             if (!editorMode) {
                 objects.forEach(function (item) {
-                    item.setMaterial({ opacity: 0 });
+                    item.addMaterial({ opacity: 0 });
                 });
             } else {
                 objects.forEach(function (item) {
-                    item.setMaterial({ opacity: 1 });
+                    item.addMaterial({ opacity: 1 });
 
                     item.oneClick = false;
                     scoreVariable = 0;
@@ -479,7 +479,6 @@ function onObjectSelect() {
     } else {
         // Execute events assigned to object.
         if (!currentSelectedObject.oneClick) {
-            console.log(currentSelectedObject.eventList.length);
             for (var i = 0; i < currentSelectedObject.eventList.length; ++i) {
                 var event = currentSelectedObject.eventList[i];
                 var eventType = event['type'];
@@ -613,7 +612,7 @@ function soundEvent(arg) {
 
 function onVisibleEvent(arg){
     newMaterial = {opacity: 1}
-    currentSelectedObject.setMaterial(newMaterial);
+    currentSelectedObject.addMaterial(newMaterial);
 }
 
 function oneClickEvent(arg){

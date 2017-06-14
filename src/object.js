@@ -53,10 +53,14 @@ Objct.prototype.setScale = function(newX, newY, newZ) {
 }
 
 Objct.prototype.setMaterial = function(newMaterial) {
-    if(newMaterial.src == null)
-        newMaterial.src = this.material.src;
     this.material = newMaterial;
     for (var key in newMaterial) {
+        this.el.setAttribute(key, newMaterial[key]);
+    }
+}
+Objct.prototype.addMaterial = function(newMaterial){
+    for(var key in newMaterial){
+        this.material[key] = newMaterial[key];
         this.el.setAttribute(key, newMaterial[key]);
     }
 }
@@ -70,7 +74,7 @@ Objct.prototype.setFadeInOutAni = function(frame){
     fadeIn.setAttribute("begin","fade-in");
     fadeOut.setAttribute("begin","fade-out");
 
-    //fadeIn.setAttribute("from","black");
+    fadeIn.setAttribute("from","black");
     fadeOut.setAttribute("from","white");
 
     fadeIn.setAttribute("to","white");
