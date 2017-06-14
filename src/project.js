@@ -52,7 +52,8 @@ Project.prototype.getSceneryListLength = function(){
     return this.sceneryList.length;
 }
 Project.prototype.toJson = function() {
-    var saveForm = { title: this.title , projectType: this.projectType};
+    var saveForm = { title: this.title};
+    saveForm.projectType = this.projectType;
     saveForm.sceneryList = [];
     for (var i in this.sceneryList) {
         var scenery = this.sceneryList[i];
