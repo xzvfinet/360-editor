@@ -53,6 +53,8 @@ Objct.prototype.setScale = function(newX, newY, newZ) {
 }
 
 Objct.prototype.setMaterial = function(newMaterial) {
+    if(newMaterial.src == null)
+        newMaterial.src = this.material.src;
     this.material = newMaterial;
     for (var key in newMaterial) {
         this.el.setAttribute(key, newMaterial[key]);
