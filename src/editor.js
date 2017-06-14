@@ -125,12 +125,13 @@ function saveJsontoServer(json, userID, sceneID) {
 function initEditor() {
     mainCanvas = $('#main-canvas')[0];
     menuElList = document.getElementsByClassName('well');
+    /*
     idEl = document.getElementsByClassName('object-id')[0];
     shapeEl = document.getElementsByClassName('object-shape')[0];
     positionEl = document.getElementsByClassName('object-position')[0];
     rotationEl = document.getElementsByClassName('object-rotation')[0];
     scaleEl = document.getElementsByClassName('object-scale')[0];
-    /*deleteBtn = document.getElementById('delete-btn');
+    deleteBtn = document.getElementById('delete-btn');
     deleteBtn.addEventListener('click', function(evt) {
         if (currentSelectedObject == null)
             console.log('Not selected');
@@ -368,18 +369,19 @@ function onObjectSelect() {
     currentSelectedObject = selected;
 
     if (editorMode) {
-        shapeEl.innerHTML = currentSelectedObject.getShape();
+
+        //shapeEl.innerHTML = currentSelectedObject.getShape();
         var position = currentSelectedObject.transform.position;
-        positionEl.innerHTML = util.makeArrayAsString(
+        /*positionEl.innerHTML = util.makeArrayAsString(
             util.floorTwo(position.x),
             util.floorTwo(position.y),
-            util.floorTwo(position.z));
+            util.floorTwo(position.z));*/
         var rotation = currentSelectedObject.transform.rotation;
-        rotationEl.innerHTML = util.makeArrayAsString(
+        /*rotationEl.innerHTML = util.makeArrayAsString(
             util.floorTwo(rotation.x),
-            util.floorTwo(rotation.y));
+            util.floorTwo(rotation.y));*/
         scale = currentSelectedObject.transform.scale;
-        scaleEl.innerHTML = util.makeArrayAsString(scale.x, scale.y, scale.z);
+        //scaleEl.innerHTML = util.makeArrayAsString(scale.x, scale.y, scale.z);
 
         // append mover element
         mover = newMover();
@@ -398,10 +400,10 @@ function onObjectSelect() {
 
 function onObjectUnselect() {
     currentSelectedObject = null;
-    shapeEl.innerHTML = "";
+    /*shapeEl.innerHTML = "";
     positionEl.innerHTML = "";
     rotationEl.innerHTML = "";
-    scaleEl.innerHTML = "";
+    scaleEl.innerHTML = "";*/
 }
 
 function newMover() {

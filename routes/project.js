@@ -77,8 +77,7 @@ router.get('/:id', function(req, res){
         res.status(500);
       }else{
         req.session.userID == null ? temp = -1 : temp = req.session;
-        //res.render('editor', {user : temp, sceneID : id});
-        res.render('tempEditor', {user : temp, sceneID : id});
+        res.render('editor', {user : temp, sceneID : id});
       }
     });
   }
@@ -94,6 +93,7 @@ router.get('/load/:id', function(req, res){
     }else{
       if(info[0].path == null){
         json = '';
+        res.end(json);
       }else{
         var key = (info[0].path).split('traverser360/')[1];
         var params = {Bucket: 'traverser360', Key: key};
@@ -106,7 +106,6 @@ router.get('/load/:id', function(req, res){
           res.end(json);
         });
       }
-      res.end(json);
     }
   });
 })
