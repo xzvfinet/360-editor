@@ -13,27 +13,17 @@ var EVENT_DICTIONARY = {
     'sound': soundEvent,
     'variable': variableEvent
 }
-var BASE_WIDTH = 300;
+var BASE_IMG_WIDTH = 200;
 
 var util = require('./util.js');
 var nodeUtil = require('util');
+var Project = require('./project.js').Project;
 var obj = require('./object.js');
-var scnry = require('./scenery.js');
+var Scenery = require('./scenery.js').Scenery;
 
 // Editor Dom Elements
 var mainCanvas;
 var menuElList;
-var idEl;
-var shapeEl;
-var positionEl;
-var rotationEl;
-var scaleEl;
-var deleteBtn;
-var editorToggle;
-var eventArgEl;
-var loadTextEl;
-var saveBtnEl;
-var loadBtnEl;
 var variableEl = {};
 var imageUrlInputEl;
 
@@ -48,6 +38,7 @@ var miniMap = null;
 var miniMapDirector = null;
 
 // State Variables
+var projectObject = null;
 var editorMode = true;
 var currentSelectedObject = null;
 var isDown = false;
@@ -58,111 +49,73 @@ window.onLoadCanvas = function(frame) {
 
     initEditor();
     initCanvas();
+
+    newProject();
 }
 
 window.setBackground = function(url) {
-    scnry.Controller.getCurrentScenery().setBackgroundImageUrl(url);
+    projectObject.getCurrentScenery().setBackgroundImageUrl(url);
 }
 
-window.saveProject = function(userID, sceneID){
-  var sceneryObject = {};
-  var objectsJson = obj.Controller.toJson();
-
-  sceneryObject.bgUrl = background.getAttribute('src');
-  sceneryObject.objects = objectsJson;
-
-  saveJsontoServer(JSON.stringify(sceneryObject), userID, sceneID);
+window.newProject = function() {
+    projectObject = new Project();
+    var newScenery = new Scenery(background);
+    projectObject.addScenery(newScenery);
 }
 
-window.loadJson = function(json){
-  var sceneryObject = JSON.parse(json);
-  console.log(sceneryObject);
+window.saveProject = function(userID, sceneID) {
+    saveJsontoServer(projectObject.toJson(), userID, sceneID);
+}
 
-  loadObjectsFromJson(sceneryObject.objects);
+window.loadProject = function(projectJson) {
+    clearAllObject();
 
-  background.setAttribute('src', sceneryObject.bgUrl);
+    var loadedProject = new Project();
+    loadedProject.fromJson(projectJson);
+    for (var i in loadedProject.sceneryList) {
+        relateSceneryWithDomEl(loadedProject.sceneryList[i]);
+        for (var j in loadedProject.sceneryList[i].objectList) {
+            relateObjectWithDomEl(loadedProject.sceneryList[i].objectList[j]);
+        }
+    }
+    projectObject = loadedProject;
+}
+
+function relateSceneryWithDomEl(scenery) {
+    scenery.setBgEl(background);
+}
+
+function relateObjectWithDomEl(object) {
+    var newEl = obj.Controller.createElFromObj(mainFrame, object);
+    sceneEl.appendChild(newEl)
+}
+
+function clearAllObject(scenery) {
+    projectObject.getCurrentScenery().removeAllObject();
+}
+
+function saveJsontoServer(json, userID, sceneID) {
+    $.ajax({
+        url: '/project/save',
+        method: 'post',
+        data: {
+            user: userID,
+            json: json,
+            scene: sceneID
+        },
+        success: function(data) {
+            alert("Save success");
+        },
+        error: function(err) {
+            alert("Save fail." + err.toString());
+        }
+    });
 }
 
 function initEditor() {
     mainCanvas = $('#main-canvas')[0];
     menuElList = document.getElementsByClassName('well');
-    idEl = document.getElementsByClassName('object-id')[0];
-    shapeEl = document.getElementsByClassName('object-shape')[0];
-    positionEl = document.getElementsByClassName('object-position')[0];
-    rotationEl = document.getElementsByClassName('object-rotation')[0];
-    scaleEl = document.getElementsByClassName('object-scale')[0];
-    deleteBtn = document.getElementById('delete-btn');
-    deleteBtn.addEventListener('click', function(evt) {
-        if (currentSelectedObject == null)
-            console.log('Not selected');
-        else {
-            obj.Controller.remove(currentSelectedObject);
-            mover = null;
-        }
-    });
-    editorToggle = $('#toggle-event');
-    // Initially the editor mode is enabled.
-    editorToggle.bootstrapToggle('on');
-    editorMode = true;
-    editorToggle.change(function() {
-        editorMode = !editorMode;
-        for (var i = 0; i < menuElList.length; ++i) {
-            menuElList[i].style.visibility = (editorMode) ? 'visible' : 'hidden';
-        }
-
-        if (!editorMode && mover) {
-            mover.parentEl.removeChild(mover);
-            mover = null;
-        }
-
-        mainCanvas.style.width = (editorMode) ? '' : '100%';
-        onObjectUnselect();
-
-    });
-    eventArgEl = document.getElementById('eventArg');
-    loadTextEl = document.getElementById('loadInput');
-    saveBtnEl = document.getElementById('saveBtn');
-    saveBtnEl.addEventListener('click', function(evt) {
-        var sceneriesJson = scnry.Controller.toJson();
-        var objectsJson = obj.Controller.toJson();
-
-        var saveObject = {
-            'sceneriesJson': sceneriesJson,
-            'objectsJson': objectsJson
-        }
-
-        loadTextEl.value = JSON.stringify(saveObject);
-        saveJsontoServer(JSON.stringify(saveObject));
-    });
-    loadBtnEl = document.getElementById('loadBtn');
-    loadBtnEl.addEventListener('click', function(evt) {
-        var json = JSON.parse(loadTextEl.value);
-        var sceneriesJson = json.sceneriesJson;
-        var objectsJson = json.objectsJson;
-
-        load(sceneriesJson, objectsJson);
-        // loadObjectsFromJson(sceneryObject.objects);
-        // background.setAttribute('src', sceneryObject.bgUrl);
-    });
-
-    for (var i = 0; i < EVENT_LIST.length; ++i) {
-        var li = document.createElement("li");
-        var a = document.createElement("a");
-        a.appendChild(document.createTextNode(EVENT_LIST[i]));
-        a.setAttribute('href', '#');
-        li.appendChild(a);
-        $(".dropdown-menu")[0].appendChild(li);
-    }
-
-    $(".dropdown-menu").on("click", "li", function(event) {
-        if (currentSelectedObject != null) {
-            var eventName = this.children[0].innerHTML;
-            currentSelectedObject.eventList = [];
-            currentSelectedObject.eventList.push({ 'type': eventName, 'arg': eventArgEl.value });
-            // currentSelectedObject.eventList.push([eventName, eventArgEl.value]);
-        }
-    });
-
+    
     $("#image-form").submit(function() {
         return false;
     });
@@ -194,7 +147,7 @@ function initCanvas() {
             var prevPos = null;
             var radius = 6;
 
-            var parentObject = obj.Controller.findByEl(this.el.parentEl);
+            var parentObject = projectObject.getCurrentScenery().findObjectByEl(this.el.parentEl);
 
             var originalScale = this.el.getAttribute('scale');
             var parentScale = this.el.parentEl.getAttribute('scale');
@@ -302,26 +255,6 @@ function initCanvas() {
             }
         }
     });
-
-    scenery = new scnry.Scenery(background);
-}
-
-function load(sceneriesJson, objectsJson) {
-    loadSceneriesFromJson(sceneriesJson);
-    loadObjectsFromJson(objectsJson);
-}
-
-function loadSceneriesFromJson(json) {
-    var sceneries = scnry.Controller.fromJson(json);
-    sceneries[0].setBgEl(background);
-}
-
-function loadObjectsFromJson(json) {
-    var objects = obj.Controller.fromJson(json);
-    for (var i = 0; i < objects.length; ++i) {
-        var el = obj.Controller.createElFromObj(mainFrame, objects[i]);
-        sceneEl.appendChild(el);
-    }
 }
 
 window.create = function(type) {
@@ -353,7 +286,7 @@ function createObject(type) {
 }
 
 function onObjectSelect() {
-    var selected = obj.Controller.findByEl(this);
+    var selected = projectObject.getCurrentScenery().findObjectByEl(this);
 
     if (editorMode && currentSelectedObject == selected) {
         return;
@@ -362,18 +295,19 @@ function onObjectSelect() {
     currentSelectedObject = selected;
 
     if (editorMode) {
-        shapeEl.innerHTML = currentSelectedObject.getShape();
+
+        //shapeEl.innerHTML = currentSelectedObject.getShape();
         var position = currentSelectedObject.transform.position;
-        positionEl.innerHTML = util.makeArrayAsString(
+        /*positionEl.innerHTML = util.makeArrayAsString(
             util.floorTwo(position.x),
             util.floorTwo(position.y),
-            util.floorTwo(position.z));
+            util.floorTwo(position.z));*/
         var rotation = currentSelectedObject.transform.rotation;
-        rotationEl.innerHTML = util.makeArrayAsString(
+        /*rotationEl.innerHTML = util.makeArrayAsString(
             util.floorTwo(rotation.x),
-            util.floorTwo(rotation.y));
+            util.floorTwo(rotation.y));*/
         scale = currentSelectedObject.transform.scale;
-        scaleEl.innerHTML = util.makeArrayAsString(scale.x, scale.y, scale.z);
+        //scaleEl.innerHTML = util.makeArrayAsString(scale.x, scale.y, scale.z);
 
         // append mover element
         mover = newMover();
@@ -392,10 +326,10 @@ function onObjectSelect() {
 
 function onObjectUnselect() {
     currentSelectedObject = null;
-    shapeEl.innerHTML = "";
+    /*shapeEl.innerHTML = "";
     positionEl.innerHTML = "";
     rotationEl.innerHTML = "";
-    scaleEl.innerHTML = "";
+    scaleEl.innerHTML = "";*/
 }
 
 function newMover() {
@@ -415,6 +349,7 @@ function newObject(type, shape, position, rotation, scale) {
     var tag = 'a-' + shape;
     var newEl = mainFrame.document.createElement(tag);
     var newObj = new obj.Objct(newEl);
+    projectObject.getCurrentScenery().addObject(newObj);
 
     newObj.type = type;
     newObj.shape = shape;
@@ -428,7 +363,7 @@ function newObject(type, shape, position, rotation, scale) {
     if (shape == 'image') {
         var url = imageUrlInputEl.value;
         util.getImageSize(url, function() {
-            newObj.setScale({ x: this.width / BASE_WIDTH, y: this.height / BASE_WIDTH });
+            newObj.setScale({ x: this.width / BASE_IMG_WIDTH, y: this.height / BASE_IMG_WIDTH });
         });
         newObj.setMaterial({ 'src': url });
     } else {
@@ -498,32 +433,6 @@ function variableEvent(arg) {
     console.log(str[0] + "=" + variableEl[str[0]]);
 }
 
-function loadObjectsFromJson(json) {
-    var objects = obj.Controller.fromJson(json);
-    for (var i = 0; i < objects.length; ++i) {
-        var el = obj.Controller.createElFromObj(mainFrame, objects[i]);
-        sceneEl.appendChild(el);
-    }
-}
-
-function saveJsontoServer(json, userID, sceneID){
-  $.ajax({
-    url : '/project/save',
-    method : 'post',
-    data : {
-        user : userID,
-        json : json,
-        scene : sceneID
-    },
-    success : function (data) {
-      alert("Save success");
-    },
-    error : function (err) {
-      alert("Save fail." + err.toString());
-    }
-  });
-}
-
 //minimap
 window.setMiniMap = function() {
     if (miniMap == null) {
@@ -548,10 +457,10 @@ window.setMiniMap = function() {
         miniMap.appendChild(miniMapDirector);
         cameraEl.appendChild(miniMap);
 
-        var objects = obj.Controller.getObjects();
+        var objectList = obj.Controller.getObjects();
 
         for (var i = 0; i < obj.Controller.getNum(); i++) {
-            setObjectOnMiniMap(objects[i].transform.position);
+            setObjectOnMiniMap(objectList[i].transform.position);
         }
     } else {
         console.log('already has minimap');
@@ -581,9 +490,7 @@ window.setObjectOnMiniMap = function(position) {
     }
 }
 
-},{"./object.js":2,"./scenery.js":3,"./util.js":4,"util":8}],2:[function(require,module,exports){
-var objects = [];
-
+},{"./object.js":2,"./project.js":3,"./scenery.js":4,"./util.js":5,"util":9}],2:[function(require,module,exports){
 function Objct(el, obj) {
     if (obj) {
         // copy all properties of obj to this
@@ -602,8 +509,6 @@ function Objct(el, obj) {
 
         this.lookat = "";
     }
-
-    objects.push(this);
 }
 
 Objct.prototype.getShape = function() {
@@ -665,11 +570,12 @@ Objct.prototype.toObj = function() {
 }
 
 Objct.prototype.getSaveForm = function() {
-    var tmp = this.el;
-    this.el = null;
-    var copyObj = JSON.parse(JSON.stringify(this));
-    this.el = tmp;
-    return copyObj;
+    var saveForm = {};
+    for (var prop in this) {
+        saveForm[prop] = this[prop];
+    }
+    saveForm.el = null;
+    return saveForm;
 }
 
 Objct.prototype.setLookAt = function(target) {
@@ -680,6 +586,16 @@ Objct.prototype.setLookAt = function(target) {
 
 Objct.prototype.addEvent = function(eventType, eventArgs) {
     this.eventList.push({ 'type': eventType, 'arg': eventArgs });
+}
+
+Objct.prototype.toJson = function() {
+    return JSON.stringify(this.getSaveForm());
+}
+
+Objct.prototype.fromJson = function(json) {
+    var object = JSON.parse(json);
+    Objct.call(this, null, object);
+    return this;
 }
 
 function Controller() {}
@@ -701,8 +617,8 @@ Controller.prototype.fromJson = function(json) {
 
 Controller.prototype.toJson = function() {
     var saveObjects = [];
-    for (var i = 0; i < objects.length; ++i) {
-        saveObjects.push(objects[i].getSaveForm());
+    for (var i = 0; i < objectList.length; ++i) {
+        saveObjects.push(objectList[i].getSaveForm());
     }
     var json = JSON.stringify(saveObjects);
     return json;
@@ -722,30 +638,11 @@ Controller.prototype.createElFromObj = function(frame, obj) {
 }
 
 Controller.prototype.getNum = function() {
-    return objects.length;
+    return objectList.length;
 }
 
 Controller.prototype.getObjects = function() {
-    return objects;
-}
-
-Controller.prototype.remove = function(obj) {
-    if (obj.el) {
-        obj.el.parentElement.removeChild(obj.el);
-    }
-
-    // remove object from list
-    var index = objects.indexOf(obj);
-    if (index > -1) {
-        objects.splice(index, 1);
-    }
-}
-
-Controller.prototype.findByEl = function(el) {
-    var objs = objects.filter(function(obj) {
-        return obj.el == el;
-    });
-    return objs[0];
+    return objectList;
 }
 
 module.exports = {
@@ -755,7 +652,82 @@ module.exports = {
 
 },{}],3:[function(require,module,exports){
 var currentIndex = 0;
-var sceneries = [];
+var Scenery = require('./scenery').Scenery;
+var Objct = require('./object.js').Objct;
+
+function Project() {
+    this.title = "";
+    this.sceneryList = [];
+}
+
+// Scenery
+Project.prototype.setTitle = function(newTitle) {
+    this.title = newTitle;
+}
+
+Project.prototype.addScenery = function(scenery) {
+    this.sceneryList.push(scenery)
+}
+
+Project.prototype.removeScenery = function(scenery) {
+    var index = sceneryList.indexOf(scenery);
+    if (index > -1) {
+        sceneryList.splice(index, 1);
+    }
+}
+
+Project.prototype.changeScenery = function(scenery) {
+    var bgEl = this.sceneryList[currentIndex].bgEl;
+    this.sceneryList[currentIndex].bgEl = null;
+
+    if (typeof scenery == 'object') {
+        for (var i = this.sceneryList.length - 1; i >= 0; i--) {
+            if (this.sceneryList[i] == scenery) {
+                currentIndex = i;
+                break;
+            }
+        }
+    } else if (typeof scenery == 'number') {
+        currentIndex = scenery;
+    }
+
+    this.sceneryList[currentIndex].bgEl = bgEl;
+}
+
+Project.prototype.getCurrentScenery = function() {
+    return this.sceneryList[currentIndex];
+}
+
+Project.prototype.toJson = function() {
+    var saveForm = { title: this.title };
+    saveForm.sceneryList = [];
+    for (var i in this.sceneryList) {
+        var scenery = this.sceneryList[i];
+        saveForm.sceneryList.push(scenery.getSaveForm());
+    }
+    return JSON.stringify(saveForm);
+}
+
+Project.prototype.fromJson = function(json) {
+    var saveForm = JSON.parse(json);
+    this.title = saveForm.title;
+    for (var i in saveForm.sceneryList) {
+    	var sceneryObject = new Scenery(null, saveForm.sceneryList[i]);
+        this.sceneryList.push(sceneryObject);
+        for (var j in sceneryObject.objectList) {
+        	var objct = new Objct(null, sceneryObject.objectList[j]);
+        	sceneryObject.objectList[j] = objct;
+        }
+    }
+    return this;
+}
+
+module.exports = {
+    Project: Project
+};
+
+},{"./object.js":2,"./scenery":4}],4:[function(require,module,exports){
+var objct = require('./object.js');
 
 function Scenery(bgEl, scenery) {
     if (scenery) {
@@ -763,12 +735,15 @@ function Scenery(bgEl, scenery) {
         for (var prop in scenery) {
             this[prop] = scenery[prop];
         }
-    } else {
+    } else if (bgEl) {
         this.bgEl = bgEl;
         this.bgUrl = this.bgEl.getAttribute('src');
+        this.objectList = [];
+    } else {
+        this.bgEl = null;
+        this.bgUrl = "";
+        this.objectList = [];
     }
-
-    sceneries.push(this);
 }
 
 Scenery.prototype.setBackgroundImageUrl = function(url) {
@@ -781,68 +756,72 @@ Scenery.prototype.setBgEl = function(bgEl) {
     bgEl.setAttribute('src', this.bgUrl);
 }
 
-Scenery.prototype.getSaveForm = function() {
-    var tmp = this.bgEl;
-    this.bgEl = null;
-    var copyScenery = JSON.parse(JSON.stringify(this));
-    this.bgEl = tmp;
-    return copyScenery;
+Scenery.prototype.addObject = function(object) {
+    this.objectList.push(object)
 }
 
-function Controller() {}
-
-Controller.prototype.addScenery = function(scenery) {
-    sceneries.push(scenery);
+Scenery.prototype.removeObject = function(object) {
+    var index = objectList.indexOf(object);
+    if (index > -1) {
+        objectList.splice(index, 1);
+    }
 }
 
-Controller.prototype.changeScenery = function(scenery) {
-    var bgEl = sceneries[currentIndex].bgEl;
-    sceneries[currentIndex].bgEl = null;
+Scenery.prototype.findObjectByEl = function(el) {
+    var objs = this.objectList.filter(function(obj) {
+        return obj.el == el;
+    });
+    return objs[0];
+}
 
-    if (typeof scenery == 'object') {
-        for (var i = sceneries.length - 1; i >= 0; i--) {
-            if (sceneries[i] == scenery) {
-                currentIndex = i;
-                break;
-            }
+Scenery.prototype.removeAllObject = function() {
+    for (var i in this.objectList) {
+        if (this.objectList[i].el) {
+            this.objectList[i].el.parentElement.removeChild(this.objectList[i].el);
         }
-    } else if (typeof scenery == 'number') {
-        currentIndex = number;
     }
 
-    sceneries[currentIndex].bgEl = bgEl;
+    this.objectList = [];
 }
 
-Controller.prototype.getCurrentScenery = function() {
-    return sceneries[currentIndex];
-}
-
-Controller.prototype.toJson = function() {
-    var saveSceneries = [];
-    for (var i = 0; i < sceneries.length; ++i) {
-        saveSceneries.push(sceneries[i].getSaveForm());
+Scenery.prototype.removeObject = function(obj) {
+    if (obj.el) {
+        obj.el.parentElement.removeChild(obj.el);
     }
-    var json = JSON.stringify(saveSceneries);
-    return json;
+
+    // remove object from list
+    var index = this.objectList.indexOf(obj);
+    if (index > -1) {
+        this.objectList.splice(index, 1);
+    }
 }
 
-Controller.prototype.fromJson = function(json) {
-    var loadedSceneries;
-    loadedSceneries = JSON.parse(json);
-    var loadedSceneriesWithPrototype = [];
-    for (var i = 0; i < loadedSceneries.length; ++i) {
-        var newScenery = new Scenery(null, loadedSceneries[i]);
-        loadedSceneriesWithPrototype.push(newScenery);
+Scenery.prototype.getSaveForm = function() {
+    var saveForm = {};
+    saveForm.bgUrl = this.bgUrl;
+    saveForm.objectList = [];
+    for (var i in this.objectList) {
+        var object = this.objectList[i];
+        saveForm.objectList.push(object.getSaveForm());
     }
-    return loadedSceneriesWithPrototype;
+    return saveForm;
+}
+
+Scenery.prototype.toJson = function() {
+    return JSON.stringify(this.getSaveForm());
+}
+
+Scenery.prototype.fromJson = function(json) {
+    var scenery = JSON.parse(json);
+    Scenery.call(this, null, scenery);
+    return this;
 }
 
 module.exports = {
-    Scenery: Scenery,
-    Controller: new Controller()
+    Scenery: Scenery
 };
 
-},{}],4:[function(require,module,exports){
+},{"./object.js":2}],5:[function(require,module,exports){
 function getRandomIntRange(min, max) {
     return Math.floor(Math.random() * (max - min) + min);
 }
@@ -903,7 +882,7 @@ module.exports.makeArrayAsString = function() {
     return result;
 }
 
-},{}],5:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 // shim for using process in browser
 var process = module.exports = {};
 
@@ -1085,7 +1064,7 @@ process.chdir = function (dir) {
 };
 process.umask = function() { return 0; };
 
-},{}],6:[function(require,module,exports){
+},{}],7:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -1110,14 +1089,14 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],7:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 module.exports = function isBuffer(arg) {
   return arg && typeof arg === 'object'
     && typeof arg.copy === 'function'
     && typeof arg.fill === 'function'
     && typeof arg.readUInt8 === 'function';
 }
-},{}],8:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 (function (process,global){
 // Copyright Joyent, Inc. and other Node contributors.
 //
@@ -1707,4 +1686,4 @@ function hasOwnProperty(obj, prop) {
 }
 
 }).call(this,require('_process'),typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"./support/isBuffer":7,"_process":5,"inherits":6}]},{},[1]);
+},{"./support/isBuffer":8,"_process":6,"inherits":7}]},{},[1]);

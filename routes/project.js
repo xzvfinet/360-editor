@@ -37,7 +37,7 @@ var uploadImage = multer({
 });
 
 router.get('/', function(req, res){
-  var projectSQL = 'SELECT * FROM scene';
+  var projectSQL = 'SELECT * FROM scene where path!=""';
     connection.query(projectSQL, function (error, info) {
         if(error) {
             res.status(500).json({
@@ -93,6 +93,7 @@ router.get('/load/:id', function(req, res){
     }else{
       if(info[0].path == null){
         json = '';
+        res.end(json);
       }else{
         var key = (info[0].path).split('traverser360/')[1];
         var params = {Bucket: 'traverser360', Key: key};
@@ -123,9 +124,8 @@ router.post('/upload/image', fileParser, function(req, res){
    });
 });
 */
-
-router.post('/:id/background', uploadImage.array('photo', 1), function(req,res){
-   res.end(req.files[0].location);
+router.post('/:id/background', uploadImage.array('image_file', 1), function(req,res){
+   res.json({result : req.files[0].location});
 });
 
 router.post('/:id/image', uploadImage.array('image_file', 1), function(req, res){

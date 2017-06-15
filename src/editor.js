@@ -12,7 +12,7 @@ var EVENT_DICTIONARY = {
     'sound': soundEvent,
     'variable': variableEvent
 }
-var BASE_WIDTH = 300;
+var BASE_IMG_WIDTH = 200;
 
 var util = require('./util.js');
 var nodeUtil = require('util');
@@ -23,17 +23,6 @@ var Scenery = require('./scenery.js').Scenery;
 // Editor Dom Elements
 var mainCanvas;
 var menuElList;
-var idEl;
-var shapeEl;
-var positionEl;
-var rotationEl;
-var scaleEl;
-var deleteBtn;
-var editorToggle;
-var eventArgEl;
-var loadTextEl;
-var saveBtnEl;
-var loadBtnEl;
 var variableEl = {};
 var imageUrlInputEl;
 
@@ -125,70 +114,7 @@ function saveJsontoServer(json, userID, sceneID) {
 function initEditor() {
     mainCanvas = $('#main-canvas')[0];
     menuElList = document.getElementsByClassName('well');
-    idEl = document.getElementsByClassName('object-id')[0];
-    shapeEl = document.getElementsByClassName('object-shape')[0];
-    positionEl = document.getElementsByClassName('object-position')[0];
-    rotationEl = document.getElementsByClassName('object-rotation')[0];
-    scaleEl = document.getElementsByClassName('object-scale')[0];
-    deleteBtn = document.getElementById('delete-btn');
-    deleteBtn.addEventListener('click', function(evt) {
-        if (currentSelectedObject == null)
-            console.log('Not selected');
-        else {
-            obj.Controller.remove(currentSelectedObject);
-            mover = null;
-        }
-    });
-    editorToggle = $('#toggle-event');
-    // Initially the editor mode is enabled.
-    editorToggle.bootstrapToggle('on');
-    editorMode = true;
-    editorToggle.change(function() {
-        editorMode = !editorMode;
-        for (var i = 0; i < menuElList.length; ++i) {
-            menuElList[i].style.visibility = (editorMode) ? 'visible' : 'hidden';
-        }
-
-        if (!editorMode && mover) {
-            mover.parentEl.removeChild(mover);
-            mover = null;
-        }
-
-        mainCanvas.style.width = (editorMode) ? '' : '100%';
-        onObjectUnselect();
-
-    });
-    eventArgEl = document.getElementById('eventArg');
-    loadTextEl = document.getElementById('loadInput');
-    saveBtnEl = document.getElementById('saveBtn');
-    saveBtnEl.addEventListener('click', function(evt) {
-        var json = projectObject.toJson();
-        loadTextEl.value = json;
-        // saveJsontoServer(JSON.stringify(saveObject));
-    });
-    loadBtnEl = document.getElementById('loadBtn');
-    loadBtnEl.addEventListener('click', function(evt) {
-        loadProject(loadTextEl.value);
-    });
-
-    for (var i = 0; i < EVENT_LIST.length; ++i) {
-        var li = document.createElement("li");
-        var a = document.createElement("a");
-        a.appendChild(document.createTextNode(EVENT_LIST[i]));
-        a.setAttribute('href', '#');
-        li.appendChild(a);
-        $(".dropdown-menu")[0].appendChild(li);
-    }
-
-    $(".dropdown-menu").on("click", "li", function(event) {
-        if (currentSelectedObject != null) {
-            var eventName = this.children[0].innerHTML;
-            currentSelectedObject.eventList = [];
-            currentSelectedObject.eventList.push({ 'type': eventName, 'arg': eventArgEl.value });
-            // currentSelectedObject.eventList.push([eventName, eventArgEl.value]);
-        }
-    });
-
+    
     $("#image-form").submit(function() {
         return false;
     });
@@ -368,18 +294,19 @@ function onObjectSelect() {
     currentSelectedObject = selected;
 
     if (editorMode) {
-        shapeEl.innerHTML = currentSelectedObject.getShape();
+
+        //shapeEl.innerHTML = currentSelectedObject.getShape();
         var position = currentSelectedObject.transform.position;
-        positionEl.innerHTML = util.makeArrayAsString(
+        /*positionEl.innerHTML = util.makeArrayAsString(
             util.floorTwo(position.x),
             util.floorTwo(position.y),
-            util.floorTwo(position.z));
+            util.floorTwo(position.z));*/
         var rotation = currentSelectedObject.transform.rotation;
-        rotationEl.innerHTML = util.makeArrayAsString(
+        /*rotationEl.innerHTML = util.makeArrayAsString(
             util.floorTwo(rotation.x),
-            util.floorTwo(rotation.y));
+            util.floorTwo(rotation.y));*/
         scale = currentSelectedObject.transform.scale;
-        scaleEl.innerHTML = util.makeArrayAsString(scale.x, scale.y, scale.z);
+        //scaleEl.innerHTML = util.makeArrayAsString(scale.x, scale.y, scale.z);
 
         // append mover element
         mover = newMover();
@@ -398,10 +325,10 @@ function onObjectSelect() {
 
 function onObjectUnselect() {
     currentSelectedObject = null;
-    shapeEl.innerHTML = "";
+    /*shapeEl.innerHTML = "";
     positionEl.innerHTML = "";
     rotationEl.innerHTML = "";
-    scaleEl.innerHTML = "";
+    scaleEl.innerHTML = "";*/
 }
 
 function newMover() {
@@ -435,7 +362,7 @@ function newObject(type, shape, position, rotation, scale) {
     if (shape == 'image') {
         var url = imageUrlInputEl.value;
         util.getImageSize(url, function() {
-            newObj.setScale({ x: this.width / BASE_WIDTH, y: this.height / BASE_WIDTH });
+            newObj.setScale({ x: this.width / BASE_IMG_WIDTH, y: this.height / BASE_IMG_WIDTH });
         });
         newObj.setMaterial({ 'src': url });
     } else {

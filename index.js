@@ -17,7 +17,7 @@ app.use(session({
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 
-app.listen(80);
+app.listen(8000);
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
