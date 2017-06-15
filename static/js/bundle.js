@@ -3,7 +3,7 @@
 var PRIMITIVE_DEFINITIONS = ['box', 'sphere', 'cylinder', 'plane', 'image'];
 var OBJECT_DEFINITIONS = ['teleport', 'minimap'];
 var OBJECT_LISTENER = 'object-listener';
-var EVENT_LIST = ['teleport', 'link', 'page', 'image', 'video', 'sound', 'variable'];
+var EVENT_LIST = ['teleport', 'link', 'page', 'image', 'video', 'sound', 'addScore', 'onVisible', 'oneClick'];
 var BACKGROUND_PREFIX = "../img/";
 var SOUND_PREFIX = "../sound/";
 var EVENT_DICTIONARY = {
@@ -11,7 +11,9 @@ var EVENT_DICTIONARY = {
     'link': linkEvent,
     'image': imageEvent,
     'sound': soundEvent,
-    'variable': variableEvent
+    'addScore': addScoreEvent,
+    'onVisible': onVisibleEvent,
+    'oneClick': oneClickEvent
 }
 var BASE_IMG_WIDTH = 200;
 
@@ -43,6 +45,7 @@ var editorMode = true;
 var currentSelectedObject = null;
 var isDown = false;
 var currentSelectedArrowEl = null;
+var scoreVariable = 0;
 
 window.onLoadCanvas = function(frame) {
     mainFrame = frame;
@@ -74,11 +77,57 @@ window.loadProject = function(projectJson) {
     loadedProject.fromJson(projectJson);
     for (var i in loadedProject.sceneryList) {
         relateSceneryWithDomEl(loadedProject.sceneryList[i]);
-        for (var j in loadedProject.sceneryList[i].objectList) {
-            relateObjectWithDomEl(loadedProject.sceneryList[i].objectList[j]);
-        }
+    }
+    for (var j in loadedProject.sceneryList[0].objectList) {
+        relateObjectWithDomEl(loadedProject.sceneryList[0].objectList[j]);
     }
     projectObject = loadedProject;
+    //scene number
+    setSceneNumber();
+    setSceneDropDown();
+}
+
+window.loadAllObjectOfScene = function(sceneNum) {
+    eraseCanvas();
+    for (var j in projectObject.sceneryList[sceneNum].objectList) {
+        relateObjectWithDomEl(projectObject.sceneryList[sceneNum].objectList[j]);
+    }
+    projectObject.changeScenery(projectObject.sceneryList[sceneNum]);
+    setSceneNumber();
+}
+
+function setSceneNumber() {
+    sceneNum = $('#scene-list')[0];
+    //remove all child
+    while (sceneNum.hasChildNodes()) { sceneNum.removeChild(sceneNum.firstChild); }
+
+    for (var i = 0; i < projectObject.getSceneryListLength(); i++) {
+        if (projectObject.getCurrentIndex() == i) {
+            var a = document.createElement("b");
+        } else {
+            var a = document.createElement("a");
+        }
+        a.innerHTML = (i + 1);
+        if (i != projectObject.getSceneryListLength() - 1)
+            a.innerHTML += "-";
+        sceneNum.appendChild(a);
+    }
+}
+
+function setSceneDropDown() {
+    sceneDropdown = $('#scene-dropdown')[0];
+    console.log(sceneDropdown);
+    while (sceneDropdown.hasChildNodes()) { sceneDropdown.removeChild(sceneDropdown.firstChild); }
+
+    var sceneName = "신이름"
+    for (var i = 0; i < projectObject.getSceneryListLength(); i++) {
+        var op = document.createElement("li");
+        var a = document.createElement("a");
+        op.appendChild(a);
+        a.setAttribute("onclick", "loadAllObjectOfScene(" + i + ")");
+        a.innerHTML = sceneName + (i + 1);
+        sceneDropdown.appendChild(op);
+    }
 }
 
 function relateSceneryWithDomEl(scenery) {
@@ -92,6 +141,14 @@ function relateObjectWithDomEl(object) {
 
 function clearAllObject(scenery) {
     projectObject.getCurrentScenery().removeAllObject();
+}
+
+function eraseCanvas() {
+    var objects = mainFrame.document.querySelectorAll(".object");
+    console.log(objects);
+    for (var i = 0; i < objects.length; i++) {
+        objects[i].parentNode.removeChild(objects[i]);
+    }
 }
 
 function saveJsontoServer(json, userID, sceneID) {
@@ -115,12 +172,16 @@ function saveJsontoServer(json, userID, sceneID) {
 function initEditor() {
     mainCanvas = $('#main-canvas')[0];
     menuElList = document.getElementsByClassName('well');
-    
+
     $("#image-form").submit(function() {
         return false;
     });
 
-
+    $('#scene-dropdown').change(function() {
+        loadAllObjectOfScene($(this).val());
+        //console.log(projectObject.getCurrentIndex());
+        //console.log($(this).val());
+    });
     imageUrlInputEl = document.getElementById('img-url');
 }
 
@@ -257,6 +318,43 @@ function initCanvas() {
     });
 }
 
+function templateFunc() {
+    switch (projectObject.projectType) {
+        case "find-hidden-pictures":
+            var objects = projectObject.sceneryList[0].objectList;
+            if (!editorMode) {
+                objects.forEach(function(item) {
+                    item.addMaterial({ opacity: 0 });
+                });
+            } else {
+                objects.forEach(function(item) {
+                    item.addMaterial({ opacity: 1 });
+
+                    item.oneClick = false;
+                    scoreVariable = 0;
+                });
+            }
+            break;
+    }
+}
+
+window.createScene = function() {
+    var newScenery = new Scenery(background);
+    projectObject.addScenery(newScenery);
+
+    console.log(projectObject.sceneryList);
+    var op = document.createElement("option");
+    var length = projectObject.getSceneryListLength();
+    op.setAttribute("value", length - 1);
+    op.innerHTML = "페이지 " + (length);
+    op.setAttribute("selected", "");
+    $('#scene-dropdown')[0].appendChild(op);
+
+    projectObject.changeScenery(projectObject.sceneryList[length - 1]);
+    eraseCanvas();
+    setSceneNumber();
+}
+
 window.create = function(type) {
     if (PRIMITIVE_DEFINITIONS.includes(type)) {
         createPrimitive(type);
@@ -314,13 +412,25 @@ function onObjectSelect() {
         this.appendChild(mover);
     } else {
         // Execute events assigned to object.
-        for (var i = 0; i < currentSelectedObject.eventList.length; ++i) {
-            var event = currentSelectedObject.eventList[i];
-            var eventType = event['type'];
-            var func = EVENT_DICTIONARY[eventType];
-            var arg = event['arg'];
-            func(arg);
+        if (!currentSelectedObject.oneClick) {
+            for (var i = 0; i < currentSelectedObject.eventList.length; ++i) {
+                var event = currentSelectedObject.eventList[i];
+                var eventType = event['type'];
+                var func = EVENT_DICTIONARY[eventType];
+                var arg = event['arg'];
+                func(arg);
+            }
+            checkSocre();
         }
+    }
+}
+
+function checkSocre() {
+    switch (projectObject.projectType) {
+        case "find-hidden-pictures":
+            if (scoreVariable == projectObject.sceneryList[0].objectList.length) {
+                console.log("game set");
+            }
     }
 }
 
@@ -372,20 +482,39 @@ function newObject(type, shape, position, rotation, scale) {
     newObj.setClickListener(OBJECT_LISTENER);
 
     newObj.eventList = [];
-    newObj.eventList.push({ 'type': type, 'arg': 'bg1.jpg' });
+    //newObj.eventList.push({ 'type': type, 'arg': 'bg1.jpg' });
 
     // Make object face at camera origin by default.
     newObj.setLookAt('#camera');
+    newObj.setFadeInOutAni(mainFrame);
+    newEl.setAttribute("class", "object");
 
     sceneEl.appendChild(newEl);
 
     setObjectOnMiniMap(position);
 }
 
+function fadeInOutAll(fade) {
+    var objects = mainFrame.document.querySelectorAll(".object");
+    mainFrame.document.querySelector('#background').emit(fade);
+    for (var i = 0; i < objects.length; i++) {
+        objects[i].emit(fade);
+    }
+}
+
 function teleportEvent(arg) {
-    console.log('teleport! to:' + arg);
-    var imageUrl = BACKGROUND_PREFIX + arg;
-    background.setAttribute('src', imageUrl);
+    fadeInOutAll('fade-out');
+    setTimeout(function() {
+        eraseCanvas();
+        console.log('teleport! to:' + arg);
+        //projectObject.changeScenery(projectObject.sceneryList[arg-1]);
+        loadAllObjectOfScene(arg - 1);
+        fadeInOutAll('fade-in');
+    }, 2000);
+
+
+    /*var imageUrl = BACKGROUND_PREFIX + arg;
+    background.setAttribute('src', imageUrl);*/
 }
 
 function linkEvent(arg) {
@@ -415,6 +544,20 @@ function soundEvent(arg) {
     //soundEl.setAttribute('src',soundUrl);
     //sceneEl.appendChild(soundEl);
     //soundEl.components.sound.playSound();
+}
+
+function onVisibleEvent(arg) {
+    newMaterial = { opacity: 1 }
+    currentSelectedObject.addMaterial(newMaterial);
+}
+
+function oneClickEvent(arg) {
+    currentSelectedObject.oneClick = true;
+}
+
+function addScoreEvent(arg) {
+    scoreVariable += Number(arg);
+    console.log("Score" + scoreVariable);
 }
 
 function variableEvent(arg) {
@@ -508,6 +651,7 @@ function Objct(el, obj) {
         this.eventList = [];
 
         this.lookat = "";
+        this.oneClick = false;
     }
 }
 
@@ -549,6 +693,34 @@ Objct.prototype.setMaterial = function(newMaterial) {
     for (var key in newMaterial) {
         this.el.setAttribute(key, newMaterial[key]);
     }
+}
+Objct.prototype.addMaterial = function(newMaterial){
+    for(var key in newMaterial){
+        this.material[key] = newMaterial[key];
+        this.el.setAttribute(key, newMaterial[key]);
+    }
+}
+
+Objct.prototype.setFadeInOutAni = function(frame){
+    var fadeIn = frame.document.createElement("a-animation" );
+    var fadeOut = frame.document.createElement("a-animation" );
+    fadeIn.setAttribute("attribute","material.color");
+    fadeOut.setAttribute("attribute","material.color");
+    
+    fadeIn.setAttribute("begin","fade-in");
+    fadeOut.setAttribute("begin","fade-out");
+
+    fadeIn.setAttribute("from","black");
+    fadeOut.setAttribute("from","white");
+
+    fadeIn.setAttribute("to","white");
+    fadeOut.setAttribute("to","black");
+
+    fadeIn.setAttribute("dur","2000");
+    fadeOut.setAttribute("dur","2000");
+
+    this.el.appendChild(fadeIn);
+    this.el.appendChild(fadeOut);
 }
 
 Objct.prototype.setSoundSrc = function(soundUrl) {
@@ -633,16 +805,10 @@ Controller.prototype.createElFromObj = function(frame, obj) {
     obj.setMaterial(obj.material);
     obj.setClickListener(obj.clickListener);
     obj.setLookAt(obj.lookat);
+    obj.setFadeInOutAni(frame);
+    newEl.setAttribute("class","object");
 
     return newEl;
-}
-
-Controller.prototype.getNum = function() {
-    return objectList.length;
-}
-
-Controller.prototype.getObjects = function() {
-    return objectList;
 }
 
 module.exports = {
@@ -657,6 +823,7 @@ var Objct = require('./object.js').Objct;
 
 function Project() {
     this.title = "";
+    this.projectType = "";
     this.sceneryList = [];
 }
 
@@ -697,9 +864,15 @@ Project.prototype.changeScenery = function(scenery) {
 Project.prototype.getCurrentScenery = function() {
     return this.sceneryList[currentIndex];
 }
-
+Project.prototype.getCurrentIndex = function() {
+    return currentIndex;
+}
+Project.prototype.getSceneryListLength = function(){
+    return this.sceneryList.length;
+}
 Project.prototype.toJson = function() {
-    var saveForm = { title: this.title };
+    var saveForm = { title: this.title};
+    saveForm.projectType = this.projectType;
     saveForm.sceneryList = [];
     for (var i in this.sceneryList) {
         var scenery = this.sceneryList[i];
@@ -711,6 +884,7 @@ Project.prototype.toJson = function() {
 Project.prototype.fromJson = function(json) {
     var saveForm = JSON.parse(json);
     this.title = saveForm.title;
+    this.projectType = saveForm.projectType;
     for (var i in saveForm.sceneryList) {
     	var sceneryObject = new Scenery(null, saveForm.sceneryList[i]);
         this.sceneryList.push(sceneryObject);
@@ -744,6 +918,7 @@ function Scenery(bgEl, scenery) {
         this.bgUrl = "";
         this.objectList = [];
     }
+    this.sceneryType = "";
 }
 
 Scenery.prototype.setBackgroundImageUrl = function(url) {
@@ -799,6 +974,7 @@ Scenery.prototype.removeObject = function(obj) {
 Scenery.prototype.getSaveForm = function() {
     var saveForm = {};
     saveForm.bgUrl = this.bgUrl;
+    saveForm.sceneryType = this.sceneryType;
     saveForm.objectList = [];
     for (var i in this.objectList) {
         var object = this.objectList[i];

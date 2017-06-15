@@ -98,25 +98,22 @@
         </div>
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1" style="padding-right:0px;">
+
           <ul class="nav navbar-nav">
-            <li class="dropdown" style="width:100px;">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">페이지<span class="caret"></span></a>
-              <ul class="dropdown-menu">
-                <li><a href="#">Action</a></li>
-                <li><a href="#">Another action</a></li>
-                <li><a href="#">Something else here</a></li>
-                <li role="separator" class="divider"></li>
-                <li><a href="#">Separated link</a></li>
-                <li role="separator" class="divider"></li>
-                <li><a href="#">One more separated link</a></li>
+
+            <li class="dropdown" style="width:80px;">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">페이지<span class="caret"></span></a>
+              <ul class="dropdown-menu" id="scene-dropdown">
               </ul>
             </li>
+          <li><div id="scene-list"></div></li>
+
           </ul>
           <ul class="nav navbar-nav navbar-right" style="text-align:center;">
             <li class="header-item" style="display:inline-flex;">
               <span class="header-span">미리보기</span>
             </li>
-            <li class="header-item" style="display:inline-flex;" onClick="saveProject(<%= user.userID %>, <%= sceneID %>);">
+            <li class="header-item" style="display:inline-flex;" onClick="saveProject(1, <%= sceneID %>);">
               <span class="header-span">저장</span>
             </li>
           </ul>
@@ -137,6 +134,11 @@
           <div class="panel panel-default panel-floating">
             <div class="panel-body panel-floating-inside">
               <span>button2</span>
+            </div>
+          </div>
+          <div class="panel panel-default panel-floating" onclick="createScene()">
+            <div class="panel-body panel-floating-inside">
+              <span>Scene</span>
             </div>
           </div>
         </div>
