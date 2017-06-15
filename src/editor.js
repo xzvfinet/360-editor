@@ -143,6 +143,7 @@ function clearAllObject(scenery) {
 }
 
 function eraseCanvas() {
+    mover = null;
     var objects = mainFrame.document.querySelectorAll(".object");
     console.log(objects);
     for (var i = 0; i < objects.length; i++) {
