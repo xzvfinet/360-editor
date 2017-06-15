@@ -95,6 +95,32 @@ window.loadAllObjectOfScene = function(sceneNum) {
     setSceneNumber();
 }
 
+window.switchEditorMode = function(){
+        editorMode = !editorMode;
+
+        if (!editorMode) {
+            if(mover){
+                mover.parentEl.removeChild(mover);
+                mover = null;
+            }
+
+            $('#floating-button').animate({
+                left: "-=150"
+            },1000,function(){
+
+            });
+            onObjectUnselect();
+            templateFunc();
+        }else{
+            $('#floating-button').animate({
+                left: "+=150"
+            },1000,function(){
+
+            });
+        }
+
+        
+}
 function setSceneNumber() {
     sceneNum = $('#scene-list')[0];
     //remove all child
