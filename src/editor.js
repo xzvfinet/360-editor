@@ -342,12 +342,16 @@ window.createScene = function() {
     var newScenery = new Scenery(background);
     projectObject.addScenery(newScenery);
 
-    console.log(projectObject.sceneryList);
-    var op = document.createElement("option");
+    var op = document.createElement("li");
+    var a = document.createElement("a");
     var length = projectObject.getSceneryListLength();
-    op.setAttribute("value", length - 1);
-    op.innerHTML = "페이지 " + (length);
-    op.setAttribute("selected", "");
+    a.innerHTML = "신이름" + (length);
+    
+    var func = "loadAllObjectOfScene("+(length-1)+")";
+    console.log(func);
+    a.setAttribute("onclick", func);
+    
+    op.appendChild(a);
     $('#scene-dropdown')[0].appendChild(op);
 
     projectObject.changeScenery(projectObject.sceneryList[length - 1]);
