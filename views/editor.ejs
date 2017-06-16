@@ -128,17 +128,17 @@
         <div class="panel-body" style="padding:10px;">
           <div class="panel panel-default panel-floating" onClick="getImagePopup();">
             <div class="panel-body panel-floating-inside">
-              <span>Image</span>
+              <span>이미지 추가</span>
             </div>
           </div>
-          <div class="panel panel-default panel-floating">
+          <div class="panel panel-default panel-floating" onclick="createOption()">
             <div class="panel-body panel-floating-inside">
-              <span>button2</span>
+              <span>선택지 추가</span>
             </div>
           </div>
           <div class="panel panel-default panel-floating" onclick="createScene()">
             <div class="panel-body panel-floating-inside">
-              <span>Scene</span>
+              <span>새로운 장면</span>
             </div>
           </div>
         </div>
@@ -217,8 +217,7 @@ $(document).ready(function () {
     $("#uploader_iframe").unbind().on('load', function() {  // This block of code will execute when the response is sent from the server.
       result = JSON.parse($(this).contents().text());  // Content of the iframe will be the response sent from the server. Parse the response as the JSON object
       if(imageFlag == FLAG_IMAGE){
-        $("#img-url").val(""+result.result);
-        create('image');
+        createImage(result.result);
       }else{
         setBackground(result.result);
       }
