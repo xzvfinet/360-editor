@@ -482,6 +482,7 @@ function onObjectSelect() {
 function checkSocre() {
     switch (projectObject.projectType) {
         case "find-hidden-pictures":
+            mainFrame.document.getElementById("object-num").setAttribute('value',scoreVariable+"/"+projectObject.sceneryList[0].objectList.length);
             if (scoreVariable == projectObject.sceneryList[0].objectList.length) {
                 console.log("game set");
             }
