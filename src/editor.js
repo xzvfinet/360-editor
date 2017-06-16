@@ -250,6 +250,7 @@ function initCanvas() {
                 var pos = cameraEl.components['mouse-cursor'].__raycaster.ray.direction;
                 initialPos = { x: pos.x * radius, y: pos.y * radius, z: pos.z * radius };
                 prevPos = initialPos;
+                $("#object-panel").css("display", "none");
             });
             this.el.addEventListener('mouseup', function(evt) {
                 this.setAttribute('material', 'color', "#000000");
@@ -351,7 +352,7 @@ window.createScene = function() {
 }
 window.createOption = function() {
     var obj = createImage('https://unsplash.it/600/300');
-    obj.addEvent('teleport', projectObject.getCurrentIndex()+1);
+    obj.addEvent('teleport', projectObject.getCurrentIndex() + 1);
 
     console.log(obj);
 }
@@ -385,7 +386,7 @@ function createObject(type) {
     return newObject(type, 'plane');
 }
 
-function onObjectSelect() {
+function onObjectSelect(event) {
     var selected = projectObject.getCurrentScenery().findObjectByEl(this);
 
     if (editorMode && currentSelectedObject == selected) {
@@ -403,6 +404,7 @@ function onObjectSelect() {
         // append mover element
         mover = newMover();
         this.appendChild(mover);
+        openObjectPropertyPanel(event.detail.mouseEvent);
     } else {
         // Execute events assigned to object.
         if (!currentSelectedObject.oneClick) {
@@ -416,6 +418,13 @@ function onObjectSelect() {
             checkSocre();
         }
     }
+}
+
+function openObjectPropertyPanel(event) {
+    if ($("#object-panel").css("display") == "none") {
+        $("#object-panel").css("display", "");
+    }
+    $("#object-panel").css( {position:"fixed", top:event.clientY, left:event.clientX});
 }
 
 function checkSocre() {

@@ -233,7 +233,7 @@
 	  /**
 	   * @private
 	   */
-	  __onRelease: function __onRelease() {
+	  __onRelease: function __onRelease(evt) {
 	    if (!this.__isActive()) {
 	      return;
 	    }
@@ -251,9 +251,9 @@
 
 	    if (this.__intersectedEl) {
 	   	  if(this.__isDown) {
-	        this.__emit('click');
+	        this.__emit('click', evt);
 	      }
-	      this.__emit('mouseup');
+	      this.__emit('mouseup', evt);
 	    }
 	    this.__isDown = false;
 	    this.__resetMousePosition();
@@ -521,7 +521,7 @@
 	  /**
 	   * @private
 	   */
-	  __emit: function __emit(evt, mouseEvent) {
+	  __emit: function c(evt, mouseEvent) {
 	    var __intersectedEl = this.__intersectedEl;
 
 	    this.el.emit(evt, { target: __intersectedEl });
