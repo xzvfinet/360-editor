@@ -84,6 +84,8 @@ window.loadProject = function(projectJson) {
     //scene number
     setSceneNumber();
     setSceneDropDown();
+
+    initTemplate();
 }
 
 window.loadAllObjectOfScene = function(sceneNum) {
@@ -335,6 +337,21 @@ function initCanvas() {
         }
     });
 }
+function initTemplate() {
+    switch (projectObject.projectType) {
+        case "find-hidden-pictures":
+            console.log("AA");
+            var newEl = mainFrame.document.createElement("a-text");
+
+            var position = { x: 8, y: 3.5, z: -5 }
+            newEl.setAttribute('id','object-num');
+            newEl.setAttribute('position', position);
+            newEl.setAttribute('value', "0/" + projectObject.sceneryList[0].objectList.length);
+
+            cameraEl.appendChild(newEl);
+    }
+}
+
 
 var time = 0;
 var timerId = 0;
@@ -348,7 +365,7 @@ function templateFunc() {
                     item.addMaterial({ opacity: 0 });
                 });
                 time = 0;
-                timerId = setInterval(function(){time+=1;console.log(time);},1000)
+                timerId = setInterval(function(){time+=1;},1000)
             } else {
                 clearInterval(timerId);
                 objects.forEach(function(item) {
