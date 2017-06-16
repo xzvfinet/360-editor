@@ -340,15 +340,21 @@ function initCanvas() {
 function initTemplate() {
     switch (projectObject.projectType) {
         case "find-hidden-pictures":
-            console.log("AA");
             var newEl = mainFrame.document.createElement("a-text");
+            var clockEl = mainFrame.document.createElement("a-text");
 
-            var position = { x: 8, y: 3.5, z: -5 }
+            var position = { x: 8, y: 3.5, z: -5 };
             newEl.setAttribute('id','object-num');
             newEl.setAttribute('position', position);
             newEl.setAttribute('value', "0/" + projectObject.sceneryList[0].objectList.length);
 
+            clockEl.setAttribute('id','clock');
+            position = { x: 8, y: 2.5, z: -5 };
+            clockEl.setAttribute('position', position);
+            clockEl.setAttribute('value', time);
+
             cameraEl.appendChild(newEl);
+            cameraEl.appendChild(clockEl);
     }
 }
 
@@ -365,7 +371,10 @@ function templateFunc() {
                     item.addMaterial({ opacity: 0 });
                 });
                 time = 0;
-                timerId = setInterval(function(){time+=1;},1000)
+                timerId = setInterval(function(){
+                    time+=1;
+                    mainFrame.document.getElementById('clock').setAttribute('value',time);
+                },1000)
             } else {
                 clearInterval(timerId);
                 objects.forEach(function(item) {
