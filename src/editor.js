@@ -377,6 +377,7 @@ function templateFunc() {
                 },1000)
             } else {
                 clearInterval(timerId);
+                mainFrame.document.getElementById('clock').setAttribute('value',0);
                 objects.forEach(function(item) {
                     item.addMaterial({ opacity: 1 });
 
