@@ -105,15 +105,13 @@ window.switchEditorMode = function(){
                 mover = null;
             }
             onObjectUnselect();
-            templateFunc();
         }
+        templateFunc();
         $('#floating-button').animate({
             left: "+="+hidden_button
         }, 1000, function () {
 
         });
-
-
 }
 function setSceneNumber() {
     sceneNum = $('#scene-list')[0];
@@ -338,6 +336,9 @@ function initCanvas() {
     });
 }
 
+var time = 0;
+var timerId = 0;
+
 function templateFunc() {
     switch (projectObject.projectType) {
         case "find-hidden-pictures":
@@ -346,7 +347,10 @@ function templateFunc() {
                 objects.forEach(function(item) {
                     item.addMaterial({ opacity: 0 });
                 });
+                time = 0;
+                timerId = setInterval(function(){time+=1;console.log(time);},1000)
             } else {
+                clearInterval(timerId);
                 objects.forEach(function(item) {
                     item.addMaterial({ opacity: 1 });
 
