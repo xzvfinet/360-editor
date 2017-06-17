@@ -53,13 +53,15 @@ window.onLoadCanvas = function(frame) {
     initCanvas();
 
     newProject();
+    updateSceneNumberList();
+    updateSceneDropDown();
 }
 
 window.setBackground = function(url) {
     projectObject.getCurrentScenery().setBackgroundImageUrl(url);
 }
 
-window.newProject = function() {
+function newProject() {
     projectObject = new Project();
     var newScenery = new Scenery(background);
     projectObject.addScenery(newScenery);
@@ -74,9 +76,7 @@ window.loadProject = function(projectJson) {
 
     var loadedProject = new Project();
     loadedProject.fromJson(projectJson);
-    for (var i in loadedProject.sceneryList) {
-        relateSceneryWithDomEl(loadedProject.sceneryList[i]);
-    }
+    relateSceneryWithDomEl(loadedProject.sceneryList[0]);
     for (var j in loadedProject.sceneryList[0].objectList) {
         relateObjectWithDomEl(loadedProject.sceneryList[0].objectList[j]);
     }
