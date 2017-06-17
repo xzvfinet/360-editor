@@ -30,6 +30,16 @@
     box-shadow: 0px 2px 5px #666;
     z-index: 1;
   }
+  #object-panel{
+    width: 300px;
+    height: 300px;
+    border-radius: 1%;
+    position: fixed;
+    top: 100px;
+    left: 100px;
+    box-shadow: 0px 2px 5px #666;
+    z-index: 1;
+  }
   .panel-floating{
     height: 40px;
     box-shadow: 0px 2px 5px #666;
@@ -110,7 +120,10 @@
 
           </ul>
           <ul class="nav navbar-nav navbar-right" style="text-align:center;">
-            <li class="header-item" style="display:inline-flex;">
+            <li class="header-item" style="display:inline-flex;" onclick="getBackgroundPopup()">
+              <span class="header-span">배경바꾸기</span>
+            </li>
+            <li class="header-item" style="display:inline-flex;" onclick="toggleEditorMode()">
               <span class="header-span">미리보기</span>
             </li>
             <li class="header-item" style="display:inline-flex;" onClick="saveProject(1, <%= sceneID %>);">
@@ -128,17 +141,26 @@
         <div class="panel-body" style="padding:10px;">
           <div class="panel panel-default panel-floating" onClick="getImagePopup();">
             <div class="panel-body panel-floating-inside">
-              <span>Image</span>
+              <span>이미지 추가</span>
             </div>
           </div>
-          <div class="panel panel-default panel-floating">
+          <div class="panel panel-default panel-floating" onclick="createOption()">
             <div class="panel-body panel-floating-inside">
-              <span>button2</span>
+              <span>선택지 추가</span>
             </div>
           </div>
           <div class="panel panel-default panel-floating" onclick="createScene()">
             <div class="panel-body panel-floating-inside">
-              <span>Scene</span>
+              <span>새로운 장면</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div id="object-panel" class="panel panel-default" style="display:none;">
+        <div class="panel-body" style="padding:10px;">
+        <div class="panel panel-default panel-floating" onclick="removeSelectedObject()">
+            <div class="panel-body panel-floating-inside">
+              <span>삭제</span>
             </div>
           </div>
         </div>
@@ -217,8 +239,7 @@ $(document).ready(function () {
     $("#uploader_iframe").unbind().on('load', function() {  // This block of code will execute when the response is sent from the server.
       result = JSON.parse($(this).contents().text());  // Content of the iframe will be the response sent from the server. Parse the response as the JSON object
       if(imageFlag == FLAG_IMAGE){
-        $("#img-url").val(""+result.result);
-        create('image');
+        createImage(result.result);
       }else{
         setBackground(result.result);
       }

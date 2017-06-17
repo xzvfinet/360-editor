@@ -15,6 +15,7 @@ function Scenery(bgEl, scenery) {
         this.bgUrl = "";
         this.objectList = [];
     }
+    this.name = "Scene";
     this.sceneryType = "";
 }
 
@@ -71,6 +72,7 @@ Scenery.prototype.removeObject = function(obj) {
 Scenery.prototype.getSaveForm = function() {
     var saveForm = {};
     saveForm.bgUrl = this.bgUrl;
+    saveForm.name = this.name;
     saveForm.sceneryType = this.sceneryType;
     saveForm.objectList = [];
     for (var i in this.objectList) {

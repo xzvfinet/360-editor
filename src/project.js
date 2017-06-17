@@ -39,7 +39,7 @@ Project.prototype.changeScenery = function(scenery) {
         currentIndex = scenery;
     }
 
-    this.sceneryList[currentIndex].bgEl = bgEl;
+    this.sceneryList[currentIndex].setBgEl(bgEl);
 }
 
 Project.prototype.getCurrentScenery = function() {
