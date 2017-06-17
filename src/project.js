@@ -4,6 +4,7 @@ var Objct = require('./object.js').Objct;
 
 function Project() {
     this.title = "";
+    this.projectType = "";
     this.sceneryList = [];
 }
 
@@ -44,9 +45,15 @@ Project.prototype.changeScenery = function(scenery) {
 Project.prototype.getCurrentScenery = function() {
     return this.sceneryList[currentIndex];
 }
-
+Project.prototype.getCurrentIndex = function() {
+    return currentIndex;
+}
+Project.prototype.getSceneryListLength = function(){
+    return this.sceneryList.length;
+}
 Project.prototype.toJson = function() {
-    var saveForm = { title: this.title };
+    var saveForm = { title: this.title};
+    saveForm.projectType = this.projectType;
     saveForm.sceneryList = [];
     for (var i in this.sceneryList) {
         var scenery = this.sceneryList[i];
@@ -58,6 +65,7 @@ Project.prototype.toJson = function() {
 Project.prototype.fromJson = function(json) {
     var saveForm = JSON.parse(json);
     this.title = saveForm.title;
+    this.projectType = saveForm.projectType;
     for (var i in saveForm.sceneryList) {
     	var sceneryObject = new Scenery(null, saveForm.sceneryList[i]);
         this.sceneryList.push(sceneryObject);

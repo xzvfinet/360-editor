@@ -15,6 +15,7 @@ function Objct(el, obj) {
         this.eventList = [];
 
         this.lookat = "";
+        this.oneClick = false;
     }
 }
 
@@ -56,6 +57,34 @@ Objct.prototype.setMaterial = function(newMaterial) {
     for (var key in newMaterial) {
         this.el.setAttribute(key, newMaterial[key]);
     }
+}
+Objct.prototype.addMaterial = function(newMaterial){
+    for(var key in newMaterial){
+        this.material[key] = newMaterial[key];
+        this.el.setAttribute(key, newMaterial[key]);
+    }
+}
+
+Objct.prototype.setFadeInOutAni = function(frame){
+    var fadeIn = frame.document.createElement("a-animation" );
+    var fadeOut = frame.document.createElement("a-animation" );
+    fadeIn.setAttribute("attribute","material.color");
+    fadeOut.setAttribute("attribute","material.color");
+    
+    fadeIn.setAttribute("begin","fade-in");
+    fadeOut.setAttribute("begin","fade-out");
+
+    fadeIn.setAttribute("from","black");
+    fadeOut.setAttribute("from","white");
+
+    fadeIn.setAttribute("to","white");
+    fadeOut.setAttribute("to","black");
+
+    fadeIn.setAttribute("dur","2000");
+    fadeOut.setAttribute("dur","2000");
+
+    this.el.appendChild(fadeIn);
+    this.el.appendChild(fadeOut);
 }
 
 Objct.prototype.setSoundSrc = function(soundUrl) {
@@ -140,16 +169,10 @@ Controller.prototype.createElFromObj = function(frame, obj) {
     obj.setMaterial(obj.material);
     obj.setClickListener(obj.clickListener);
     obj.setLookAt(obj.lookat);
+    obj.setFadeInOutAni(frame);
+    newEl.setAttribute("class","object");
 
     return newEl;
-}
-
-Controller.prototype.getNum = function() {
-    return objectList.length;
-}
-
-Controller.prototype.getObjects = function() {
-    return objectList;
 }
 
 module.exports = {
