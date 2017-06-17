@@ -194,4 +194,15 @@ function saveThumbnail(id, path){
   });
 }
 
+function getTemplateList(){
+  var query = "select * from template";
+  connection.query(query, function(err, info){
+    if(err){
+      console.log('err : ' + err);
+    }else{
+      res.end(JSON.stringify(info));
+    }
+  });
+}
+
 module.exports = router;
