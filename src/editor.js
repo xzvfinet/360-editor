@@ -343,6 +343,7 @@ function initTemplate() {
         case "find-hidden-pictures":
             var newEl = mainFrame.document.createElement("a-text");
             var clockEl = mainFrame.document.createElement("a-text");
+            var gameSetImage = mainFrame.document.createElement("a-image");
 
             var position = { x: 8, y: 3.5, z: -5 };
             newEl.setAttribute('id','object-num');
@@ -354,8 +355,13 @@ function initTemplate() {
             clockEl.setAttribute('position', position);
             clockEl.setAttribute('value', time);
 
+            gameSetImage.setAttribute('id','game-set');
+            gameSetImage.setAttribute('position','0 0 3');
+            gameSetImage.setAttribute('src','https://traverser360.s3.ap-northeast-2.amazonaws.com/1497716132769.png');
+
             cameraEl.appendChild(newEl);
             cameraEl.appendChild(clockEl);
+            cameraEl.appendChild(gameSetImage);
     }
 }
 
@@ -408,6 +414,7 @@ function templateFunc() {
             } else {
                 clearInterval(timerId);
                 mainFrame.document.getElementById('clock').setAttribute('value',0);
+                mainFrame.document.getElementById('game-set').setAttribute('position','0 0 3');
                 updateObjectNumUI();
                 objects.forEach(function(item) {
                     item.addMaterial({ opacity: 1 });
@@ -519,7 +526,8 @@ function checkSocre() {
         case "find-hidden-pictures":
             mainFrame.document.getElementById("object-num").setAttribute('value',scoreVariable+"/"+projectObject.sceneryList[0].objectList.length);
             if (scoreVariable == projectObject.sceneryList[0].objectList.length) {
-                console.log("game set");
+                mainFrame.document.getElementById('game-set').setAttribute('position','0 0 -1');
+                clearInterval(timerId);
             }
     }
 }
