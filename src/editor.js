@@ -101,6 +101,7 @@ window.loadAllObjectOfScene = function(sceneNum) {
 var hidden_button = 150;
 window.switchEditorMode = function(){
         editorMode = !editorMode;
+        $("#floating-panel").css("display", "none");
         hidden_button *= -1;
         if (!editorMode) {
             if(mover){
@@ -372,8 +373,8 @@ function createTemplateObject(){
             updateObjectNumUI();
     }
 }
-    window.createLatelyObject = function(){
-        if(latelyCreatedObject){
+window.createLatelyObject = function(){
+    if(latelyCreatedObject){
         var newEl = mainFrame.document.createElement('a-image');
         var newObj = new obj.Objct(newEl,latelyCreatedObject);
         projectObject.getCurrentScenery().addObject(newObj);
@@ -385,11 +386,13 @@ function createTemplateObject(){
         newObj.setScale(newObj.transform.scale);
         newObj.setFadeInOutAni(mainFrame);
         newObj.setClickListener(OBJECT_LISTENER);
-
+        newObj.setLookAt('#camera');
+        
         newEl.setAttribute('src',newObj.material.src);
         newEl.setAttribute('class','object');
 
         sceneEl.appendChild(newEl);
+        updateObjectNumUI();
     }else{
         console.log("no lately created object");
     }
