@@ -137,6 +137,13 @@ function relateObjectWithDomEl(object) {
     sceneEl.appendChild(newEl)
 }
 
+window.removeSelectedObject = function() {
+    projectObject.getCurrentScenery().removeObject(currentSelectedObject);
+    mover = null;
+    currentSelectedObject = null;
+    $("#object-panel").css("display", "none");
+}
+
 function clearAllObject(scenery) {
     projectObject.getCurrentScenery().removeAllObject();
 }
@@ -189,6 +196,20 @@ function initCanvas() {
     sceneEl = mainFrame.document.querySelector('a-scene');
     cameraEl = mainFrame.document.querySelector('[camera]');
     background = mainFrame.document.querySelector('a-sky');
+
+
+    // background listener
+    mainFrame.AFRAME.registerComponent("background-listener", {
+        init: function() {
+            console.log(this);
+            this.el.addEventListener('click', function() {
+                onObjectUnselect();
+            });
+        }
+
+    });
+    background.setAttribute('background-listener', "");
+    background.setAttribute('material', 'side', 'double');
 
     mainFrame.AFRAME.registerComponent(OBJECT_LISTENER, {
         schema: {
@@ -424,7 +445,7 @@ function openObjectPropertyPanel(event) {
     if ($("#object-panel").css("display") == "none") {
         $("#object-panel").css("display", "");
     }
-    $("#object-panel").css( {position:"fixed", top:event.clientY, left:event.clientX});
+    $("#object-panel").css({ position: "fixed", top: event.clientY, left: event.clientX });
 }
 
 function checkSocre() {
@@ -438,6 +459,19 @@ function checkSocre() {
 
 function onObjectUnselect() {
     currentSelectedObject = null;
+    if (mover)
+        mover.parentEl.removeChild(mover);
+    mover = null;
+    $("#object-panel").css("display", "none");
+}
+
+window.toggleEditorMode = function() {
+    editorMode = !editorMode;
+    if (editorMode) {
+        console.log("Editor Mode");
+    } else {
+        console.log("Preview Mode")
+    }
 }
 
 function newMover() {
