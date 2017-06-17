@@ -366,23 +366,27 @@ function createTemplateObject(){
             updateObjectNumUI();
     }
 }
-window.createLatelyObject = function(){
-    var newEl = mainFrame.document.createElement('a-image');
-    var newObj = new obj.Objct(newEl,latelyCreatedObject);
-    projectObject.getCurrentScenery().addObject(newObj);
-    
-    position = util.getForwardPosition(cameraEl.getAttribute('rotation'));
-    newObj.setPosition(position);
-    rotation = cameraEl.getAttribute('rotation');
-    newObj.setRotation(rotation);
-    newObj.setScale(newObj.transform.scale);
-    newObj.setFadeInOutAni(mainFrame);
-    newObj.setClickListener(OBJECT_LISTENER);
+    window.createLatelyObject = function(){
+        if(latelyCreatedObject){
+        var newEl = mainFrame.document.createElement('a-image');
+        var newObj = new obj.Objct(newEl,latelyCreatedObject);
+        projectObject.getCurrentScenery().addObject(newObj);
+        
+        position = util.getForwardPosition(cameraEl.getAttribute('rotation'));
+        newObj.setPosition(position);
+        rotation = cameraEl.getAttribute('rotation');
+        newObj.setRotation(rotation);
+        newObj.setScale(newObj.transform.scale);
+        newObj.setFadeInOutAni(mainFrame);
+        newObj.setClickListener(OBJECT_LISTENER);
 
-    newEl.setAttribute('src',newObj.material.src);
-    newEl.setAttribute('class','object');
+        newEl.setAttribute('src',newObj.material.src);
+        newEl.setAttribute('class','object');
 
-    sceneEl.appendChild(newEl);
+        sceneEl.appendChild(newEl);
+    }else{
+        console.log("no lately created object");
+    }
 }
 
 var time = 0;
