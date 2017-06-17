@@ -360,8 +360,11 @@ function initTemplate() {
 }
 
 function createTemplateObject(){
-    latelyCreatedObject.eventList.push({'type': "oneClick", 'arg':""},{'type':'onVisible','arg':""},{'type':'addScore','arg':'1'});
-    updateObjectNumUI();
+    switch (projectObject.projectType) {
+        case "find-hidden-pictures":
+            latelyCreatedObject.eventList.push({'type': "oneClick", 'arg':""},{'type':'onVisible','arg':""},{'type':'addScore','arg':'1'});
+            updateObjectNumUI();
+    }
 }
 window.createLatelyObject = function(){
     var newEl = mainFrame.document.createElement('a-image');
