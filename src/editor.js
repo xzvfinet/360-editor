@@ -42,6 +42,7 @@ var miniMapDirector = null;
 var projectObject = null;
 var editorMode = true;
 var currentSelectedObject = null;
+var latelyCreatedObject = null;
 var isDown = false;
 var currentSelectedArrowEl = null;
 var scoreVariable = 0;
@@ -358,6 +359,28 @@ function initTemplate() {
     }
 }
 
+function createTemplateObject(){
+    latelyCreatedObject.eventList.push({'type': "oneClick", 'arg':""},{'type':'onVisible','arg':""},{'type':'addScore','arg':'1'});
+    updateObjectNumUI();
+}
+window.createLatelyObject = function(){
+    var newEl = mainFrame.document.createElement('a-image');
+    var newObj = new obj.Objct(newEl,latelyCreatedObject);
+    projectObject.getCurrentScenery().addObject(newObj);
+    
+    position = util.getForwardPosition(cameraEl.getAttribute('rotation'));
+    newObj.setPosition(position);
+    rotation = cameraEl.getAttribute('rotation');
+    newObj.setRotation(rotation);
+    newObj.setScale(newObj.transform.scale);
+    newObj.setFadeInOutAni(mainFrame);
+    newObj.setClickListener(OBJECT_LISTENER);
+
+    newEl.setAttribute('src',newObj.material.src);
+    newEl.setAttribute('class','object');
+
+    sceneEl.appendChild(newEl);
+}
 
 var time = 0;
 var timerId = 0;
@@ -378,6 +401,7 @@ function templateFunc() {
             } else {
                 clearInterval(timerId);
                 mainFrame.document.getElementById('clock').setAttribute('value',0);
+                updateObjectNumUI();
                 objects.forEach(function(item) {
                     item.addMaterial({ opacity: 1 });
 
@@ -387,6 +411,9 @@ function templateFunc() {
             }
             break;
     }
+}
+function updateObjectNumUI(){
+    mainFrame.document.getElementById('object-num').setAttribute('value',"0/"+projectObject.sceneryList[0].objectList.length);
 }
 
 window.createScene = function() {
@@ -547,6 +574,9 @@ function newObject(type, shape, position, rotation, scale) {
 
     sceneEl.appendChild(newEl);
 
+    latelyCreatedObject = newObj;
+    createTemplateObject();
+    
     setObjectOnMiniMap(position);
 }
 
