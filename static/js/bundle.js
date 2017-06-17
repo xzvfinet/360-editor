@@ -54,13 +54,15 @@ window.onLoadCanvas = function(frame) {
     initCanvas();
 
     newProject();
+    updateSceneNumberList();
+    updateSceneDropDown();
 }
 
 window.setBackground = function(url) {
     projectObject.getCurrentScenery().setBackgroundImageUrl(url);
 }
 
-window.newProject = function() {
+function newProject() {
     projectObject = new Project();
     var newScenery = new Scenery(background);
     projectObject.addScenery(newScenery);
@@ -75,16 +77,14 @@ window.loadProject = function(projectJson) {
 
     var loadedProject = new Project();
     loadedProject.fromJson(projectJson);
-    for (var i in loadedProject.sceneryList) {
-        relateSceneryWithDomEl(loadedProject.sceneryList[i]);
-    }
+    relateSceneryWithDomEl(loadedProject.sceneryList[0]);
     for (var j in loadedProject.sceneryList[0].objectList) {
         relateObjectWithDomEl(loadedProject.sceneryList[0].objectList[j]);
     }
     projectObject = loadedProject;
     //scene number
-    setSceneNumber();
-    setSceneDropDown();
+    updateSceneNumberList();
+    updateSceneDropDown();
 }
 
 window.loadAllObjectOfScene = function(sceneNum) {
@@ -93,10 +93,10 @@ window.loadAllObjectOfScene = function(sceneNum) {
         relateObjectWithDomEl(projectObject.sceneryList[sceneNum].objectList[j]);
     }
     projectObject.changeScenery(projectObject.sceneryList[sceneNum]);
-    setSceneNumber();
+    updateSceneNumberList();
 }
 
-function setSceneNumber() {
+function updateSceneNumberList() {
     sceneNum = $('#scene-list')[0];
     //remove all child
     while (sceneNum.hasChildNodes()) { sceneNum.removeChild(sceneNum.firstChild); }
@@ -114,13 +114,12 @@ function setSceneNumber() {
     }
 }
 
-function setSceneDropDown() {
+function updateSceneDropDown() {
     sceneDropdown = $('#scene-dropdown')[0];
-    console.log(sceneDropdown);
     while (sceneDropdown.hasChildNodes()) { sceneDropdown.removeChild(sceneDropdown.firstChild); }
 
-    var sceneName = "신이름"
     for (var i = 0; i < projectObject.getSceneryListLength(); i++) {
+        var sceneName = projectObject.sceneryList[i].name;
         var op = document.createElement("li");
         var a = document.createElement("a");
         op.appendChild(a);
@@ -139,11 +138,19 @@ function relateObjectWithDomEl(object) {
     sceneEl.appendChild(newEl)
 }
 
+window.removeSelectedObject = function() {
+    projectObject.getCurrentScenery().removeObject(currentSelectedObject);
+    mover = null;
+    currentSelectedObject = null;
+    $("#object-panel").css("display", "none");
+}
+
 function clearAllObject(scenery) {
     projectObject.getCurrentScenery().removeAllObject();
 }
 
 function eraseCanvas() {
+    currentSelectedObject = null;
     mover = null;
     var objects = mainFrame.document.querySelectorAll(".object");
     console.log(objects);
@@ -190,6 +197,19 @@ function initCanvas() {
     sceneEl = mainFrame.document.querySelector('a-scene');
     cameraEl = mainFrame.document.querySelector('[camera]');
     background = mainFrame.document.querySelector('a-sky');
+
+
+    // background listener
+    mainFrame.AFRAME.registerComponent("background-listener", {
+        init: function() {
+            this.el.addEventListener('click', function() {
+                onObjectUnselect();
+            });
+        }
+
+    });
+    background.setAttribute('background-listener', "");
+    background.setAttribute('material', 'side', 'double');
 
     mainFrame.AFRAME.registerComponent(OBJECT_LISTENER, {
         schema: {
@@ -251,6 +271,7 @@ function initCanvas() {
                 var pos = cameraEl.components['mouse-cursor'].__raycaster.ray.direction;
                 initialPos = { x: pos.x * radius, y: pos.y * radius, z: pos.z * radius };
                 prevPos = initialPos;
+                $("#object-panel").css("display", "none");
             });
             this.el.addEventListener('mouseup', function(evt) {
                 this.setAttribute('material', 'color', "#000000");
@@ -343,17 +364,18 @@ window.createScene = function() {
     var newScenery = new Scenery(background);
     projectObject.addScenery(newScenery);
 
-    console.log(projectObject.sceneryList);
-    var op = document.createElement("option");
-    var length = projectObject.getSceneryListLength();
-    op.setAttribute("value", length - 1);
-    op.innerHTML = "페이지 " + (length);
-    op.setAttribute("selected", "");
-    $('#scene-dropdown')[0].appendChild(op);
+    updateSceneDropDown();
 
     projectObject.changeScenery(projectObject.sceneryList[length - 1]);
+
     eraseCanvas();
-    setSceneNumber();
+    updateSceneNumberList();
+}
+window.createOption = function() {
+    var obj = createImage('https://unsplash.it/600/300');
+    obj.addEvent('teleport', projectObject.getCurrentIndex() + 1);
+
+    console.log(obj);
 }
 
 window.create = function(type) {
@@ -364,8 +386,9 @@ window.create = function(type) {
     }
 }
 
-window.createImage = function(type, src) {
-    newObject('primitive', type, src);
+window.createImage = function(src) {
+    imageUrlInputEl.value = src;
+    return newObject('primitive', 'image');
 }
 
 function createPrimitive(shape) {
@@ -373,7 +396,7 @@ function createPrimitive(shape) {
         console.log('Not valid shape:' + shape);
         return;
     }
-    newObject('primitive', shape);
+    return newObject('primitive', shape);
 }
 
 function createObject(type) {
@@ -381,10 +404,10 @@ function createObject(type) {
         console.log('Not valid type:' + type);
         return;
     }
-    newObject(type, 'plane');
+    return newObject(type, 'plane');
 }
 
-function onObjectSelect() {
+function onObjectSelect(event) {
     var selected = projectObject.getCurrentScenery().findObjectByEl(this);
 
     if (editorMode && currentSelectedObject == selected) {
@@ -395,22 +418,14 @@ function onObjectSelect() {
 
     if (editorMode) {
 
-        //shapeEl.innerHTML = currentSelectedObject.getShape();
         var position = currentSelectedObject.transform.position;
-        /*positionEl.innerHTML = util.makeArrayAsString(
-            util.floorTwo(position.x),
-            util.floorTwo(position.y),
-            util.floorTwo(position.z));*/
         var rotation = currentSelectedObject.transform.rotation;
-        /*rotationEl.innerHTML = util.makeArrayAsString(
-            util.floorTwo(rotation.x),
-            util.floorTwo(rotation.y));*/
         scale = currentSelectedObject.transform.scale;
-        //scaleEl.innerHTML = util.makeArrayAsString(scale.x, scale.y, scale.z);
 
         // append mover element
         mover = newMover();
         this.appendChild(mover);
+        openObjectPropertyPanel(event.detail.mouseEvent);
     } else {
         // Execute events assigned to object.
         if (!currentSelectedObject.oneClick) {
@@ -426,6 +441,13 @@ function onObjectSelect() {
     }
 }
 
+function openObjectPropertyPanel(event) {
+    if ($("#object-panel").css("display") == "none") {
+        $("#object-panel").css("display", "");
+    }
+    $("#object-panel").css({ position: "fixed", top: event.clientY, left: event.clientX });
+}
+
 function checkSocre() {
     switch (projectObject.projectType) {
         case "find-hidden-pictures":
@@ -437,10 +459,19 @@ function checkSocre() {
 
 function onObjectUnselect() {
     currentSelectedObject = null;
-    /*shapeEl.innerHTML = "";
-    positionEl.innerHTML = "";
-    rotationEl.innerHTML = "";
-    scaleEl.innerHTML = "";*/
+    if (mover)
+        mover.parentEl.removeChild(mover);
+    mover = null;
+    $("#object-panel").css("display", "none");
+}
+
+window.toggleEditorMode = function() {
+    editorMode = !editorMode;
+    if (editorMode) {
+        console.log("Editor Mode");
+    } else {
+        console.log("Preview Mode")
+    }
 }
 
 function newMover() {
@@ -483,7 +514,6 @@ function newObject(type, shape, position, rotation, scale) {
     newObj.setClickListener(OBJECT_LISTENER);
 
     newObj.eventList = [];
-    //newObj.eventList.push({ 'type': type, 'arg': 'bg1.jpg' });
 
     // Make object face at camera origin by default.
     newObj.setLookAt('#camera');
@@ -493,6 +523,8 @@ function newObject(type, shape, position, rotation, scale) {
     sceneEl.appendChild(newEl);
 
     setObjectOnMiniMap(position);
+
+    return newObj;
 }
 
 function fadeInOutAll(fade) {
@@ -508,14 +540,9 @@ function teleportEvent(arg) {
     setTimeout(function() {
         eraseCanvas();
         console.log('teleport! to:' + arg);
-        //projectObject.changeScenery(projectObject.sceneryList[arg-1]);
-        loadAllObjectOfScene(arg - 1);
+        loadAllObjectOfScene(arg);
         fadeInOutAll('fade-in');
     }, 2000);
-
-
-    /*var imageUrl = BACKGROUND_PREFIX + arg;
-    background.setAttribute('src', imageUrl);*/
 }
 
 function linkEvent(arg) {
@@ -859,7 +886,7 @@ Project.prototype.changeScenery = function(scenery) {
         currentIndex = scenery;
     }
 
-    this.sceneryList[currentIndex].bgEl = bgEl;
+    this.sceneryList[currentIndex].setBgEl(bgEl);
 }
 
 Project.prototype.getCurrentScenery = function() {
@@ -919,6 +946,7 @@ function Scenery(bgEl, scenery) {
         this.bgUrl = "";
         this.objectList = [];
     }
+    this.name = "Scene";
     this.sceneryType = "";
 }
 
@@ -975,6 +1003,7 @@ Scenery.prototype.removeObject = function(obj) {
 Scenery.prototype.getSaveForm = function() {
     var saveForm = {};
     saveForm.bgUrl = this.bgUrl;
+    saveForm.name = this.name;
     saveForm.sceneryType = this.sceneryType;
     saveForm.objectList = [];
     for (var i in this.objectList) {

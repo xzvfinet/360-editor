@@ -201,7 +201,6 @@ function initCanvas() {
     // background listener
     mainFrame.AFRAME.registerComponent("background-listener", {
         init: function() {
-            console.log(this);
             this.el.addEventListener('click', function() {
                 onObjectUnselect();
             });

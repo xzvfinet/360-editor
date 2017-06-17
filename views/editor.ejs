@@ -8,28 +8,7 @@
   <script type="text/javascript" src="../static/js/bootstrap.min.js"></script>
   <script type="text/javascript" src="../static/js/bundle.js"></script>
   <style>
-  #floating-button{
-    width: 55px;
-    height: 55px;
-    border-radius: 50%;
-    background: #109DEF;
-    position: fixed;
-    top: 100px;
-    left: 20px;
-    cursor: pointer;
-    box-shadow: 0px 2px 5px #666;
-    z-index: 1;
-  }
-  #floating-panel{
-    width: 200px;
-    height: 300px;
-    border-radius: 1%;
-    position: fixed;
-    top: 100px;
-    left: 100px;
-    box-shadow: 0px 2px 5px #666;
-    z-index: 1;
-  }
+
   #object-panel{
     width: 300px;
     height: 300px;
@@ -41,8 +20,7 @@
     z-index: 1;
   }
   .panel-floating{
-    height: 40px;
-    box-shadow: 0px 2px 5px #666;
+    height: 60px;
     margin-bottom: 10px;
     margin-right: 0px;
     z-index: 1;
@@ -55,23 +33,49 @@
     padding : 5px;
     height : 100%;
   }
-  .plus{
-    color: white;
-    position: absolute;
-    top: 0;
-    display: block;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    text-align: center;
-    padding: 0;
-    margin: 0;
-    line-height: 55px;
-    font-size: 38px;
-    font-family: 'Roboto';
-    font-weight: 300;
-    animation: plus-out 0.3s;
-    transition: all 0.3s;
+  .header-item{
+    width: 100px;
+    height: 50px;
+    align-items: center;
+    cursor : pointer;
+  }
+  .header-span{
+    margin:auto;
+  }
+  .navbar-header{
+    width:48px;
+    height:48px;
+    background-size : 100% 100%;
+    background-image:url('../static/img/editor_logo.png')
+  }
+  #floating-button{
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    position: fixed;
+    top: 150px;
+    left: 20px;
+    cursor: pointer;
+    z-index: 2;
+    background-size: 100% 100%;
+    background-image:url('../static/img/editor_icon_mouseout.png')
+  }
+  #floating-button:hover{
+    background-size: 100% 100%;
+    background-image:url('../static/img/editor_icon_mouseon.png')
+  }
+  #floating-panel{
+    padding-top: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+    width: 220px;
+    height: 250px;
+    position: fixed;
+    top: 115px;
+    left: 85px;
+    z-index: 1;
+    background-size: 100% 100%;
+    background-image:url('../static/img/editor_panel.png')
   }
   #container {
       width: 100%;
@@ -82,15 +86,27 @@
     width:100%;
     height:100%;
   }
-  .header-item{
-    width: 100px;
-    height: 50px;
-    align-items: center;
-    cursor : pointer;
+  #newImage{
+    background-size: 100% 100%;
+    background-image:url('../static/img/editor_newImage_mouseout.png')
   }
-  .header-span{
-    margin:auto;
+  #newImage:hover{
+    background-size: 100% 100%;
+    background-image:url('../static/img/editor_newImage_mouseon.png')
   }
+  #newChoice{
+    background-size: 100% 100%;
+    background-image:url('../static/img/editor_option_mouseout.png')
+  }
+  #newChoice:hover{
+    background-size: 100% 100%;
+    background-image:url('../static/img/editor_option_mouseon.png')
+  }
+  /*
+  .modal-content{
+    background-size: 100% 100%;
+    background-image:url('../static/img/editor_modal_bg.png')
+  }*/
   </style>
 </head>
 <body onload="getJson();" style="background-color:white;">
@@ -98,13 +114,6 @@
       <div class="container-fluid">
         <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
-            <span class="sr-only">Toggle navigation</span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-            <span class="icon-bar"></span>
-          </button>
-          <a class="navbar-brand" href="#">Traverser360</a>
         </div>
         <!-- Collect the nav links, forms, and other content for toggling -->
         <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1" style="padding-right:0px;">
@@ -134,41 +143,29 @@
       </div><!-- /.container-fluid -->
     </nav>
     <div id="container">
-      <div id="floating-button" data-toggle="tooltip" data-placement="left" data-original-title="Create" onclick="openMenu()">
-          <p class="plus">+</p>
-      </div>
-      <div id="floating-panel" class="panel panel-default" style="display:none;">
-        <div class="panel-body" style="padding:10px;">
-          <div class="panel panel-default panel-floating" onClick="getImagePopup();">
-            <div class="panel-body panel-floating-inside">
-              <span>이미지 추가</span>
+        <div id="floating-button" data-toggle="tooltip" data-placement="left" data-original-title="Create" onclick="openMenu()"></div>
+        <div id="floating-panel" style="display:none;">
+            <div id="newImage" class="panel-floating" onclick="getImagePopup()"></div>
+            <div id="newChoice" class="panel-floating" onclick="createOption()"></div>
+            <div class="panel panel-default panel-floating" onclick="createScene()">
+                <div class="panel-body panel-floating-inside">
+                    <span>새로운 장면</span>
+                </div>
             </div>
-          </div>
-          <div class="panel panel-default panel-floating" onclick="createOption()">
-            <div class="panel-body panel-floating-inside">
-              <span>선택지 추가</span>
-            </div>
-          </div>
-          <div class="panel panel-default panel-floating" onclick="createScene()">
-            <div class="panel-body panel-floating-inside">
-              <span>새로운 장면</span>
-            </div>
-          </div>
         </div>
-      </div>
-      <div id="object-panel" class="panel panel-default" style="display:none;">
-        <div class="panel-body" style="padding:10px;">
-        <div class="panel panel-default panel-floating" onclick="removeSelectedObject()">
-            <div class="panel-body panel-floating-inside">
-              <span>삭제</span>
+        <div id="object-panel" class="panel panel-default" style="display:none;">
+            <div class="panel-body" style="padding:10px;">
+                <div class="panel panel-default panel-floating" onclick="removeSelectedObject()">
+                    <div class="panel-body panel-floating-inside">
+                        <span>삭제</span>
+                    </div>
+                </div>
             </div>
-          </div>
         </div>
-      </div>
-      <div id="main-canvas" class="col-md-8" style="height:100%;">
-        <iframe id="main_scene" class="main_scene" width="100%" height="100%" allowfullscreen="yes" scrolling="no" allowvr="yes" src="../static/html/canvas.html"></iframe>
-      </div>
-  </div>
+        <div id="main-canvas" class="col-md-8" style="height:100%;">
+            <iframe id="main_scene" class="main_scene" width="100%" height="100%" allowfullscreen="yes" scrolling="no" allowvr="yes" src="../static/html/canvas.html"></iframe>
+        </div>
+    </div>
 </body>
 <!-- Modal -->
 <div id="imageModal" class="modal fade" role="dialog">
@@ -251,9 +248,11 @@ $(document).ready(function () {
 function openMenu(){
   if($("#floating-panel").css("display") == "none"){
     $("#floating-panel").css("display", "");
+    $("#floating-button").css('background-image', 'url(../static/img/editor_icon_mouseout.png)')
     return;
   }
   $("#floating-panel").css("display", "none");
+  $("#floating-button").css('background-image', '')
 }
 
 function getJson(){
