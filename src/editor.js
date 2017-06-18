@@ -51,10 +51,6 @@ window.onLoadCanvas = function(frame) {
 
     initEditor();
     initCanvas();
-
-    newProject();
-    updateSceneNumberList();
-    updateSceneDropDown();
 }
 
 window.setBackground = function(url) {
@@ -63,9 +59,24 @@ window.setBackground = function(url) {
 
 function newProject(type) {
     projectObject = new Project();
-    if (type) projectObject.projectType = type;
-    var newScenery = new Scenery(background);
-    projectObject.addScenery(newScenery);
+    projectObject.projectType = type;
+    switch (type) {
+        case 'free':
+            var newScenery = new Scenery(background);
+            projectObject.addScenery(newScenery);
+            break;
+        case 'simri':
+            var optionScene = new Scenery(background);
+            projectObject.addScenery(optionScene);
+            var resultScene = new Scenery();
+            projectObject.addScenery(resultScene);
+            break;
+        case 'hidenseek':
+            break;
+    }
+
+    updateSceneNumberList();
+    updateSceneDropDown();
 }
 
 window.saveProject = function(userID, sceneID) {
@@ -151,7 +162,9 @@ window.removeSelectedObject = function() {
 }
 
 function clearAllObject(scenery) {
-    projectObject.getCurrentScenery().removeAllObject();
+    if (projectObject) {
+        projectObject.getCurrentScenery().removeAllObject();
+    }
 }
 
 function eraseCanvas() {
