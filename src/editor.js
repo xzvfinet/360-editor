@@ -51,20 +51,32 @@ window.onLoadCanvas = function(frame) {
 
     initEditor();
     initCanvas();
-
-    newProject();
-    updateSceneNumberList();
-    updateSceneDropDown();
 }
 
 window.setBackground = function(url) {
     projectObject.getCurrentScenery().setBackgroundImageUrl(url);
 }
 
-function newProject() {
+function newProject(type) {
     projectObject = new Project();
-    var newScenery = new Scenery(background);
-    projectObject.addScenery(newScenery);
+    projectObject.projectType = type;
+    switch (type) {
+        case 'free':
+            var newScenery = new Scenery(background);
+            projectObject.addScenery(newScenery);
+            break;
+        case 'simri':
+            var optionScene = new Scenery(background);
+            projectObject.addScenery(optionScene);
+            var resultScene = new Scenery();
+            projectObject.addScenery(resultScene);
+            break;
+        case 'hidenseek':
+            break;
+    }
+
+    updateSceneNumberList();
+    updateSceneDropDown();
 }
 
 window.saveProject = function(userID, sceneID) {
@@ -75,7 +87,10 @@ window.loadProject = function(projectJson) {
     clearAllObject();
 
     var loadedProject = new Project();
-    loadedProject.fromJson(projectJson);
+    if (!loadedProject.fromJson(projectJson)) {
+        newProject(loadedProject.projectType);
+        return false;
+    }
     relateSceneryWithDomEl(loadedProject.sceneryList[0]);
     for (var j in loadedProject.sceneryList[0].objectList) {
         relateObjectWithDomEl(loadedProject.sceneryList[0].objectList[j]);
@@ -84,6 +99,8 @@ window.loadProject = function(projectJson) {
     //scene number
     updateSceneNumberList();
     updateSceneDropDown();
+
+    return true;
 }
 
 window.loadAllObjectOfScene = function(sceneNum) {
@@ -145,7 +162,9 @@ window.removeSelectedObject = function() {
 }
 
 function clearAllObject(scenery) {
-    projectObject.getCurrentScenery().removeAllObject();
+    if (projectObject) {
+        projectObject.getCurrentScenery().removeAllObject();
+    }
 }
 
 function eraseCanvas() {

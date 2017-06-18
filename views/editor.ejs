@@ -146,12 +146,18 @@
         <div id="floating-button" data-toggle="tooltip" data-placement="left" data-original-title="Create" onclick="openMenu()"></div>
         <div id="floating-panel" style="display:none;">
             <div id="newImage" class="panel-floating" onclick="getImagePopup()"></div>
+            <% if (projectType == "free") { %>
+            <% } %>
+            <% if (projectType == "simri") { %>
             <div id="newChoice" class="panel-floating" onclick="createOption()"></div>
             <div class="panel panel-default panel-floating" onclick="createScene()">
                 <div class="panel-body panel-floating-inside">
                     <span>새로운 장면</span>
                 </div>
             </div>
+            <% } %>
+            <% if (projectType == "hidenseek") { %>
+            <% } %>
         </div>
         <div id="object-panel" class="panel panel-default" style="display:none;">
             <div class="panel-body" style="padding:10px;">
@@ -256,23 +262,9 @@ function openMenu(){
 }
 
 function getJson(){
-  $.ajax({
-    url : '/project/load/<%= sceneID %>',
-    method : 'get',
-    data : {
-    },
-    dataType : "html",
-    success : function (data) {
-      if(data.length > 0){
-        loadProject(data);
-        return;
-      }
-      getBackgroundPopup();
-    },
-    error : function(request,status,error){
-      console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
-     }
-  });
+  if (!loadProject('<%-JSON.stringify(projectObjectJson) %>')){
+    getBackgroundPopup();
+  }
 }
 
 function getBackgroundPopup(){

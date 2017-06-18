@@ -57,13 +57,42 @@ router.get('/:id', function(req, res){
     if(req.session.userID==null){
       res.redirect('/login');
     }else{
-      var query = "insert into scene(userID, title) values(?, ?)";
-      var params = [req.session.userID, "no title"];
-      connection.query(query, params, function (error, info) {
+      var projectObject = {
+        projectType: req.query['type']
+      };
+      var base64data = new Buffer(JSON.stringify(projectObject), 'binary');
+
+      var query1 = "insert into scene(userID, title) values(?, ?)";
+      var params1 = [req.session.userID, "no title"];
+      connection.query(query1, params1, function (error, info1) {
           if(error) {
             throw error;
           } else {
-            res.redirect('/project/' + info.insertId);
+            s3.upload({
+              Bucket: 'traverser360',
+              Key: id + "/" + Date.now() + ".json",
+              Body: base64data,
+              ACL: 'public-read'
+            }, function (err, result) {
+              if(err){
+                console.log(err);
+              }else{
+                var query2 = "update scene set path=? where idscene=?"
+                var params2 = [host + "/" + result.key, info1.insertId];
+                connection.query(query2, params2, function (error, info2) {
+                  var temp = (req.session.userID == null) ? -1 : req.session;
+                  if(error) {
+                    console.log("err : " + error);
+                    // res.json({user : temp, saveResult : 0});
+                  } else {
+                    // res.json({user : temp, saveResult : 1});
+                    console.log(req.query['type'] + " is created");
+                    console.log(params2);
+                    res.redirect('/project/' + info1.insertId);
+                  }
+                });
+              }
+            });
           }
       });
     }
@@ -76,8 +105,30 @@ router.get('/:id', function(req, res){
         console.log("err : " + err);
         res.status(500);
       }else{
-        req.session.userID == null ? temp = -1 : temp = req.session;
-        res.render('editor', {user : temp, sceneID : id});
+        var query2 = 'SELECT * FROM scene WHERE idscene=?';
+        var params2 = [req.params.id];
+        connection.query(query2, params, function(err, info){
+          var key = (info[0].path).split('traverser360/')[1];
+          var params3 = {Bucket: 'traverser360', Key: key};
+          s3.getObject(params3, function(err, data) {
+            if (err){
+              console.log(err, err.stack); // an error occurred
+            }else{
+              json = data.Body.toString();
+              var projectObject = JSON.parse(json);
+              var projectType = projectObject.projectType;
+              req.session.userID == null ? temp = -1 : temp = req.session;
+              res.render('editor', {
+                user : temp, 
+                sceneID : id, 
+                projectType: projectType,
+                projectObjectJson: projectObject
+              });
+            }
+            // res.end(json);
+          });
+        });
+        
       }
     });
   }
