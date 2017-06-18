@@ -87,6 +87,8 @@ window.loadProject = function(projectJson) {
     setSceneDropDown();
 
     initTemplate();
+    console.log(projectObject);
+    //projectObject.sceneryList[4].sceneryType = "result-scenery";
 }
 
 window.loadAllObjectOfScene = function(sceneNum) {
@@ -371,6 +373,13 @@ function createTemplateObject(){
         case "find-hidden-pictures":
             latelyCreatedObject.eventList.push({'type': "oneClick", 'arg':""},{'type':'onVisible','arg':""},{'type':'addScore','arg':'1'});
             updateObjectNumUI();
+            break;
+        case "psychology-test":
+            if(projectObject.getCurrentScenery.sceneryType != "reulst-scenery"){
+                var nextSceneNum = projectObject.getCurrentIndex()+2
+                latelyCreatedObject.eventList.push({'type': "oneClick", 'arg':""},{'type':'teleport','arg':nextSceneNum},{'type':'addScore','arg':'20'});
+                latelyCreatedObject.el.setAttribute('src',"https://traverser360.s3.ap-northeast-2.amazonaws.com/1497782502160.png");
+            }
     }
 }
 window.createLatelyObject = function(){
@@ -400,6 +409,11 @@ window.createLatelyObject = function(){
 
 var time = 0;
 var timerId = 0;
+var resultSet = [
+    {score: 90, image_url:"https://traverser360.s3.ap-northeast-2.amazonaws.com/1497425965490.png" ,background_url:"https://traverser360.s3.ap-northeast-2.amazonaws.com/1497425957447.png"},
+    {score: 60, image_url:"https://traverser360.s3.ap-northeast-2.amazonaws.com/1497425965490.png" ,background_url:"https://traverser360.s3.ap-northeast-2.amazonaws.com/1497504973734.jpg"},
+    {score: 70, image_url:"https://traverser360.s3.ap-northeast-2.amazonaws.com/1497425965490.png" ,background_url:"https://traverser360.s3.ap-northeast-2.amazonaws.com/1497616671082.jpg"}
+];
 
 function templateFunc() {
     switch (projectObject.projectType) {
@@ -419,14 +433,36 @@ function templateFunc() {
                 mainFrame.document.getElementById('clock').setAttribute('value',0);
                 mainFrame.document.getElementById('game-set').setAttribute('position','0 0 3');
                 updateObjectNumUI();
+                scoreVariable = 0;
                 objects.forEach(function(item) {
                     item.addMaterial({ opacity: 1 });
 
                     item.oneClick = false;
-                    scoreVariable = 0;
                 });
             }
             break;
+        case "psychology-test":
+            var scenes = projectObject.sceneryList;
+            if(projectObject.getCurrentScenery().sceneryType=="result-scenery"){
+                console.log("sdddd");
+                resultSet.sort(function(a,b){
+                    return b.score - a.score;
+                })
+                resultSet.forEach(function(item){
+                    if(scoreVariable > item.score){
+                        setBackground(item.background_url);
+                        projectObject.getCurrentScenery().objectList[0].el.setAttribute('src',item.image_url);
+                    }
+                });
+            }
+            if(editorMode){
+                scoreVariable = 0;
+                scenes.forEach(function(scene){
+                    scene.objectList.forEach(function(item) {
+                        item.oneClick = false;
+                    });
+                });
+            }
     }
 }
 function updateObjectNumUI(){
@@ -583,7 +619,6 @@ function newObject(type, shape, position, rotation, scale) {
     newObj.setClickListener(OBJECT_LISTENER);
 
     newObj.eventList = [];
-    //newObj.eventList.push({ 'type': type, 'arg': 'bg1.jpg' });
 
     // Make object face at camera origin by default.
     newObj.setLookAt('#camera');
@@ -613,6 +648,7 @@ function teleportEvent(arg) {
         console.log('teleport! to:' + arg);
         //projectObject.changeScenery(projectObject.sceneryList[arg-1]);
         loadAllObjectOfScene(arg - 1);
+        templateFunc();
         fadeInOutAll('fade-in');
     }, 2000);
 

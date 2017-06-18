@@ -10,12 +10,14 @@ function Scenery(bgEl, scenery) {
         this.bgEl = bgEl;
         this.bgUrl = this.bgEl.getAttribute('src');
         this.objectList = [];
+        this.sceneryType = "";
     } else {
         this.bgEl = null;
         this.bgUrl = "";
         this.objectList = [];
+        this.sceneryType = "";
+        
     }
-    this.sceneryType = "";
 }
 
 Scenery.prototype.setBackgroundImageUrl = function(url) {
