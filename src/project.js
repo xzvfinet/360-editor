@@ -64,8 +64,11 @@ Project.prototype.toJson = function() {
 
 Project.prototype.fromJson = function(json) {
     var saveForm = JSON.parse(json);
-    this.title = saveForm.title;
     this.projectType = saveForm.projectType;
+    if (saveForm.sceneryList == undefined) {
+        return undefined;
+    }
+    this.title = saveForm.title;
     for (var i in saveForm.sceneryList) {
     	var sceneryObject = new Scenery(null, saveForm.sceneryList[i]);
         this.sceneryList.push(sceneryObject);

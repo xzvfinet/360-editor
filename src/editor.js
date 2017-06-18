@@ -61,8 +61,9 @@ window.setBackground = function(url) {
     projectObject.getCurrentScenery().setBackgroundImageUrl(url);
 }
 
-function newProject() {
+function newProject(type) {
     projectObject = new Project();
+    if (type) projectObject.projectType = type;
     var newScenery = new Scenery(background);
     projectObject.addScenery(newScenery);
 }
@@ -75,7 +76,10 @@ window.loadProject = function(projectJson) {
     clearAllObject();
 
     var loadedProject = new Project();
-    loadedProject.fromJson(projectJson);
+    if (!loadedProject.fromJson(projectJson)) {
+        newProject(loadedProject.projectType);
+        return false;
+    }
     relateSceneryWithDomEl(loadedProject.sceneryList[0]);
     for (var j in loadedProject.sceneryList[0].objectList) {
         relateObjectWithDomEl(loadedProject.sceneryList[0].objectList[j]);
@@ -84,6 +88,8 @@ window.loadProject = function(projectJson) {
     //scene number
     updateSceneNumberList();
     updateSceneDropDown();
+
+    return true;
 }
 
 window.loadAllObjectOfScene = function(sceneNum) {

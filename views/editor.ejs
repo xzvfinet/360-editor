@@ -263,11 +263,9 @@ function getJson(){
     },
     dataType : "html",
     success : function (data) {
-      if(data.length > 0){
-        loadProject(data);
-        return;
+      if(!loadProject(data)){
+        getBackgroundPopup();
       }
-      getBackgroundPopup();
     },
     error : function(request,status,error){
       console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
