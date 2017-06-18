@@ -115,9 +115,15 @@ router.get('/:id', function(req, res){
               console.log(err, err.stack); // an error occurred
             }else{
               json = data.Body.toString();
-              var projectType = JSON.parse(json).projectType;
+              var projectObject = JSON.parse(json);
+              var projectType = projectObject.projectType;
               req.session.userID == null ? temp = -1 : temp = req.session;
-              res.render('editor', {user : temp, sceneID : id, projectType: projectType});
+              res.render('editor', {
+                user : temp, 
+                sceneID : id, 
+                projectType: projectType,
+                projectObjectJson: projectObject
+              });
             }
             // res.end(json);
           });

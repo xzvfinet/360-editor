@@ -262,21 +262,9 @@ function openMenu(){
 }
 
 function getJson(){
-  $.ajax({
-    url : '/project/load/<%= sceneID %>',
-    method : 'get',
-    data : {
-    },
-    dataType : "html",
-    success : function (data) {
-      if(!loadProject(data)){
-        getBackgroundPopup();
-      }
-    },
-    error : function(request,status,error){
-      console.log("code:"+request.status+"\n"+"message:"+request.responseText+"\n"+"error:"+error);
-     }
-  });
+  if (!loadProject('<%-JSON.stringify(projectObjectJson) %>')){
+    getBackgroundPopup();
+  }
 }
 
 function getBackgroundPopup(){
