@@ -378,7 +378,7 @@ function createTemplateObject(){
             if(projectObject.getCurrentScenery.sceneryType != "reulst-scenery"){
                 var nextSceneNum = projectObject.getCurrentIndex()+2
                 latelyCreatedObject.eventList.push({'type': "oneClick", 'arg':""},{'type':'teleport','arg':nextSceneNum},{'type':'addScore','arg':'20'});
-                latelyCreatedObject.el.setAttribute('src',"https://traverser360.s3.ap-northeast-2.amazonaws.com/1497782502160.png");
+                //latelyCreatedObject.el.setAttribute('src',"https://traverser360.s3.ap-northeast-2.amazonaws.com/1497782502160.png");
             }
     }
 }
@@ -518,6 +518,11 @@ function createObject(type) {
     newObject(type, 'plane');
 }
 
+//psychology template function
+window.createOption = function(){
+    newObject('primitive','image',"https://traverser360.s3.ap-northeast-2.amazonaws.com/1497782502160.png")
+}
+
 function onObjectSelect() {
     var selected = projectObject.getCurrentScenery().findObjectByEl(this);
 
@@ -592,7 +597,7 @@ function newMover() {
     return newMover;
 }
 
-function newObject(type, shape, position, rotation, scale) {
+function newObject(type, shape, url, position, rotation, scale) {
     var tag = 'a-' + shape;
     var newEl = mainFrame.document.createElement(tag);
     var newObj = new obj.Objct(newEl);
@@ -608,7 +613,9 @@ function newObject(type, shape, position, rotation, scale) {
     newObj.setScale(scale);
 
     if (shape == 'image') {
-        var url = imageUrlInputEl.value;
+        if(url == null){
+            var url = imageUrlInputEl.value;
+        }
         util.getImageSize(url, function() {
             newObj.setScale({ x: this.width / BASE_IMG_WIDTH, y: this.height / BASE_IMG_WIDTH });
         });
