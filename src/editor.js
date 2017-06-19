@@ -343,7 +343,7 @@ function initCanvas() {
 }
 function initTemplate() {
     switch (projectObject.projectType) {
-        case "find-hidden-pictures":
+        case "hidenseek":
             var newEl = mainFrame.document.createElement("a-text");
             var clockEl = mainFrame.document.createElement("a-text");
             var gameSetImage = mainFrame.document.createElement("a-image");
@@ -370,11 +370,12 @@ function initTemplate() {
 
 function createTemplateObject(){
     switch (projectObject.projectType) {
-        case "find-hidden-pictures":
+        case "hidenseek":
+            newObject('primitive','image');
             latelyCreatedObject.eventList.push({'type': "oneClick", 'arg':""},{'type':'onVisible','arg':""},{'type':'addScore','arg':'1'});
             updateObjectNumUI();
             break;
-        case "psychology-test":
+        case "simri":
             if(projectObject.getCurrentScenery.sceneryType != "reulst-scenery"){
                 var nextSceneNum = projectObject.getCurrentIndex()+2
                 latelyCreatedObject.eventList.push({'type': "oneClick", 'arg':""},{'type':'teleport','arg':nextSceneNum},{'type':'addScore','arg':'20'});
@@ -417,7 +418,7 @@ var resultSet = [
 
 function templateFunc() {
     switch (projectObject.projectType) {
-        case "find-hidden-pictures":
+        case "hidenseek":
             var objects = projectObject.sceneryList[0].objectList;
             if (!editorMode) {
                 objects.forEach(function(item) {
@@ -441,19 +442,20 @@ function templateFunc() {
                 });
             }
             break;
-        case "psychology-test":
+        case "simri":
             var scenes = projectObject.sceneryList;
             if(projectObject.getCurrentScenery().sceneryType=="result-scenery"){
                 console.log("sdddd");
                 resultSet.sort(function(a,b){
                     return b.score - a.score;
                 })
-                resultSet.forEach(function(item){
+                for(var item in resultSet){
                     if(scoreVariable > item.score){
                         setBackground(item.background_url);
                         projectObject.getCurrentScenery().objectList[0].el.setAttribute('src',item.image_url);
+                        break;
                     }
-                });
+                }
             }
             if(editorMode){
                 scoreVariable = 0;
@@ -567,7 +569,7 @@ function onObjectSelect() {
 
 function checkSocre() {
     switch (projectObject.projectType) {
-        case "find-hidden-pictures":
+        case "hidenseek":
             mainFrame.document.getElementById("object-num").setAttribute('value',scoreVariable+"/"+projectObject.sceneryList[0].objectList.length);
             if (scoreVariable == projectObject.sceneryList[0].objectList.length) {
                 mainFrame.document.getElementById('game-set').setAttribute('position','0 0 -1');
