@@ -6,17 +6,18 @@ function Scenery(bgEl, scenery) {
         for (var prop in scenery) {
             this[prop] = scenery[prop];
         }
-    } else if (bgEl) {
-        this.bgEl = bgEl;
-        this.bgUrl = this.bgEl.getAttribute('src');
-        this.objectList = [];
     } else {
-        this.bgEl = null;
-        this.bgUrl = "";
+        this.name = "Scene";
+        this.sceneryType = "";
         this.objectList = [];
+        if (bgEl) {
+            this.bgEl = bgEl;
+            this.bgUrl = this.bgEl.getAttribute('src');
+        } else {
+            this.bgEl = null;
+            this.bgUrl = "";
+        }
     }
-    this.name = "Scene";
-    this.sceneryType = "";
 }
 
 Scenery.prototype.setBackgroundImageUrl = function(url) {

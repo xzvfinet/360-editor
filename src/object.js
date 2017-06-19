@@ -3,6 +3,7 @@ function Objct(el, obj) {
         // copy all properties of obj to this
         for (var prop in obj) {
             this[prop] = obj[prop];
+            this.el = el;
         }
     } else {
         this.el = el;

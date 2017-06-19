@@ -43,6 +43,7 @@ var miniMapDirector = null;
 var projectObject = null;
 var editorMode = true;
 var currentSelectedObject = null;
+var latelyCreatedObject = null;
 var isDown = false;
 var currentSelectedArrowEl = null;
 var scoreVariable = 0;
@@ -111,6 +112,26 @@ window.loadAllObjectOfScene = function(sceneNum) {
     }
     projectObject.changeScenery(projectObject.sceneryList[sceneNum]);
     updateSceneNumberList();
+}
+
+var hidden_button = 150;
+window.switchEditorMode = function(){
+        editorMode = !editorMode;
+        $("#floating-panel").css("display", "none");
+        hidden_button *= -1;
+        if (!editorMode) {
+            if(mover){
+                mover.parentEl.removeChild(mover);
+                mover = null;
+            }
+            onObjectUnselect();
+        }
+        templateFunc();
+        $('#floating-button').animate({
+            left: "+="+hidden_button
+        }, 1000, function () {
+
+        });
 }
 
 function updateSceneNumberList() {
@@ -358,25 +379,134 @@ function initCanvas() {
         }
     });
 }
+function initTemplate() {
+    switch (projectObject.projectType) {
+        case "hidenseek":
+            var newEl = mainFrame.document.createElement("a-text");
+            var clockEl = mainFrame.document.createElement("a-text");
+            var gameSetImage = mainFrame.document.createElement("a-image");
+
+            var position = { x: 8, y: 3.5, z: -5 };
+            newEl.setAttribute('id','object-num');
+            newEl.setAttribute('position', position);
+            newEl.setAttribute('value', "0/" + projectObject.sceneryList[0].objectList.length);
+
+            clockEl.setAttribute('id','clock');
+            position = { x: 8, y: 2.5, z: -5 };
+            clockEl.setAttribute('position', position);
+            clockEl.setAttribute('value', time);
+
+            gameSetImage.setAttribute('id','game-set');
+            gameSetImage.setAttribute('position','0 0 3');
+            gameSetImage.setAttribute('src','https://traverser360.s3.ap-northeast-2.amazonaws.com/1497716132769.png');
+
+            cameraEl.appendChild(newEl);
+            cameraEl.appendChild(clockEl);
+            cameraEl.appendChild(gameSetImage);
+    }
+}
+
+function createTemplateObject(){
+    switch (projectObject.projectType) {
+        case "hidenseek":
+            newObject('primitive','image');
+            latelyCreatedObject.eventList.push({'type': "oneClick", 'arg':""},{'type':'onVisible','arg':""},{'type':'addScore','arg':'1'});
+            updateObjectNumUI();
+            break;
+        case "simri":
+            if(projectObject.getCurrentScenery.sceneryType != "reulst-scenery"){
+                var nextSceneNum = projectObject.getCurrentIndex()+2
+                latelyCreatedObject.eventList.push({'type': "oneClick", 'arg':""},{'type':'teleport','arg':nextSceneNum},{'type':'addScore','arg':'20'});
+                //latelyCreatedObject.el.setAttribute('src',"https://traverser360.s3.ap-northeast-2.amazonaws.com/1497782502160.png");
+            }
+    }
+}
+window.createLatelyObject = function(){
+    if(latelyCreatedObject){
+        var newEl = mainFrame.document.createElement('a-image');
+        var newObj = new obj.Objct(newEl,latelyCreatedObject);
+        projectObject.getCurrentScenery().addObject(newObj);
+        
+        position = util.getForwardPosition(cameraEl.getAttribute('rotation'));
+        newObj.setPosition(position);
+        rotation = cameraEl.getAttribute('rotation');
+        newObj.setRotation(rotation);
+        newObj.setScale(newObj.transform.scale);
+        newObj.setFadeInOutAni(mainFrame);
+        newObj.setClickListener(OBJECT_LISTENER);
+        newObj.setLookAt('#camera');
+        
+        newEl.setAttribute('src',newObj.material.src);
+        newEl.setAttribute('class','object');
+
+        sceneEl.appendChild(newEl);
+        updateObjectNumUI();
+    }else{
+        console.log("no lately created object");
+    }
+}
+
+var time = 0;
+var timerId = 0;
+var resultSet = [
+    {score: 90, image_url:"https://traverser360.s3.ap-northeast-2.amazonaws.com/1497425965490.png" ,background_url:"https://traverser360.s3.ap-northeast-2.amazonaws.com/1497425957447.png"},
+    {score: 60, image_url:"https://traverser360.s3.ap-northeast-2.amazonaws.com/1497425965490.png" ,background_url:"https://traverser360.s3.ap-northeast-2.amazonaws.com/1497504973734.jpg"},
+    {score: 70, image_url:"https://traverser360.s3.ap-northeast-2.amazonaws.com/1497425965490.png" ,background_url:"https://traverser360.s3.ap-northeast-2.amazonaws.com/1497616671082.jpg"}
+];
 
 function templateFunc() {
     switch (projectObject.projectType) {
-        case "find-hidden-pictures":
+        case "hidenseek":
             var objects = projectObject.sceneryList[0].objectList;
             if (!editorMode) {
                 objects.forEach(function(item) {
                     item.addMaterial({ opacity: 0 });
                 });
+                time = 0;
+                timerId = setInterval(function(){
+                    time+=1;
+                    mainFrame.document.getElementById('clock').setAttribute('value',time);
+                },1000)
             } else {
+                clearInterval(timerId);
+                mainFrame.document.getElementById('clock').setAttribute('value',0);
+                mainFrame.document.getElementById('game-set').setAttribute('position','0 0 3');
+                updateObjectNumUI();
+                scoreVariable = 0;
                 objects.forEach(function(item) {
                     item.addMaterial({ opacity: 1 });
 
                     item.oneClick = false;
-                    scoreVariable = 0;
                 });
             }
             break;
+        case "simri":
+            var scenes = projectObject.sceneryList;
+            if(projectObject.getCurrentScenery().sceneryType=="result-scenery"){
+                console.log("sdddd");
+                resultSet.sort(function(a,b){
+                    return b.score - a.score;
+                })
+                for(var item in resultSet){
+                    if(scoreVariable > item.score){
+                        setBackground(item.background_url);
+                        projectObject.getCurrentScenery().objectList[0].el.setAttribute('src',item.image_url);
+                        break;
+                    }
+                }
+            }
+            if(editorMode){
+                scoreVariable = 0;
+                scenes.forEach(function(scene){
+                    scene.objectList.forEach(function(item) {
+                        item.oneClick = false;
+                    });
+                });
+            }
     }
+}
+function updateObjectNumUI(){
+    mainFrame.document.getElementById('object-num').setAttribute('value',"0/"+projectObject.sceneryList[0].objectList.length);
 }
 
 window.createScene = function() {
@@ -469,9 +599,11 @@ function openObjectPropertyPanel(event) {
 
 function checkSocre() {
     switch (projectObject.projectType) {
-        case "find-hidden-pictures":
+        case "hidenseek":
+            mainFrame.document.getElementById("object-num").setAttribute('value',scoreVariable+"/"+projectObject.sceneryList[0].objectList.length);
             if (scoreVariable == projectObject.sceneryList[0].objectList.length) {
-                console.log("game set");
+                mainFrame.document.getElementById('game-set').setAttribute('position','0 0 -1');
+                clearInterval(timerId);
             }
     }
 }
@@ -506,7 +638,7 @@ function newMover() {
     return newMover;
 }
 
-function newObject(type, shape, position, rotation, scale) {
+function newObject(type, shape, url, position, rotation, scale) {
     var tag = 'a-' + shape;
     var newEl = mainFrame.document.createElement(tag);
     var newObj = new obj.Objct(newEl);
@@ -522,7 +654,9 @@ function newObject(type, shape, position, rotation, scale) {
     newObj.setScale(scale);
 
     if (shape == 'image') {
-        var url = imageUrlInputEl.value;
+        if(url == null){
+            var url = imageUrlInputEl.value;
+        }
         util.getImageSize(url, function() {
             newObj.setScale({ x: this.width / BASE_IMG_WIDTH, y: this.height / BASE_IMG_WIDTH });
         });
@@ -541,6 +675,9 @@ function newObject(type, shape, position, rotation, scale) {
 
     sceneEl.appendChild(newEl);
 
+    latelyCreatedObject = newObj;
+    createTemplateObject();
+    
     setObjectOnMiniMap(position);
 
     return newObj;
@@ -559,7 +696,10 @@ function teleportEvent(arg) {
     setTimeout(function() {
         eraseCanvas();
         console.log('teleport! to:' + arg);
+        
         loadAllObjectOfScene(arg);
+        templateFunc();
+
         fadeInOutAll('fade-in');
     }, 2000);
 }
@@ -686,6 +826,7 @@ function Objct(el, obj) {
         // copy all properties of obj to this
         for (var prop in obj) {
             this[prop] = obj[prop];
+            this.el = el;
         }
     } else {
         this.el = el;
@@ -959,17 +1100,18 @@ function Scenery(bgEl, scenery) {
         for (var prop in scenery) {
             this[prop] = scenery[prop];
         }
-    } else if (bgEl) {
-        this.bgEl = bgEl;
-        this.bgUrl = this.bgEl.getAttribute('src');
-        this.objectList = [];
     } else {
-        this.bgEl = null;
-        this.bgUrl = "";
+        this.name = "Scene";
+        this.sceneryType = "";
         this.objectList = [];
+        if (bgEl) {
+            this.bgEl = bgEl;
+            this.bgUrl = this.bgEl.getAttribute('src');
+        } else {
+            this.bgEl = null;
+            this.bgUrl = "";
+        }
     }
-    this.name = "Scene";
-    this.sceneryType = "";
 }
 
 Scenery.prototype.setBackgroundImageUrl = function(url) {
