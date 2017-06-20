@@ -533,6 +533,13 @@ window.createOption = function() {
     console.log(obj);
 }
 
+window.modifyOption = function(text,image_url,score){
+    //currentSelectedObject.drawText(mainFrame,text);
+    currentSelectedObject.material.src = image_url;
+    currentSelectedObject.el.setAttribute("src",image_url);
+    currentSelectedObject.modifyEvent("addScore",score);
+}
+
 window.create = function(type) {
     if (PRIMITIVE_DEFINITIONS.includes(type)) {
         createPrimitive(type);

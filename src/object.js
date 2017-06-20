@@ -9,6 +9,7 @@ function Objct(el, obj) {
         this.el = el;
         this.type = "";
         this.shape = "";
+        this.text ="";
         this.transform = {};
         this.material = {};
 
@@ -64,6 +65,13 @@ Objct.prototype.addMaterial = function(newMaterial){
         this.material[key] = newMaterial[key];
         this.el.setAttribute(key, newMaterial[key]);
     }
+}
+
+Objct.prototype.drawText = function(frame,text){
+    this.text = text;
+    var newEl = frame.document.createElement("a-text");
+    newEl.setAttribute('value',text);
+    this.el.appendChild(newEl);
 }
 
 Objct.prototype.setFadeInOutAni = function(frame){
@@ -123,6 +131,15 @@ Objct.prototype.setLookAt = function(target) {
 
 Objct.prototype.addEvent = function(eventType, eventArgs) {
     this.eventList.push({ 'type': eventType, 'arg': eventArgs });
+}
+Objct.prototype.modifyEvent = function(eventType, eventAgrs){
+    for(var i = 0;i<this.eventList.length;i++){
+        if(this.eventList[i].type == eventType){
+            this.eventList[i].arg = eventAgrs;
+            return true;
+        }
+    }
+    return false;
 }
 
 Objct.prototype.toJson = function() {

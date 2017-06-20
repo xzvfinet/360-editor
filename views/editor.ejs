@@ -14,6 +14,27 @@
         padding: 0;
     }
     
+    #adjust-button{
+      margin-top: 240px;
+      width: 130px;
+      height: 40px;
+    }
+
+    #remove-button{
+      margin-top: 240px;
+      width: 130px;
+      height: 40px;
+      float: right;
+    }
+
+    #simri-panel-image{
+      width:280px;
+      height: 250px;
+      position: fixed;
+      background-size: 100% 100%;
+      background-image: url('../static/img/bg_input.png')
+    }
+
     #object-panel {
         width: 300px;
         height: 300px;
@@ -23,6 +44,7 @@
         left: 100px;
         box-shadow: 0px 2px 5px #666;
         z-index: 1;
+        
     }
     
     .panel-floating {
@@ -174,6 +196,7 @@
             <% } %>
             <% if (projectType == "simri") { %>
             <div id="newChoice" class="panel-floating" onclick="createOption()"></div>
+            <div id="newChoice" class="panel-floating" onclick="modifyOption('ddd','',30)"></div>
             <div class="panel panel-default panel-floating" onclick="createScene()">
                 <div class="panel-body panel-floating-inside">
                     <span>새로운 장면</span>
@@ -183,13 +206,28 @@
             <% if (projectType == "hidenseek") { %>
             <% } %>
         </div>
-        <div id="object-panel" class="panel panel-default" style="display:none;">
+
+        <form>
+          <div id="object-panel" class="panel panel-default" style="display:none;">
             <div class="panel-body" style="padding:10px;">
-                <div class="panel panel-default panel-floating" onclick="removeSelectedObject()">
-                    <div class="panel-body panel-floating-inside">
-                        <span>삭제</span>
-                    </div>
+              <div id="simri-panel-image">
+                <input id="image_file" type="file" name="image_file" size="30" style="display:inline-flex;margin-left:120px;margin-top:120px"
+                  disabled="true" />
+                <input type="text"style="float: right;margin-top: 17px;margin-right: 10px;width: 150px;">
+                <input type="text"style="left: 120px;bottom: 110px;position: relative;">
+              </div>
+              <div id="remove-button" class="panel panel-default panel-floating" onclick="removeSelectedObject()">
+                <div class="panel-body panel-floating-inside">
+                  <span>삭제</span>
                 </div>
+              </div>
+              <div id="adjust-button" class="panel panel-default panel-floating" onclick="removeSelectedObject()">
+                <div class="panel-body panel-floating-inside">
+                  <span>적용</span>
+                </div>
+              </div>
+        </form>
+                
             </div>
         </div>
         <div id="main-canvas" class="col-md-8" style="height:100%;">
