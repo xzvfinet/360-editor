@@ -48,11 +48,11 @@ Project.prototype.getCurrentScenery = function() {
 Project.prototype.getCurrentIndex = function() {
     return currentIndex;
 }
-Project.prototype.getSceneryListLength = function(){
+Project.prototype.getSceneryListLength = function() {
     return this.sceneryList.length;
 }
 Project.prototype.toJson = function() {
-    var saveForm = { title: this.title};
+    var saveForm = { title: this.title };
     saveForm.projectType = this.projectType;
     saveForm.sceneryList = [];
     for (var i in this.sceneryList) {
@@ -70,11 +70,11 @@ Project.prototype.fromJson = function(json) {
     }
     this.title = saveForm.title;
     for (var i in saveForm.sceneryList) {
-    	var sceneryObject = new Scenery(null, saveForm.sceneryList[i]);
+        var sceneryObject = new Scenery(null, saveForm.sceneryList[i]);
         this.sceneryList.push(sceneryObject);
         for (var j in sceneryObject.objectList) {
-        	var objct = new Objct(null, sceneryObject.objectList[j]);
-        	sceneryObject.objectList[j] = objct;
+            var objct = new Objct(null, sceneryObject.objectList[j]);
+            sceneryObject.objectList[j] = objct;
         }
     }
     return this;

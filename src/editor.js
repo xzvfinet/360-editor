@@ -118,23 +118,23 @@ window.loadAllObjectOfScene = function(sceneNum) {
 }
 
 var hidden_button = 150;
-window.switchEditorMode = function(){
-        editorMode = !editorMode;
-        $("#floating-panel").css("display", "none");
-        hidden_button *= -1;
-        if (!editorMode) {
-            if(mover){
-                mover.parentEl.removeChild(mover);
-                mover = null;
-            }
-            onObjectUnselect();
+window.switchEditorMode = function() {
+    editorMode = !editorMode;
+    $("#floating-panel").css("display", "none");
+    hidden_button *= -1;
+    if (!editorMode) {
+        if (mover) {
+            mover.parentEl.removeChild(mover);
+            mover = null;
         }
-        templateFunc();
-        $('#floating-button').animate({
-            left: "+="+hidden_button
-        }, 1000, function () {
+        onObjectUnselect();
+    }
+    templateFunc();
+    $('#floating-button').animate({
+        left: "+=" + hidden_button
+    }, 1000, function() {
 
-        });
+    });
 }
 
 function updateSceneNumberList() {
@@ -382,6 +382,7 @@ function initCanvas() {
         }
     });
 }
+
 function initTemplate() {
     switch (projectObject.projectType) {
         case "hidenseek":
@@ -390,18 +391,18 @@ function initTemplate() {
             var gameSetImage = mainFrame.document.createElement("a-image");
 
             var position = { x: 8, y: 3.5, z: -5 };
-            newEl.setAttribute('id','object-num');
+            newEl.setAttribute('id', 'object-num');
             newEl.setAttribute('position', position);
             newEl.setAttribute('value', "0/" + projectObject.sceneryList[0].objectList.length);
 
-            clockEl.setAttribute('id','clock');
+            clockEl.setAttribute('id', 'clock');
             position = { x: 8, y: 2.5, z: -5 };
             clockEl.setAttribute('position', position);
             clockEl.setAttribute('value', time);
 
-            gameSetImage.setAttribute('id','game-set');
-            gameSetImage.setAttribute('position','0 0 3');
-            gameSetImage.setAttribute('src','https://traverser360.s3.ap-northeast-2.amazonaws.com/1497716132769.png');
+            gameSetImage.setAttribute('id', 'game-set');
+            gameSetImage.setAttribute('position', '0 0 3');
+            gameSetImage.setAttribute('src', 'https://traverser360.s3.ap-northeast-2.amazonaws.com/1497716132769.png');
 
             cameraEl.appendChild(newEl);
             cameraEl.appendChild(clockEl);
@@ -409,27 +410,27 @@ function initTemplate() {
     }
 }
 
-function createTemplateObject(){
+function createTemplateObject() {
     switch (projectObject.projectType) {
         case "hidenseek":
-            newObject('primitive','image');
-            latelyCreatedObject.eventList.push({'type': "oneClick", 'arg':""},{'type':'onVisible','arg':""},{'type':'addScore','arg':'1'});
+            newObject('primitive', 'image');
+            latelyCreatedObject.eventList.push({ 'type': "oneClick", 'arg': "" }, { 'type': 'onVisible', 'arg': "" }, { 'type': 'addScore', 'arg': '1' });
             updateObjectNumUI();
             break;
         case "simri":
-            if(projectObject.getCurrentScenery.sceneryType != "reulst-scenery"){
-                var nextSceneNum = projectObject.getCurrentIndex()+2
-                latelyCreatedObject.eventList.push({'type': "oneClick", 'arg':""},{'type':'teleport','arg':nextSceneNum},{'type':'addScore','arg':'20'});
+            if (projectObject.getCurrentScenery.sceneryType != "reulst-scenery") {
+                var nextSceneNum = projectObject.getCurrentIndex() + 2
+                latelyCreatedObject.eventList.push({ 'type': "oneClick", 'arg': "" }, { 'type': 'teleport', 'arg': nextSceneNum }, { 'type': 'addScore', 'arg': '20' });
                 //latelyCreatedObject.el.setAttribute('src',"https://traverser360.s3.ap-northeast-2.amazonaws.com/1497782502160.png");
             }
     }
 }
-window.createLatelyObject = function(){
-    if(latelyCreatedObject){
+window.createLatelyObject = function() {
+    if (latelyCreatedObject) {
         var newEl = mainFrame.document.createElement('a-image');
-        var newObj = new obj.Objct(newEl,latelyCreatedObject);
+        var newObj = new obj.Objct(newEl, latelyCreatedObject);
         projectObject.getCurrentScenery().addObject(newObj);
-        
+
         position = util.getForwardPosition(cameraEl.getAttribute('rotation'));
         newObj.setPosition(position);
         rotation = cameraEl.getAttribute('rotation');
@@ -438,13 +439,13 @@ window.createLatelyObject = function(){
         newObj.setFadeInOutAni(mainFrame);
         newObj.setClickListener(OBJECT_LISTENER);
         newObj.setLookAt('#camera');
-        
-        newEl.setAttribute('src',newObj.material.src);
-        newEl.setAttribute('class','object');
+
+        newEl.setAttribute('src', newObj.material.src);
+        newEl.setAttribute('class', 'object');
 
         sceneEl.appendChild(newEl);
         updateObjectNumUI();
-    }else{
+    } else {
         console.log("no lately created object");
     }
 }
@@ -452,9 +453,9 @@ window.createLatelyObject = function(){
 var time = 0;
 var timerId = 0;
 var resultSet = [
-    {score: 90, image_url:"https://traverser360.s3.ap-northeast-2.amazonaws.com/1497425965490.png" ,background_url:"https://traverser360.s3.ap-northeast-2.amazonaws.com/1497425957447.png"},
-    {score: 60, image_url:"https://traverser360.s3.ap-northeast-2.amazonaws.com/1497425965490.png" ,background_url:"https://traverser360.s3.ap-northeast-2.amazonaws.com/1497504973734.jpg"},
-    {score: 70, image_url:"https://traverser360.s3.ap-northeast-2.amazonaws.com/1497425965490.png" ,background_url:"https://traverser360.s3.ap-northeast-2.amazonaws.com/1497616671082.jpg"}
+    { score: 90, image_url: "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497425965490.png", background_url: "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497425957447.png" },
+    { score: 60, image_url: "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497425965490.png", background_url: "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497504973734.jpg" },
+    { score: 70, image_url: "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497425965490.png", background_url: "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497616671082.jpg" }
 ];
 
 function templateFunc() {
@@ -466,14 +467,14 @@ function templateFunc() {
                     item.addMaterial({ opacity: 0 });
                 });
                 time = 0;
-                timerId = setInterval(function(){
-                    time+=1;
-                    mainFrame.document.getElementById('clock').setAttribute('value',time);
-                },1000)
+                timerId = setInterval(function() {
+                    time += 1;
+                    mainFrame.document.getElementById('clock').setAttribute('value', time);
+                }, 1000)
             } else {
                 clearInterval(timerId);
-                mainFrame.document.getElementById('clock').setAttribute('value',0);
-                mainFrame.document.getElementById('game-set').setAttribute('position','0 0 3');
+                mainFrame.document.getElementById('clock').setAttribute('value', 0);
+                mainFrame.document.getElementById('game-set').setAttribute('position', '0 0 3');
                 updateObjectNumUI();
                 scoreVariable = 0;
                 objects.forEach(function(item) {
@@ -485,22 +486,22 @@ function templateFunc() {
             break;
         case "simri":
             var scenes = projectObject.sceneryList;
-            if(projectObject.getCurrentScenery().sceneryType=="result-scenery"){
+            if (projectObject.getCurrentScenery().sceneryType == "result-scenery") {
                 console.log("sdddd");
-                resultSet.sort(function(a,b){
+                resultSet.sort(function(a, b) {
                     return b.score - a.score;
                 })
-                for(var item in resultSet){
-                    if(scoreVariable > item.score){
+                for (var item in resultSet) {
+                    if (scoreVariable > item.score) {
                         setBackground(item.background_url);
-                        projectObject.getCurrentScenery().objectList[0].el.setAttribute('src',item.image_url);
+                        projectObject.getCurrentScenery().objectList[0].el.setAttribute('src', item.image_url);
                         break;
                     }
                 }
             }
-            if(editorMode){
+            if (editorMode) {
                 scoreVariable = 0;
-                scenes.forEach(function(scene){
+                scenes.forEach(function(scene) {
                     scene.objectList.forEach(function(item) {
                         item.oneClick = false;
                     });
@@ -508,8 +509,9 @@ function templateFunc() {
             }
     }
 }
-function updateObjectNumUI(){
-    mainFrame.document.getElementById('object-num').setAttribute('value',"0/"+projectObject.sceneryList[0].objectList.length);
+
+function updateObjectNumUI() {
+    mainFrame.document.getElementById('object-num').setAttribute('value', "0/" + projectObject.sceneryList[0].objectList.length);
 }
 
 window.createScene = function() {
@@ -603,9 +605,9 @@ function openObjectPropertyPanel(event) {
 function checkSocre() {
     switch (projectObject.projectType) {
         case "hidenseek":
-            mainFrame.document.getElementById("object-num").setAttribute('value',scoreVariable+"/"+projectObject.sceneryList[0].objectList.length);
+            mainFrame.document.getElementById("object-num").setAttribute('value', scoreVariable + "/" + projectObject.sceneryList[0].objectList.length);
             if (scoreVariable == projectObject.sceneryList[0].objectList.length) {
-                mainFrame.document.getElementById('game-set').setAttribute('position','0 0 -1');
+                mainFrame.document.getElementById('game-set').setAttribute('position', '0 0 -1');
                 clearInterval(timerId);
             }
     }
@@ -657,7 +659,7 @@ function newObject(type, shape, url, position, rotation, scale) {
     newObj.setScale(scale);
 
     if (shape == 'image') {
-        if(url == null){
+        if (url == null) {
             var url = imageUrlInputEl.value;
         }
         util.getImageSize(url, function() {
@@ -680,7 +682,7 @@ function newObject(type, shape, url, position, rotation, scale) {
 
     latelyCreatedObject = newObj;
     createTemplateObject();
-    
+
     setObjectOnMiniMap(position);
 
     return newObj;
@@ -699,7 +701,7 @@ function teleportEvent(arg) {
     setTimeout(function() {
         eraseCanvas();
         console.log('teleport! to:' + arg);
-        
+
         loadAllObjectOfScene(arg);
         templateFunc();
 
