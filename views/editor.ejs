@@ -138,10 +138,10 @@
             <li class="header-item" style="display:inline-flex;" onclick="getBackgroundPopup()">
               <span class="header-span">배경바꾸기</span>
             </li>
-            <li class="header-item" style="display:inline-flex;" onClick="switchEditorMode()">
+            <li class="header-item" style="display:inline-flex;" onclick="switchEditorMode()">
               <span class="header-span">미리보기</span>
             </li>
-            <li class="header-item" style="display:inline-flex;" onClick="saveProject(1, <%= sceneID %>);">
+            <li class="header-item" style="display:inline-flex;" onclick="getThumbnailPopup()">
               <span class="header-span">저장</span>
             </li>
           </ul>
@@ -219,12 +219,65 @@
         </div>
     </form>
   </div>
+<div id="thumbnailModal" class="modal fade" role="dialog">
+    <form id="thumbnail_form" method="post" enctype="multipart/form-data" target="uploader_iframe">
+        <input type="hidden" name="imageData" id="imageData" value="merong"/>
+        <input type="submit" style="position: absolute; left: -9999px" />
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title">Thumbnail</h4>
+                </div>
+                <div class="modal-body">
+                    <div style="display:none;">
+                        <canvas id="original-360"></canvas>
+                    </div>
+                    <canvas id="canvas-360" onclick="mymouseclick(event)"></canvas>
+                    <canvas id="base-canvas"></canvas>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="modal-close" class="btn btn-default" data-dismiss="modal" onClick="resetForm()">Close</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal" value="OK" onclick="submitThumbnail()">OK</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
 </html>
 <script type="text/javascript">
 
 var imageFlag = -1;
 var FLAG_IMAGE = 1;
 var FLAG_BACKGROUND = 2;
+var FLAG_THUMBNAIL = 3;
+var nothumbnail = false;
+
+// Thumbnail
+var segmentNum = 36;
+var corners = [];
+var unitPoint = {};
+
+var orig_img;
+var ratio;
+var orig_canvas;
+var orig_ctx;
+var resized_canvas;
+var resized_ctx;
+var base_canvas;
+var base_ctx;
+
+var worker = null;
+
+var resizedWidth = 512;
+var dstWidth = 300;
+var dstHeight = 300;
+var hfov = 80; //  in degrees
+var gYaw = 0,
+    gPitch = 0,
+    gRoll = 0;
+
 
 $(document).ready(function () {
   $('#inlineradio1').click(function () {
@@ -249,10 +302,30 @@ $(document).ready(function () {
       result = JSON.parse($(this).contents().text());  // Content of the iframe will be the response sent from the server. Parse the response as the JSON object
       if(imageFlag == FLAG_IMAGE){
         createImage(result.result);
-      }else{
+      }else if (imageFlag == FLAG_BACKGROUND){
         setBackground(result.result);
       }
       resetForm();
+    });
+  });
+
+  $('#thumbnail_form').submit(function(){
+    if (imageFlag == FLAG_THUMBNAIL) {
+      // get the canvas image data
+      var imageData = base_canvas.toDataURL("image/png");
+
+      // let the hidden field we added earlier carry the image data into the upload handler
+      $("#imageData").val(imageData);
+
+      // submit the form
+      $(this).attr('action', "/project/<%= sceneID %>/thumbnail");
+    }
+
+    $("#uploader_iframe").unbind().on('load', function() {  // This block of code will execute when the response is sent from the server.
+      result = JSON.parse($(this).contents().text());  // Content of the iframe will be the response sent from the server. Parse the response as the JSON object
+      if(imageFlag == FLAG_THUMBNAIL){
+        saveProject(1, <%= sceneID %>);
+      }
     });
   });
 });
@@ -274,6 +347,7 @@ function getJson(){
 }
 
 function getBackgroundPopup(){
+  nothumbnail = true;
   imageFlag = FLAG_BACKGROUND;
   $('#imageModal').modal('show');
 }
@@ -292,13 +366,199 @@ function submitImage(){
       setBackground($("#img-url").val());
 
     $("#modal-close").click();
-    return;
+  } else{
+     $("#image_form").submit();
   }
-  $("#image_form").submit();
+}
+
+function submitThumbnail() {
+  $("#thumbnail_form").submit();
 }
 
 function resetForm(){
   $("#img-url").val("");
   $("#image_file").val("");
+}
+
+function getThumbnailPopup(){
+  if (nothumbnail) {
+    setupEquirectangularApp();
+    imageFlag = FLAG_THUMBNAIL;
+    $('#thumbnailModal').modal('show');
+  }
+  else{
+    saveProject(1, <%= sceneID %>);
+  }
+}
+
+function setupEquirectangularApp() {
+  // Equirectangular-to-pinhole app
+  orig_img = new Image;
+  ratio = 1;
+  orig_canvas = $("#original-360")[0];
+  orig_ctx = orig_canvas.getContext('2d');
+  resized_canvas = $("#canvas-360")[0];
+  resized_ctx = resized_canvas.getContext('2d');
+  base_canvas = $("#base-canvas")[0];
+  base_ctx = base_canvas.getContext("2d");
+
+  orig_img.onload = function() {
+      ratio = resizedWidth / orig_img.width;
+
+      resized_canvas.width = resizedWidth;
+      resized_canvas.height = orig_img.height * ratio;
+
+      // draw original image (not show)
+      orig_canvas.width = orig_img.width;
+      orig_canvas.height = orig_img.height;
+
+      drawImageAntialiasing(orig_img, orig_img.width, orig_img.height, orig_ctx);
+
+      // draw resized image
+      resized_ctx.drawImage(orig_canvas, 0, 0, orig_img.width * ratio, orig_img.height * ratio);
+  }
+  orig_img.crossOrigin = "anonymous";
+  orig_img.src = getBackgroundUrl();
+
+  base_canvas.width = dstWidth;
+  base_canvas.height = dstHeight;
+
+  worker = new Worker("../static/js/equiprocess.js");
+  worker.addEventListener("message", onmessage);
+}
+
+function mymouseclick(event) {
+    var a = equiToLatlon(event.layerX / ratio, event.layerY / ratio, orig_img.width, orig_img.height);
+    setDirection(a.lon, a.lat, 0);
+    // move(1);
+
+    clearCanvas();
+
+    updateFrame();
+    updateBase();
+}
+
+function updateFrame() {
+    resized_ctx.drawImage(orig_canvas, 0, 0, orig_img.width * ratio, orig_img.height * ratio);
+
+    var points = [];
+
+    points = points.concat(getLinePoints(0, 0, dstWidth, 0, segmentNum));
+    points = points.concat(getLinePoints(dstWidth, 0, dstWidth, dstHeight, segmentNum));
+    points = points.concat(getLinePoints(dstWidth, dstHeight, 0, dstHeight, segmentNum));
+    points = points.concat(getLinePoints(0, dstHeight, 0, 0, segmentNum));
+
+    worker.postMessage({
+        direction: "unit",
+        points: points,
+        srcWidth: orig_img.width,
+        srcHeight: orig_img.height,
+        dstWidth: base_canvas.width,
+        dstHeight: base_canvas.height,
+        hfov: hfov, //  in degrees
+        gYaw: gYaw,
+        gPitch: gPitch,
+        gRoll: gRoll
+    });
+}
+
+function updateBase() {
+    var params = {
+        direction: "forward",
+        srcData: orig_ctx.getImageData(0, 0, orig_canvas.width, orig_canvas.height),
+        dstData: base_ctx.createImageData(base_canvas.width, base_canvas.height),
+        srcWidth: orig_img.width,
+        srcHeight: orig_img.height,
+        dstWidth: base_canvas.width,
+        dstHeight: base_canvas.height,
+        hfov: hfov, //  in degrees
+        gYaw: gYaw,
+        gPitch: gPitch,
+        gRoll: gRoll
+    };
+    worker.postMessage(params);
+}
+
+function onmessage(event) {
+    var result = event.data.result;
+    if (event.data.finished) {
+        switch (event.data.direction) {
+            case "forward":
+                base_ctx.putImageData(result.dstData, 0, 0);
+                break;
+            case "unit":
+            corners = result.equiPoints;
+
+            resized_ctx.lineWidth = 7;
+            resized_ctx.strokeStyle = '#ff0000';
+
+            resized_ctx.beginPath();
+            resized_ctx.moveTo(corners[0].x * ratio, corners[0].y * ratio);
+            for (var i = 0; i < corners.length; ++i) {
+                var j = (i + 1);
+                if (j >= corners.length) break;
+
+                var dist = Math.sqrt(Math.pow(corners[i].x - corners[j].x, 2) + Math.pow(corners[i].y - corners[j].y, 2));
+                if (dist < orig_canvas.width / 2) {
+                    resized_ctx.lineTo(corners[j].x * ratio, corners[j].y * ratio);
+                } else {
+                    resized_ctx.stroke();
+                    resized_ctx.beginPath();
+                    resized_ctx.moveTo(corners[j].x * ratio, corners[j].y * ratio);
+                }
+            }
+            resized_ctx.stroke();
+            break;
+        }
+    } else {
+        // move();
+    }
+}
+
+function equiToLatlon(x, y, width, height) {
+    var lon = (x / width - 0.5) * Math.PI * 2;
+    var lat = ((height - y - 1.0) / (height - 1) - 0.5) * Math.PI;
+    return {
+        lon: lon,
+        lat: lat
+    }
+}
+
+function setDirection(yaw, pitch, roll) {
+    gYaw = yaw;
+    gPitch = pitch;
+    gRoll = roll;
+}
+
+function drawImageAntialiasing(img, width, height, dstCtx) {
+    var off_canvas = document.createElement('canvas'),
+        off_ctx = off_canvas.getContext('2d');
+
+    off_canvas.width = img.width * 0.5;
+    off_canvas.height = img.height * 0.5;
+
+    off_ctx.drawImage(img, 0, 0, off_canvas.width, off_canvas.height);
+    off_ctx.drawImage(off_canvas, 0, 0, off_canvas.width * 0.5, off_canvas.height * 0.5);
+
+    dstCtx.drawImage(off_canvas, 0, 0, off_canvas.width * 0.5, off_canvas.height * 0.5, 0, 0, width, height);
+}
+
+function getLinePoints(x0, y0, x1, y1, segments) {
+    var linePoints = [];
+
+    var dx = (x1 - x0) / segments;
+    var dy = (y1 - y0) / segments;
+    for (var i = 0; i < segments; ++i) {
+        var x = x0 + dx * i;
+        var y = y0 + dy * i;
+
+        linePoints.push({ x: x, y: y });
+    }
+    return linePoints;
+}
+
+function clearCanvas() {
+    base_ctx.clearRect(0, 0, base_canvas.width, base_canvas.height);
+    resized_ctx.clearRect(0, 0, resized_canvas.width, resized_canvas.height);
 }
 </script>

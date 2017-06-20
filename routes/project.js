@@ -183,6 +183,33 @@ router.post('/:id/image', uploadImage.array('image_file', 1), function(req, res)
   res.json({result : req.files[0].location});
 });
 
+router.post('/:id/thumbnail', uploadImage.array('image_file', 1), function(req, res){
+  console.log(req);
+  var id = req.params.id;
+  var imageData = req.body.imageData;
+  console.log('got post thumb. start uploading');
+  cloudinary.uploader.upload(imageData, function(result){
+    console.log('uploaded to cloudinary');
+    if (result.url) {
+       var temp = (result.url).split("upload/");
+       var url = temp[0] + "upload/" + temp[1];
+       var q = 'update scene set thumbnail=? where idscene=?';
+       var p = [url, id];
+       console.log(p);
+       connection.query(q, p, function(err, info){
+         if(err){
+           console.log("err : " + err);
+         }
+         else{
+            res.json({result: true});
+         }
+       })
+    } else {
+      console.log('Error uploading to cloudinary: ',result);
+    }
+  });
+});
+
 router.post('/save', function(req, res){
   var data = req.body
   var base64data = new Buffer(data.json, 'binary');
@@ -196,7 +223,6 @@ router.post('/save', function(req, res){
     if(err){
       console.log(err);
     }else{
-      saveThumbnail(data.scene, host + "/" + result.key);
       var query = "update scene set path=? where idscene=?"
       var params = [host + "/" + result.key, data.scene];
       connection.query(query, params, function (error, info) {
@@ -211,6 +237,20 @@ router.post('/save', function(req, res){
       });
     }
   });
+});
+
+router.post('/clear/:number', function(req, res){
+  var number = req.params.number;
+  var query = "delete from scene where idscene>" + number;
+    var params = [req.params.id];
+    connection.query(query, params, function(err, info){
+      if(err){
+        console.log("err : " + err);
+        res.status(500);
+      }else{
+        res.json({result:"successful"});
+      }
+    });
 });
 
 function saveThumbnail(id, path){

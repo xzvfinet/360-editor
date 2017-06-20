@@ -59,6 +59,10 @@ window.setBackground = function(url) {
     projectObject.getCurrentScenery().setBackgroundImageUrl(url);
 }
 
+window.getBackgroundUrl = function() {
+    return projectObject.getCurrentScenery().bgUrl;
+}
+
 function newProject(type) {
     projectObject = new Project();
     projectObject.projectType = type;
