@@ -142,6 +142,7 @@ function updateSceneNumberList() {
     //remove all child
     while (sceneNum.hasChildNodes()) { sceneNum.removeChild(sceneNum.firstChild); }
 
+    console.log(projectObject.getCurrentIndex());
     for (var i = 0; i < projectObject.getSceneryListLength(); i++) {
         if (projectObject.getCurrentIndex() == i) {
             var a = document.createElement("b");
@@ -196,7 +197,6 @@ function eraseCanvas() {
     currentSelectedObject = null;
     mover = null;
     var objects = mainFrame.document.querySelectorAll(".object");
-    console.log(objects);
     for (var i = 0; i < objects.length; i++) {
         objects[i].parentNode.removeChild(objects[i]);
     }
@@ -520,15 +520,16 @@ window.createScene = function() {
 
     updateSceneDropDown();
 
-    projectObject.changeScenery(projectObject.sceneryList[length - 1]);
+    projectObject.changeScenery(projectObject.sceneryList.length-1);
 
     eraseCanvas();
     updateSceneNumberList();
 }
 window.createOption = function() {
-    var obj = createImage('https://unsplash.it/600/300');
+    var obj = createImage('https://traverser360.s3.ap-northeast-2.amazonaws.com/1497782502160.png');
     obj.addEvent('teleport', projectObject.getCurrentIndex() + 1);
-
+    obj.addEvent('oneClick',"");
+    obj.addEvent('addScore',"1");
     console.log(obj);
 }
 
@@ -599,7 +600,7 @@ function openObjectPropertyPanel(event) {
     if ($("#object-panel").css("display") == "none") {
         $("#object-panel").css("display", "");
     }
-    $("#object-panel").css({ position: "fixed", top: event.clientY, left: event.clientX });
+    $("#object-panel").css({ position: "fixed", top: event.clientY, left: event.clientX+150 });
 }
 
 function checkSocre() {
@@ -681,7 +682,7 @@ function newObject(type, shape, url, position, rotation, scale) {
     sceneEl.appendChild(newEl);
 
     latelyCreatedObject = newObj;
-    createTemplateObject();
+    //createTemplateObject();
 
     setObjectOnMiniMap(position);
 
