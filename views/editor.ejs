@@ -196,7 +196,6 @@
             <% } %>
             <% if (projectType == "simri") { %>
             <div id="newChoice" class="panel-floating" onclick="createOption()"></div>
-            <div id="newChoice" class="panel-floating" onclick="modifyOption('ddd','',30)"></div>
             <div class="panel panel-default panel-floating" onclick="createScene()">
                 <div class="panel-body panel-floating-inside">
                     <span>새로운 장면</span>
@@ -204,18 +203,25 @@
             </div>
             <% } %>
             <% if (projectType == "hidenseek") { %>
+            <div class="panel panel-default panel-floating" onclick="createSpot()">
+                <div class="panel-body panel-floating-inside">
+                    <span>스팟추가</span>
+                </div>
+            </div>
             <% } %>
         </div>
 
         <form>
           <div id="object-panel" class="panel panel-default" style="display:none;">
             <div class="panel-body" style="padding:10px;">
+              <% if (projectType == "simri") { %>
               <div id="simri-panel-image">
                 <input id="image_file" type="file" name="image_file" size="30" style="display:inline-flex;margin-left:120px;margin-top:120px"
                   disabled="true" />
                 <input type="text"style="float: right;margin-top: 17px;margin-right: 10px;width: 150px;">
                 <input type="text"style="left: 120px;bottom: 110px;position: relative;">
               </div>
+              <% } %>
               <div id="remove-button" class="panel panel-default panel-floating" onclick="removeSelectedObject()">
                 <div class="panel-body panel-floating-inside">
                   <span>삭제</span>

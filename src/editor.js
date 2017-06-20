@@ -77,6 +77,8 @@ function newProject(type) {
             projectObject.addScenery(resultScene);
             break;
         case 'hidenseek':
+            var newScene = new Scenery(background);
+            projectObject.addScenery(newScene);
             break;
     }
 
@@ -105,6 +107,7 @@ window.loadProject = function(projectJson) {
     updateSceneNumberList();
     updateSceneDropDown();
 
+    initTemplate();
     return true;
 }
 
@@ -425,30 +428,6 @@ function createTemplateObject() {
             }
     }
 }
-window.createLatelyObject = function() {
-    if (latelyCreatedObject) {
-        var newEl = mainFrame.document.createElement('a-image');
-        var newObj = new obj.Objct(newEl, latelyCreatedObject);
-        projectObject.getCurrentScenery().addObject(newObj);
-
-        position = util.getForwardPosition(cameraEl.getAttribute('rotation'));
-        newObj.setPosition(position);
-        rotation = cameraEl.getAttribute('rotation');
-        newObj.setRotation(rotation);
-        newObj.setScale(newObj.transform.scale);
-        newObj.setFadeInOutAni(mainFrame);
-        newObj.setClickListener(OBJECT_LISTENER);
-        newObj.setLookAt('#camera');
-
-        newEl.setAttribute('src', newObj.material.src);
-        newEl.setAttribute('class', 'object');
-
-        sceneEl.appendChild(newEl);
-        updateObjectNumUI();
-    } else {
-        console.log("no lately created object");
-    }
-}
 
 var time = 0;
 var timerId = 0;
@@ -539,6 +518,41 @@ window.modifyOption = function(text,image_url,score){
     currentSelectedObject.el.setAttribute("src",image_url);
     currentSelectedObject.modifyEvent("addScore",score);
 }
+
+window.createSpot = function() {
+    var obj = createImage('https://traverser360.s3.ap-northeast-2.amazonaws.com/1497977716404.png');
+    obj.addEvent('onVisible',"");
+    obj.addEvent('oneClick',"");
+    obj.addEvent('addScore',"1");
+    console.log(obj);
+}
+
+window.createLatelyObject = function() {
+    if (latelyCreatedObject) {
+        var newEl = mainFrame.document.createElement('a-image');
+        var newObj = new obj.Objct(newEl, latelyCreatedObject);
+        projectObject.getCurrentScenery().addObject(newObj);
+
+        position = util.getForwardPosition(cameraEl.getAttribute('rotation'));
+        newObj.setPosition(position);
+        rotation = cameraEl.getAttribute('rotation');
+        newObj.setRotation(rotation);
+        newObj.setScale(newObj.transform.scale);
+        newObj.setFadeInOutAni(mainFrame);
+        newObj.setClickListener(OBJECT_LISTENER);
+        newObj.setLookAt('#camera');
+
+        newEl.setAttribute('src', newObj.material.src);
+        newEl.setAttribute('class', 'object');
+
+        sceneEl.appendChild(newEl);
+        updateObjectNumUI();
+    } else {
+        console.log("no lately created object");
+    }
+}
+
+
 
 window.create = function(type) {
     if (PRIMITIVE_DEFINITIONS.includes(type)) {
