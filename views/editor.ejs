@@ -24,11 +24,12 @@
     }
 
     #remove-button{
-        margin-top: 59px;
-        margin-right: 28px;
+        top: 240px;
+        margin-left: 150px;
         width: 100px;
         height: 30px;
         float: right;
+        position: absolute; 
     }
 
     #simri-panel-image{
@@ -274,11 +275,13 @@
             <div id="simri-result-panel" class="panel object-panel" style="display:none;">
                 <div class="panel-body" style="padding:10px;">
                         <div id="simri-panel-end-image">
-                            <input id="image_file2" type="file" name="image_file" size="30" style="display:inline-flex;margin-left:120px;margin-top:120px"
+                            <input id="result-image-file" type="file" name="image_file" size="30" style="display:inline-flex;margin-left:120px;margin-top:120px"
                                 disabled="true" />
                             <input type="text" style="margin-top: 17px;margin-left: 120px;width: 40%;">
                             <input type="text" style="left: 120px;bottom: 153px;position: absolute;width: 40%;">
-                            <div id="remove-button" class="panel panel-default panel-floating" onclick="removeSelectedObject()">
+                            <input id="result-back-file" type="file" name="image_file" size="30" style="display:inline-flex;margin-left:120px;margin-top:20px"
+                                disabled="true" />
+                            <div id="remove-button" class="panel panel-default panel-floating" onclick="removeSelectedObject()" style="margin-top:21">
                                 <div class="panel-body panel-floating-inside">
                                     <span>삭제</span>
                                 </div>

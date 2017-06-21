@@ -487,7 +487,7 @@ function templateFunc() {
             break;
         case "simri":
             var scenes = projectObject.sceneryList;
-            if (projectObject.getCurrentScenery().sceneryType == "result-scenery") {
+            if (projectObject.getCurrentScenery().sceneryType == "result") {
                 console.log("sdddd");
                 resultSet.sort(function(a, b) {
                     return b.score - a.score;
@@ -496,6 +496,12 @@ function templateFunc() {
                     if (scoreVariable > item.score) {
                         setBackground(item.background_url);
                         projectObject.getCurrentScenery().objectList[0].el.setAttribute('src', item.image_url);
+                        
+                        var objects = projectObject.getCurrentScenery().objectList;
+                        objects.forEach(function(item) {
+                            item.addMaterial({ opacity: 0 });
+                        });
+                        item.obj.el.setAttribute('opacity',1);
                         break;
                     }
                 }
@@ -579,7 +585,15 @@ window.createLatelyObject = function() {
     }
 }
 
-
+window.modifyResult = function(text,image_url,score,background_url){
+    currentSelectedObject.material.src = image_url;
+    currentSelectedObject.el.setAttribute("src",image_url);
+    var result = {
+        obj: currentSelectedObject,
+        back_url: background_url,
+        score: score,
+    }
+}
 
 window.create = function(type) {
     if (PRIMITIVE_DEFINITIONS.includes(type)) {
@@ -628,7 +642,7 @@ function onObjectSelect(event) {
         // append mover element
         mover = newMover();
         this.appendChild(mover);
-        openObjectPropertyPanel(event.detail.mouseEvent,"#simri-option-panel");
+        openObjectPropertyPanel(event.detail.mouseEvent);
     } else {
         // Execute events assigned to object.
         if (!currentSelectedObject.oneClick) {
@@ -644,7 +658,13 @@ function onObjectSelect(event) {
     }
 }
 
-function openObjectPropertyPanel(event,id) {
+function openObjectPropertyPanel(event) {
+    console.log(projectObject.projectType);
+    switch(projectObject.projectType){
+        case "simri":if(projectObject.getCurrentScenery().sceneryType == "result") id = "#simri-result-panel";
+                    else id = "#simri-option-panel";
+                    break;
+    }
     if ($(id).css("display") == "none") {
         $(id).css("display", "");
     }

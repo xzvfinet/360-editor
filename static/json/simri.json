@@ -61,6 +61,18 @@
             "name": "Scene",
             "sceneryType": "",
             "objectList": []
+        },
+         {
+            "bgUrl": "",
+            "name": "Scene",
+            "sceneryType": "",
+            "objectList": []
+        },
+         {
+            "bgUrl": "",
+            "name": "Scene",
+            "sceneryType": "result",
+            "objectList": []
         }
     ]
 }
