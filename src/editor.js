@@ -547,6 +547,10 @@ window.createSpot = function() {
     updateObjectNumUI();
     console.log(obj);
 }
+window.modifySpot = function(imgage_url) {
+    currentSelectedObject.material.src = image_url;
+    currentSelectedObject.el.setAttribute("src",image_url);
+}
 
 window.createLatelyObject = function() {
     if (latelyCreatedObject) {
