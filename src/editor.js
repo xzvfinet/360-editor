@@ -113,6 +113,8 @@ window.loadProject = function(projectJson) {
 }
 
 window.loadAllObjectOfScene = function(sceneNum) {
+
+    $(".object-panel").css("display", "none");
     eraseCanvas();
     for (var j in projectObject.sceneryList[sceneNum].objectList) {
         relateObjectWithDomEl(projectObject.sceneryList[sceneNum].objectList[j]);
@@ -188,7 +190,7 @@ window.removeSelectedObject = function() {
     projectObject.getCurrentScenery().removeObject(currentSelectedObject);
     mover = null;
     currentSelectedObject = null;
-    $("#object-panel").css("display", "none");
+    $(".object-panel").css("display", "none");
 }
 
 function clearAllObject(scenery) {
@@ -318,7 +320,7 @@ function initCanvas() {
                 var pos = cameraEl.components['mouse-cursor'].__raycaster.ray.direction;
                 initialPos = { x: pos.x * radius, y: pos.y * radius, z: pos.z * radius };
                 prevPos = initialPos;
-                $("#object-panel").css("display", "none");
+                $(".object-panel").css("display", "none");
             });
             this.el.addEventListener('mouseup', function(evt) {
                 this.setAttribute('material', 'color', "#000000");
@@ -665,7 +667,7 @@ function onObjectUnselect() {
     if (mover)
         mover.parentEl.removeChild(mover);
     mover = null;
-    $("#object-panel").css("display", "none");
+    $(".object-panel").css("display", "none");
 }
 
 window.toggleEditorMode = function() {
