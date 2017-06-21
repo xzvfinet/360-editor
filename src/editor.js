@@ -63,18 +63,25 @@ window.getBackgroundUrl = function() {
 }
 
 function newProject(type) {
-    projectObject = new Project();
-    projectObject.projectType = type;
+    console.log("ASFAS");
+    //projectObject = new Project();
+    //projectObject.projectType = type;
     switch (type) {
         case 'free':
             var newScenery = new Scenery(background);
             projectObject.addScenery(newScenery);
             break;
         case 'simri':
-            var optionScene = new Scenery(background);
+            /*var optionScene = new Scenery(background);
             projectObject.addScenery(optionScene);
             var resultScene = new Scenery();
-            projectObject.addScenery(resultScene);
+            projectObject.addScenery(resultScene);*/
+            var tempJson;
+            $.getJSON("../static/json/simri.json",function(data){
+                tempJson = data;
+                loadProject(JSON.stringify(tempJson));
+            });
+            
             break;
         case 'hidenseek':
             var newScene = new Scenery(background);
@@ -82,8 +89,8 @@ function newProject(type) {
             break;
     }
 
-    updateSceneNumberList();
-    updateSceneDropDown();
+    //updateSceneNumberList();
+    //updateSceneDropDown();
 }
 
 window.saveProject = function(userID, sceneID) {
@@ -145,7 +152,7 @@ function updateSceneNumberList() {
     //remove all child
     while (sceneNum.hasChildNodes()) { sceneNum.removeChild(sceneNum.firstChild); }
 
-    console.log(projectObject.getCurrentIndex());
+    console.log(projectObject);
     for (var i = 0; i < projectObject.getSceneryListLength(); i++) {
         if (projectObject.getCurrentIndex() == i) {
             var a = document.createElement("b");

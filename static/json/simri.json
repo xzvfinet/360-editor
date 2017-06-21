@@ -1,0 +1,66 @@
+{
+    "title": "",
+    "projectType": "simri",
+    "sceneryList": [
+        {
+            "bgUrl": "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497936858129.jpg",
+            "name": "Scene",
+            "sceneryType": "",
+            "objectList": [
+                {
+                    "el": null,
+                    "type": "primitive",
+                    "shape": "image",
+                    "transform": {
+                        "position": {
+                            "x": -0.057704936596440895,
+                            "y": 3.243017425890088,
+                            "z": -5.047723062497153
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "scale": {
+                            "x": 2.48,
+                            "y": 1.11
+                        }
+                    },
+                    "material": {
+                        "src": "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497782502160.png"
+                    },
+                    "clickListener": "object-listener",
+                    "eventList": [
+                        {
+                            "type": "teleport",
+                            "arg": 1
+                        },
+                        {
+                            "type": "oneClick",
+                            "arg": ""
+                        },
+                        {
+                            "type": "addScore",
+                            "arg": "1"
+                        }
+                    ],
+                    "lookat": "#camera",
+                    "oneClick": false
+                }
+            ]
+        },
+        {
+            "bgUrl": "",
+            "name": "Scene",
+            "sceneryType": "",
+            "objectList": []
+        },
+        {
+            "bgUrl": "",
+            "name": "Scene",
+            "sceneryType": "",
+            "objectList": []
+        }
+    ]
+}
