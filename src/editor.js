@@ -626,7 +626,7 @@ function onObjectSelect(event) {
         // append mover element
         mover = newMover();
         this.appendChild(mover);
-        openObjectPropertyPanel(event.detail.mouseEvent);
+        openObjectPropertyPanel(event.detail.mouseEvent,"#simri-option-panel");
     } else {
         // Execute events assigned to object.
         if (!currentSelectedObject.oneClick) {
@@ -642,11 +642,11 @@ function onObjectSelect(event) {
     }
 }
 
-function openObjectPropertyPanel(event) {
-    if ($("#object-panel").css("display") == "none") {
-        $("#object-panel").css("display", "");
+function openObjectPropertyPanel(event,id) {
+    if ($(id).css("display") == "none") {
+        $(id).css("display", "");
     }
-    $("#object-panel").css({ position: "fixed", top: event.clientY, left: event.clientX+150 });
+    $(id).css({ position: "fixed", top: event.clientY, left: event.clientX+150 });
 }
 
 function checkScore() {

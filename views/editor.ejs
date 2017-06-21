@@ -15,16 +15,16 @@
     }
     
     #adjust-button{
-        width: 100px;
+            width: 100px;
         height: 30px;
         float: left;
         margin-left: 30px;
         position: absolute;
-        bottom: 15px;
+        top: 240px;
     }
 
     #remove-button{
-        margin-top: 14px;
+        margin-top: 59px;
         margin-right: 28px;
         width: 100px;
         height: 30px;
@@ -38,8 +38,17 @@
       background-size: 100% 100%;
       background-image: url('../static/img/bg_input.png')
     }
+    
+        
+    #simri-panel-end-image{
+      width:280px;
+      height: 250px;
+      position: fixed;
+      background-size: 100% 100%;
+      background-image: url('../static/img/popup_end.png')
+    }
 
-    #object-panel {
+    .object-panel {
         width: 300px;
         height: 300px;
         /*border-radius: 1%;*/
@@ -240,9 +249,8 @@
         </div>
 
         <form>
-            <div id="object-panel" class="panel" style="display:none;">
+            <div id="simri-option-panel" class="panel object-panel" style="display:none;">
                 <div class="panel-body" style="padding:10px;">
-                    <% if (projectType == "simri") { %>
                         <div id="simri-panel-image">
                             <input id="image_file2" type="file" name="image_file" size="30" style="display:inline-flex;margin-left:120px;margin-top:120px"
                                 disabled="true" />
@@ -261,7 +269,28 @@
                         </div>
                 </div>
             </div>
-            <% } %>
+        </form>
+        <form>
+            <div id="simri-option-panel" class="panel object-panel" style="display:none;">
+                <div class="panel-body" style="padding:10px;">
+                        <div id="simri-panel-end-image">
+                            <input id="image_file2" type="file" name="image_file" size="30" style="display:inline-flex;margin-left:120px;margin-top:120px"
+                                disabled="true" />
+                            <input type="text" style="margin-top: 17px;margin-left: 120px;width: 40%;">
+                            <input type="text" style="left: 120px;bottom: 153px;position: absolute;width: 40%;">
+                            <div id="remove-button" class="panel panel-default panel-floating" onclick="removeSelectedObject()">
+                                <div class="panel-body panel-floating-inside">
+                                    <span>삭제</span>
+                                </div>
+                            </div>
+                            <div id="adjust-button" class="panel panel-default panel-floating" onclick="removeSelectedObject()">
+                                <div class="panel-body panel-floating-inside">
+                                    <span>적용</span>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+            </div>
         </form>
                 
         <div id="main-canvas" class="col-md-8" style="height:100%;">
