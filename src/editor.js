@@ -660,6 +660,7 @@ function openObjectPropertyPanel(event) {
         case "simri":if(projectObject.getCurrentScenery().sceneryType == "result") id = "#simri-result-panel";
                     else id = "#simri-option-panel";
                     break;
+        case "hidenseek" :id ="#hidenseek-panel";break;
     }
     if ($(id).css("display") == "none") {
         $(id).css("display", "");

@@ -49,6 +49,14 @@
       background-image: url('../static/img/popup_end.png')
     }
 
+    #hidenseek-panel-image{
+      width:280px;
+      height: 250px;
+      position: fixed;
+      background-size: 100% 100%;
+      background-image: url('../static/img/popup_spot.png')
+    }
+
     .object-panel {
         width: 300px;
         height: 300px;
@@ -280,6 +288,28 @@
                             <input type="text" style="margin-top: 17px;margin-left: 120px;width: 40%;">
                             <input type="text" style="left: 120px;bottom: 153px;position: absolute;width: 40%;">
                             <input id="result-back-file" type="file" name="image_file" size="30" style="display:inline-flex;margin-left:120px;margin-top:20px"
+                                disabled="true" />
+                            <div id="remove-button" class="panel panel-default panel-floating" onclick="removeSelectedObject()" style="margin-top:21">
+                                <div class="panel-body panel-floating-inside">
+                                    <span>삭제</span>
+                                </div>
+                            </div>
+                            <div id="adjust-button" class="panel panel-default panel-floating" onclick="removeSelectedObject()">
+                                <div class="panel-body panel-floating-inside">
+                                    <span>적용</span>
+                                </div>
+                            </div>
+                        </div>
+                </div>
+            </div>
+        </form>
+        <form>
+            <div id="hidenseek-panel" class="panel object-panel" style="display:none;">
+                <div class="panel-body" style="padding:10px;">
+                        <div id="hidenseek-panel-image">
+                            <input id="hidenseek-image-file" type="file" name="image_file" size="30" style="display:inline-flex;margin-left:120px;margin-top:80px"
+                                disabled="true" />
+                            <input id="hidenseek-sound-file" type="file" name="image_file" size="30" style="display:inline-flex;margin-left:120px;margin-top:55px"
                                 disabled="true" />
                             <div id="remove-button" class="panel panel-default panel-floating" onclick="removeSelectedObject()" style="margin-top:21">
                                 <div class="panel-body panel-floating-inside">
