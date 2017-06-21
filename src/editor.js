@@ -63,29 +63,23 @@ window.getBackgroundUrl = function() {
 }
 
 function newProject(type) {
-    console.log("ASFAS");
-    //projectObject = new Project();
-    //projectObject.projectType = type;
+    var tempJson;
     switch (type) {
         case 'free':
             var newScenery = new Scenery(background);
             projectObject.addScenery(newScenery);
             break;
         case 'simri':
-            /*var optionScene = new Scenery(background);
-            projectObject.addScenery(optionScene);
-            var resultScene = new Scenery();
-            projectObject.addScenery(resultScene);*/
-            var tempJson;
             $.getJSON("../static/json/simri.json",function(data){
                 tempJson = data;
                 loadProject(JSON.stringify(tempJson));
             });
-            
             break;
         case 'hidenseek':
-            var newScene = new Scenery(background);
-            projectObject.addScenery(newScene);
+            $.getJSON("../static/json/hidenseek.json",function(data){
+                tempJson = data;
+                loadProject(JSON.stringify(tempJson));
+            });
             break;
     }
 
@@ -398,22 +392,40 @@ function initTemplate() {
         case "hidenseek":
             var newEl = mainFrame.document.createElement("a-text");
             var clockEl = mainFrame.document.createElement("a-text");
+            var bgClockEl = mainFrame.document.createElement("a-image");
             var gameSetImage = mainFrame.document.createElement("a-image");
 
-            var position = { x: 8, y: 3.5, z: -5 };
+            var position = { x: 8.2, y: 3.15, z: -5 };
             newEl.setAttribute('id', 'object-num');
             newEl.setAttribute('position', position);
             newEl.setAttribute('value', "0/" + projectObject.sceneryList[0].objectList.length);
-
+            newEl.setAttribute('color', 'black');
+            newEl.setAttribute('align', 'center');
+            newEl.setAttribute('width', '10');
+            
             clockEl.setAttribute('id', 'clock');
-            position = { x: 8, y: 2.5, z: -5 };
+            position = { x: 8.1, y: 3.65, z: -5 };
             clockEl.setAttribute('position', position);
             clockEl.setAttribute('value', time);
-
+            clockEl.setAttribute('color', 'black');
+            clockEl.setAttribute('align', 'center');
+            clockEl.setAttribute('width', '10');
+            
             gameSetImage.setAttribute('id', 'game-set');
             gameSetImage.setAttribute('position', '0 0 3');
-            gameSetImage.setAttribute('src', 'https://traverser360.s3.ap-northeast-2.amazonaws.com/1497716132769.png');
+            gameSetImage.setAttribute('src', '../img/template/results_final.jpg');
+            gameSetImage.setAttribute('scale',"2 1 1");
+            var setClock = clockEl.cloneNode(true);
+            setClock.setAttribute('id','back-clock');
+            setClock.setAttribute('position','0.13 0 0');
+            setClock.setAttribute('width','4');
+            gameSetImage.appendChild(setClock);
 
+            bgClockEl.setAttribute('src','../img/template/icon_time_final.png')
+            bgClockEl.setAttribute('position','8 3.5 -5');
+            bgClockEl.setAttribute('scale','2.5 2.5 0');
+            
+            cameraEl.appendChild(bgClockEl);
             cameraEl.appendChild(newEl);
             cameraEl.appendChild(clockEl);
             cameraEl.appendChild(gameSetImage);
@@ -456,6 +468,7 @@ function templateFunc() {
                 timerId = setInterval(function() {
                     time += 1;
                     mainFrame.document.getElementById('clock').setAttribute('value', time);
+                    mainFrame.document.getElementById('back-clock').setAttribute('value', time);
                 }, 1000)
             } else {
                 clearInterval(timerId);
@@ -531,6 +544,7 @@ window.createSpot = function() {
     obj.addEvent('onVisible',"");
     obj.addEvent('oneClick',"");
     obj.addEvent('addScore',"1");
+    updateObjectNumUI();
     console.log(obj);
 }
 
@@ -619,7 +633,7 @@ function onObjectSelect(event) {
                 var arg = event['arg'];
                 func(arg);
             }
-            checkSocre();
+            checkScore();
         }
     }
 }
@@ -631,7 +645,7 @@ function openObjectPropertyPanel(event) {
     $("#object-panel").css({ position: "fixed", top: event.clientY, left: event.clientX+150 });
 }
 
-function checkSocre() {
+function checkScore() {
     switch (projectObject.projectType) {
         case "hidenseek":
             mainFrame.document.getElementById("object-num").setAttribute('value', scoreVariable + "/" + projectObject.sceneryList[0].objectList.length);

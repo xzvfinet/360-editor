@@ -146,6 +146,26 @@
         background-size: 100% 100%;
         background-image: url('../static/img/editor_option_mouseon.png')
     }
+
+    #newSpot{
+        background-size: 100% 100%;
+        background-image: url('../static/img/btn_newspot_over_blue.png')
+    }
+
+    #newSpot:hover{
+        background-size: 100% 100%;
+        background-image: url('../static/img/btn_newspot_on_blue.png')
+    }
+
+    #latelySpot{
+        background-size: 100% 100%;
+        background-image: url('../static/img/btn_spot_over_blue.png')
+    }
+
+    #latelySpot:hover{
+        background-size: 100% 100%;
+        background-image: url('../static/img/btn_spot_on_blue.png')
+    }
     /*
   .modal-content{
     background-size: 100% 100%;
@@ -203,11 +223,8 @@
             </div>
             <% } %>
             <% if (projectType == "hidenseek") { %>
-            <div class="panel panel-default panel-floating" onclick="createSpot()">
-                <div class="panel-body panel-floating-inside">
-                    <span>스팟추가</span>
-                </div>
-            </div>
+            <div id="newSpot" class="panel-floating" onclick="createSpot()"></div>
+            <div id="latelySpot" class="panel-floating" onclick="createLatelyObject()"></div>
             <% } %>
         </div>
 
@@ -216,7 +233,7 @@
             <div class="panel-body" style="padding:10px;">
               <% if (projectType == "simri") { %>
               <div id="simri-panel-image">
-                <input id="image_file" type="file" name="image_file" size="30" style="display:inline-flex;margin-left:120px;margin-top:120px"
+                <input id="image_file2" type="file" name="image_file" size="30" style="display:inline-flex;margin-left:120px;margin-top:120px"
                   disabled="true" />
                 <input type="text"style="float: right;margin-top: 17px;margin-right: 10px;width: 150px;">
                 <input type="text"style="left: 120px;bottom: 110px;position: relative;">

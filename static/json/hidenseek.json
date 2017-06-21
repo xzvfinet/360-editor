@@ -1,0 +1,56 @@
+{
+    "title": "",
+    "projectType": "hidenseek",
+    "sceneryList": [
+        {
+            "bgUrl": "",
+            "name": "Scene",
+            "sceneryType": "",
+            "objectList": [
+                {
+                    "el": null,
+                    "type": "primitive",
+                    "shape": "image",
+                    "text": "",
+                    "transform": {
+                        "position": {
+                            "x": -0.4784442176292626,
+                            "y": -0.395712566610135,
+                            "z": -5.967788760943533
+                        },
+                        "rotation": {
+                            "x": -3.7815214478634336,
+                            "y": 4.583662361046586,
+                            "z": 0
+                        },
+                        "scale": {
+                            "x": 3,
+                            "y": 3
+                        }
+                    },
+                    "material": {
+                        "src": "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497977716404.png",
+                        "opacity": 1
+                    },
+                    "clickListener": "object-listener",
+                    "eventList": [
+                        {
+                            "type": "onVisible",
+                            "arg": ""
+                        },
+                        {
+                            "type": "oneClick",
+                            "arg": ""
+                        },
+                        {
+                            "type": "addScore",
+                            "arg": "1"
+                        }
+                    ],
+                    "lookat": "#camera",
+                    "oneClick": false
+                }
+            ]
+        }
+    ]
+}
