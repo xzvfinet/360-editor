@@ -2,6 +2,7 @@
 <html class="fullscreen_page sticky_menu">
 <head>
 <% include head %>
+    <script type="text/javascript" src="../static/js/aframe.min.js"></script>
 </head>
 <body>
 	<header class="main_header">
@@ -9,8 +10,46 @@
       <% include header %>
       </header>
     </header>
-
-		<div class="fullscreen_block fw_background bg_image bg1"></div>
+		<div class="fullscreen_block fw_background">
+		<a-scene vr-mode-ui="enabled: false">
+		<a-sky></a-sky>
+			<a-entity position="-30 0 -35">
+            <a-entity id="line" position="0 0 0">
+                <!-- <a-box position="30 0 0" scale="60 0.5 1" material="color:#FF0000"></a-box> -->
+            </a-entity>
+            <a-entity class="t" position="0 0 0" material="color:#c6171e">
+            </a-entity>
+            <a-entity class="r" position="5 0 0">
+            </a-entity>
+            <a-entity class="a" position="10 0 0">
+            </a-entity>
+            <a-entity class="v" position="15 0 0">
+            </a-entity>
+            <a-entity class="e" position="20 0 0">
+            </a-entity>
+            <a-entity class="r" position="25 0 0">
+            </a-entity>
+            <a-entity class="s" position="30 0 0">
+            </a-entity>
+            <a-entity class="e" position="35 0 0">
+            </a-entity>
+            <a-entity class="r" position="40 0 0">
+            </a-entity>
+            <a-entity class="3" position="46 0 0">
+                <a-animation attribute="rotation" to="180 0 0" dur="2000"></a-animation>
+                <a-animation attribute="rotation" to="360 0 0" dur="2000"></a-animation>
+            </a-entity>
+            <a-entity class="6" position="52 0 0">
+                <a-animation attribute="rotation" to="180 0 0" dur="2000" delay="1500"></a-animation>
+                <a-animation attribute="rotation" to="360 0 0" dur="2000"  delay="1500"></a-animation>
+            </a-entity>
+            <a-entity class="0" position="58 0 0">
+                <a-animation attribute="rotation" to="180 0 0" dur="2000" delay="3000"></a-animation>
+                <a-animation attribute="rotation" to="360 0 0" dur="2000" delay="3000"></a-animation>
+            </a-entity>
+        </a-entity>
+		</a-scene>
+		</div>
 	<div class="content_bg"></div>
 
 	<div class="content_bg"></div>
@@ -66,6 +105,178 @@
 				jQuery('iframe').height(jQuery(window).height() - jQuery('.main_header').height());
 			}
 		});
-	</script>
+
+
+	var bgInd = Math.floor(Math.random()*10)%7+1;
+    $('a-sky').attr('src', "../static/img/bgs/360-" + bgInd + ".jpg");;
+
+    var str = "travese";
+    var elems = [];
+    var startX = -15;
+    var deltaX = 4;
+
+    var colors = [
+        "c6171e",
+        "e58225",
+        "ffcc00",
+        "0ba140",
+        "1976c2",
+        "6a1c8b",
+        "000000",
+        "0d2a61"
+    ];
+
+    var CH = {};
+    CH['t'] = new Array();
+    for (var i = 0; i < 6; ++i) {
+        CH['t'][i] = new Array();
+    }
+    CH['t'] = [
+        [0, 0, 0, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0, 1, 1, 1, 1],
+        [0, 0, 1, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0, 0, 1, 0, 0],
+        [0, 0, 1, 1, 1],
+    ];
+    CH['r'] = new Array();
+    for (var i = 0; i < 6; ++i) {
+        CH['r'][i] = new Array();
+    }
+    CH['r'] = [
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 1, 1, 1, 1],
+        [0, 1, 0, 0, 0],
+        [0, 1, 0, 0, 0],
+        [0, 1, 0, 0, 0],
+        [0, 1, 0, 0, 0],
+    ];
+    CH['a'] = new Array();
+    for (var i = 0; i < 6; ++i) {
+        CH['a'][i] = new Array();
+    }
+    CH['a'] = [
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 1, 1, 1, 1],
+        [0, 0, 0, 0, 1],
+        [0, 1, 1, 1, 1],
+        [0, 1, 0, 0, 1],
+        [0, 1, 1, 1, 1],
+    ];
+    CH['v'] = new Array();
+    for (var i = 0; i < 6; ++i) {
+        CH['v'][i] = new Array();
+    }
+    CH['v'] = [
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 1, 0, 0, 1],
+        [0, 1, 0, 0, 1],
+        [0, 1, 0, 0, 1],
+        [0, 1, 1, 1, 1],
+        [0, 0, 1, 1, 0],
+    ];
+    CH['e'] = new Array();
+    for (var i = 0; i < 6; ++i) {
+        CH['e'][i] = new Array();
+    }
+    CH['e'] = [
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 1, 1, 1, 1],
+        [0, 1, 0, 0, 0],
+        [0, 1, 1, 1, 1],
+        [0, 1, 0, 0, 0],
+        [0, 1, 1, 1, 1],
+    ];
+    CH['s'] = new Array();
+    for (var i = 0; i < 6; ++i) {
+        CH['s'][i] = new Array();
+    }
+    CH['s'] = [
+        [0, 0, 0, 0, 0],
+        [0, 0, 0, 0, 0],
+        [0, 1, 1, 1, 1],
+        [0, 1, 0, 0, 0],
+        [0, 1, 1, 1, 1],
+        [0, 0, 0, 0, 1],
+        [0, 1, 1, 1, 1],
+    ];
+    CH['3'] = new Array();
+    for (var i = 0; i < 6; ++i) {
+        CH['3'][i] = new Array();
+    }
+    CH['3'] = [
+        [1, 1, 1, 1, 1],
+        [0, 0, 0, 0, 1],
+        [0, 0, 0, 0, 1],
+        [1, 1, 1, 1, 1],
+        [0, 0, 0, 0, 1],
+        [0, 0, 0, 0, 1],
+        [1, 1, 1, 1, 1],
+    ];
+
+    CH['6'] = new Array();
+    for (var i = 0; i < 6; ++i) {
+        CH['6'][i] = new Array();
+    }
+    CH['6'] = [
+        [1, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0],
+        [1, 0, 0, 0, 0],
+        [1, 1, 1, 1, 1],
+        [1, 0, 0, 0, 1],
+        [1, 0, 0, 0, 1],
+        [1, 1, 1, 1, 1],
+    ];
+
+    CH['0'] = new Array();
+    for (var i = 0; i < 6; ++i) {
+        CH['0'][i] = new Array();
+    }
+    CH['0'] = [
+        [1, 1, 1, 1, 1],
+        [1, 0, 0, 0, 1],
+        [1, 0, 0, 0, 1],
+        [1, 0, 0, 0, 1],
+        [1, 0, 0, 0, 1],
+        [1, 0, 0, 0, 1],
+        [1, 1, 1, 1, 1],
+    ];
+
+
+    var pos = {
+        x: 0,
+        y: 0,
+        z: 0
+    };
+
+    var chlist = ['t', 'r', 'a', 'v', 'e', 'r', 's', '3', '6', '0'];
+
+    for (var k in chlist) {
+        var a = Math.floor((Math.random() * 10)) % colors.length;
+        var color = colors[a];
+        for (var i = 0; i < 7; ++i) {
+            for (var j = 0; j < 5; ++j) {
+                if (CH[chlist[k]][i][j]) {
+                    $("." + chlist[k]).each(function(index) {
+                        var box = document.createElement('a-box');
+                        box.setAttribute('material', "color:#" + color);
+
+                        pos.x = j;
+                        pos.y = -i + 3;
+
+                        box.setAttribute('position', pos.x + ' ' + pos.y + ' ' + pos.z);
+                        this.appendChild(box);
+                    });
+                }
+            }
+        }
+    }
+
+    </script>
 </body>
 </html>
