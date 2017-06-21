@@ -452,11 +452,6 @@ function createTemplateObject() {
 
 var time = 0;
 var timerId = 0;
-var resultSet = [
-    { score: 90, image_url: "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497425965490.png", background_url: "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497425957447.png" },
-    { score: 60, image_url: "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497425965490.png", background_url: "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497504973734.jpg" },
-    { score: 70, image_url: "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497425965490.png", background_url: "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497616671082.jpg" }
-];
 
 function templateFunc() {
     switch (projectObject.projectType) {
@@ -489,19 +484,20 @@ function templateFunc() {
             var scenes = projectObject.sceneryList;
             if (projectObject.getCurrentScenery().sceneryType == "result") {
                 console.log("sdddd");
-                resultSet.sort(function(a, b) {
-                    return b.score - a.score;
+                
+                var objects = projectObject.getCurrentScenery().objectList;
+                console.log(objects);
+
+                objects.sort(function(a, b) {
+                    return b.eventList[0].score - a.eventList[0].score;
                 })
-                for (var item in resultSet) {
-                    if (scoreVariable > item.score) {
-                        setBackground(item.background_url);
-                        projectObject.getCurrentScenery().objectList[0].el.setAttribute('src', item.image_url);
-                        
-                        var objects = projectObject.getCurrentScenery().objectList;
-                        objects.forEach(function(item) {
-                            item.addMaterial({ opacity: 0 });
-                        });
-                        item.obj.el.setAttribute('opacity',1);
+                for (var i=0;i<objects.length;i++) {
+                    console.log(objects[i].eventList[0]);
+                    objects[i].addMaterial({ opacity: 0 });
+                    if (scoreVariable >= objects[i].eventList[0].score) {
+                        console.log(objects[i].eventList[0].back_url);
+                        setBackground(objects[i].eventList[0].back_url);
+                        objects[i].addMaterial({ opacity: 1 });
                         break;
                     }
                 }
