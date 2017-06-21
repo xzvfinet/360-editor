@@ -15,16 +15,20 @@
     }
     
     #adjust-button{
-      margin-top: 240px;
-      width: 130px;
-      height: 40px;
+        width: 100px;
+        height: 30px;
+        float: left;
+        margin-left: 30px;
+        position: absolute;
+        bottom: 15px;
     }
 
     #remove-button{
-      margin-top: 240px;
-      width: 130px;
-      height: 40px;
-      float: right;
+        margin-top: 14px;
+        margin-right: 28px;
+        width: 100px;
+        height: 30px;
+        float: right;
     }
 
     #simri-panel-image{
@@ -38,12 +42,13 @@
     #object-panel {
         width: 300px;
         height: 300px;
-        border-radius: 1%;
+        /*border-radius: 1%;*/
         position: fixed;
         top: 100px;
         left: 100px;
-        box-shadow: 0px 2px 5px #666;
+        /*box-shadow: 0px 2px 5px #666;*/
         z-index: 1;
+        background:rgba(0,0,0,0);
         
     }
     
@@ -147,6 +152,16 @@
         background-image: url('../static/img/editor_option_mouseon.png')
     }
 
+    #newScene {
+        background-size: 100% 100%;
+        background-image: url('../static/img/btn_scence_off.png')
+    }
+
+    #newScene:hover {
+        background-size: 100% 100%;
+        background-image: url('../static/img/btn_scene_on.png')
+    }
+
     #newSpot{
         background-size: 100% 100%;
         background-image: url('../static/img/btn_newspot_over_blue.png')
@@ -216,11 +231,7 @@
             <% } %>
             <% if (projectType == "simri") { %>
             <div id="newChoice" class="panel-floating" onclick="createOption()"></div>
-            <div class="panel panel-default panel-floating" onclick="createScene()">
-                <div class="panel-body panel-floating-inside">
-                    <span>새로운 장면</span>
-                </div>
-            </div>
+            <div id="newScene" class="panel-floating" onclick="createScene()"></div>
             <% } %>
             <% if (projectType == "hidenseek") { %>
             <div id="newSpot" class="panel-floating" onclick="createSpot()"></div>
@@ -229,30 +240,30 @@
         </div>
 
         <form>
-          <div id="object-panel" class="panel panel-default" style="display:none;">
-            <div class="panel-body" style="padding:10px;">
-              <% if (projectType == "simri") { %>
-              <div id="simri-panel-image">
-                <input id="image_file2" type="file" name="image_file" size="30" style="display:inline-flex;margin-left:120px;margin-top:120px"
-                  disabled="true" />
-                <input type="text"style="float: right;margin-top: 17px;margin-right: 10px;width: 150px;">
-                <input type="text"style="left: 120px;bottom: 110px;position: relative;">
-              </div>
-              <% } %>
-              <div id="remove-button" class="panel panel-default panel-floating" onclick="removeSelectedObject()">
-                <div class="panel-body panel-floating-inside">
-                  <span>삭제</span>
+            <div id="object-panel" class="panel" style="display:none;">
+                <div class="panel-body" style="padding:10px;">
+                    <% if (projectType == "simri") { %>
+                        <div id="simri-panel-image">
+                            <input id="image_file2" type="file" name="image_file" size="30" style="display:inline-flex;margin-left:120px;margin-top:120px"
+                                disabled="true" />
+                            <input type="text" style="margin-top: 17px;margin-left: 120px;width: 40%;">
+                            <input type="text" style="left: 120px;bottom: 153px;position: absolute;width: 40%;">
+                            <div id="remove-button" class="panel panel-default panel-floating" onclick="removeSelectedObject()">
+                                <div class="panel-body panel-floating-inside">
+                                    <span>삭제</span>
+                                </div>
+                            </div>
+                            <div id="adjust-button" class="panel panel-default panel-floating" onclick="removeSelectedObject()">
+                                <div class="panel-body panel-floating-inside">
+                                    <span>적용</span>
+                                </div>
+                            </div>
+                        </div>
                 </div>
-              </div>
-              <div id="adjust-button" class="panel panel-default panel-floating" onclick="removeSelectedObject()">
-                <div class="panel-body panel-floating-inside">
-                  <span>적용</span>
-                </div>
-              </div>
+            </div>
+            <% } %>
         </form>
                 
-            </div>
-        </div>
         <div id="main-canvas" class="col-md-8" style="height:100%;">
             <iframe id="main_scene" class="main_scene" width="100%" height="100%" allowfullscreen="yes" scrolling="no" allowvr="yes" src="../static/html/canvas.html"></iframe>
         </div>
