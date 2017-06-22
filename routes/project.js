@@ -37,7 +37,7 @@ var uploadImage = multer({
 });
 
 router.get('/', function(req, res) {
-    var projectSQL = 'SELECT * FROM scene where path!=""';
+    var projectSQL = 'SELECT * FROM scene where date!=""';
     connection.query(projectSQL, function(error, info) {
         if (error) {
             res.status(500).json({
@@ -46,7 +46,7 @@ router.get('/', function(req, res) {
         } else {
             var temp;
             req.session.userID == null ? temp = -1 : temp = req.session;
-            res.render('project', { user: temp, scenes: info });
+            res.render('project', { user: temp, scenes: info});
         }
     });
 });
@@ -226,8 +226,8 @@ router.post('/save', function(req, res) {
         if (err) {
             console.log(err);
         } else {
-            var query = "update scene set path=? where idscene=?"
-            var params = [host + "/" + result.key, data.scene];
+            var query = "update scene set path=?, date=? where idscene=?"
+            var params = [host + "/" + result.key, new Date().toISOString().replace(/T/, ' ').replace(/\..+/, ''), data.scene];
             connection.query(query, params, function(error, info) {
                 var temp;
                 req.session.userID == null ? temp = -1 : temp = req.session;
