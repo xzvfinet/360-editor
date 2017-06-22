@@ -193,6 +193,7 @@ window.removeSelectedObject = function() {
     mover = null;
     currentSelectedObject = null;
     $(".object-panel").css("display", "none");
+    updateObjectNumUI();
 }
 
 function clearAllObject(scenery) {
@@ -394,10 +395,26 @@ function initCanvas() {
 function initTemplate() {
     switch (projectObject.projectType) {
         case "hidenseek":
-            var newEl = mainFrame.document.createElement("a-text");
-            var clockEl = mainFrame.document.createElement("a-text");
+            updateObjectNumUI();
             var bgClockEl = mainFrame.document.createElement("a-image");
             var gameSetImage = mainFrame.document.createElement("a-image");
+            gameSetImage.setAttribute('id', 'game-set');
+            gameSetImage.setAttribute('position', '0 0 3');
+            gameSetImage.setAttribute('src', '../img/template/results_final.jpg');
+            gameSetImage.setAttribute('scale',"2 1 1");
+
+            var setClock = mainFrame.document.createElement("a-text");
+            setClock.setAttribute('id','back-clock');
+            setClock.setAttribute('position','0.13 0 0');
+            setClock.setAttribute('width','4');
+            setClock.setAttribute('value', 0);
+            setClock.setAttribute('align', 'center');
+            setClock.setAttribute('color', 'black');
+            gameSetImage.appendChild(setClock);
+
+            cameraEl.appendChild(gameSetImage)
+            /*var newEl = mainFrame.document.createElement("a-text");
+            
 
             var position = { x: 8.2, y: 3.15, z: -5 };
             newEl.setAttribute('id', 'object-num');
@@ -415,24 +432,11 @@ function initTemplate() {
             clockEl.setAttribute('align', 'center');
             clockEl.setAttribute('width', '10');
             
-            gameSetImage.setAttribute('id', 'game-set');
-            gameSetImage.setAttribute('position', '0 0 3');
-            gameSetImage.setAttribute('src', '../img/template/results_final.jpg');
-            gameSetImage.setAttribute('scale',"2 1 1");
-            var setClock = clockEl.cloneNode(true);
-            setClock.setAttribute('id','back-clock');
-            setClock.setAttribute('position','0.13 0 0');
-            setClock.setAttribute('width','4');
-            gameSetImage.appendChild(setClock);
-
-            bgClockEl.setAttribute('src','../img/template/icon_time_final.png')
-            bgClockEl.setAttribute('position','8 3.5 -5');
-            bgClockEl.setAttribute('scale','2.5 2.5 0');
             
-            cameraEl.appendChild(bgClockEl);
+
+           
             cameraEl.appendChild(newEl);
-            cameraEl.appendChild(clockEl);
-            cameraEl.appendChild(gameSetImage);
+            cameraEl.appendChild(clockEl);;*/
     }
 }
 
@@ -461,24 +465,29 @@ function templateFunc() {
             var objects = projectObject.sceneryList[0].objectList;
             if (!editorMode) {
                 objects.forEach(function(item) {
-                    item.addMaterial({ opacity: 0 });
+                    item.eventList.forEach(function(event){
+                        if(event != null && event.type == "addScore")
+                            item.addMaterial({ opacity: 0 });
+                    });
                 });
                 time = 0;
                 timerId = setInterval(function() {
                     time += 1;
-                    mainFrame.document.getElementById('clock').setAttribute('value', time);
+                    document.getElementById('hidenseek-count').innerHTML = time;
                     mainFrame.document.getElementById('back-clock').setAttribute('value', time);
                 }, 1000)
             } else {
                 clearInterval(timerId);
-                mainFrame.document.getElementById('clock').setAttribute('value', 0);
-                mainFrame.document.getElementById('game-set').setAttribute('position', '0 0 3');
+                document.getElementById('hidenseek-count').innerHTML = 0;
                 updateObjectNumUI();
                 scoreVariable = 0;
+                mainFrame.document.getElementById('game-set').setAttribute('position', '0 0 3');
                 objects.forEach(function(item) {
-                    item.addMaterial({ opacity: 1 });
-
-                    item.oneClick = false;
+                    item.eventList.forEach(function(event){
+                        if(event != null &&event.type == "addScore")
+                            item.addMaterial({ opacity: 1 });
+                            item.oneClick = false;
+                    });
                 });
             }
             break;
@@ -516,9 +525,20 @@ function templateFunc() {
             }
     }
 }
-
+function getTotalSpot(){
+    var totalSpot = 0;
+    var objects = projectObject.sceneryList[0].objectList;
+    for(var i=0;i<objects.length;i++){
+        if(objects[i].eventList[2] != null && objects[i].eventList[2].type=="addScore"){
+            totalSpot++;
+        }
+    }
+    return totalSpot;
+}
 function updateObjectNumUI() {
-    mainFrame.document.getElementById('object-num').setAttribute('value', "0/" + projectObject.sceneryList[0].objectList.length);
+    //mainFrame.document.getElementById('object-num').setAttribute('value', "0/" + projectObject.sceneryList[0].objectList.length);
+    
+    document.getElementById("hidenseek-num").innerHTML = ("0/")+getTotalSpot();
 }
 
 window.createScene = function() {
@@ -679,8 +699,8 @@ function openObjectPropertyPanel(event) {
 function checkScore() {
     switch (projectObject.projectType) {
         case "hidenseek":
-            mainFrame.document.getElementById("object-num").setAttribute('value', scoreVariable + "/" + projectObject.sceneryList[0].objectList.length);
-            if (scoreVariable == projectObject.sceneryList[0].objectList.length) {
+            document.getElementById("hidenseek-num").innerHTML= scoreVariable + "/" + getTotalSpot();
+            if (scoreVariable == getTotalSpot()) {
                 mainFrame.document.getElementById('game-set').setAttribute('position', '0 0 -1');
                 clearInterval(timerId);
             }
