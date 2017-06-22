@@ -129,7 +129,6 @@ window.switchEditorMode = function() {
     $("#floating-panel").css("display", "none");
     hidden_button *= -1;
     document.getElementById("editor-mode").textContent = "미리보기";
-    console.log(document.getElementById("editor-mode").innerHTML);
     if (!editorMode) {
         if (mover) {
             mover.parentEl.removeChild(mover);
@@ -545,6 +544,9 @@ window.modifyOption = function(text,image_url,score){
     //currentSelectedObject.drawText(mainFrame,text);
     currentSelectedObject.material.src = image_url;
     currentSelectedObject.el.setAttribute("src",image_url);
+    util.getImageSize(image_url, function() {
+        currentSelectedObject.setScale({ x: this.width / BASE_IMG_WIDTH, y: this.height / BASE_IMG_WIDTH });
+    });
     currentSelectedObject.modifyEvent("addScore",score);
 }
 
@@ -559,6 +561,9 @@ window.createSpot = function() {
 window.modifySpot = function(imgage_url) {
     currentSelectedObject.material.src = image_url;
     currentSelectedObject.el.setAttribute("src",image_url);
+    util.getImageSize(image_url, function() {
+        currentSelectedObject.setScale({ x: this.width / BASE_IMG_WIDTH, y: this.height / BASE_IMG_WIDTH });
+    });
 }
 
 window.createLatelyObject = function() {
@@ -589,11 +594,9 @@ window.createLatelyObject = function() {
 window.modifyResult = function(text,image_url,score,background_url){
     currentSelectedObject.material.src = image_url;
     currentSelectedObject.el.setAttribute("src",image_url);
-    var result = {
-        obj: currentSelectedObject,
-        back_url: background_url,
-        score: score,
-    }
+    util.getImageSize(image_url, function() {
+        currentSelectedObject.setScale({ x: this.width / BASE_IMG_WIDTH, y: this.height / BASE_IMG_WIDTH });
+    });
 }
 
 window.create = function(type) {
