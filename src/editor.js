@@ -636,23 +636,25 @@ function openObjectPropertyPanel(event) {
     console.log(projectObject.projectType);
     switch (projectObject.projectType) {
         case "simri":
-            if (projectObject.getCurrentScenery().sceneryType == "result") id = "#simri-result-panel";
-            else id = "#simri-option-panel";
+            if (projectObject.getCurrentScenery().sceneryType == "result") id = "#simri-result-";
+            else id = "#simri-option-";
             break;
         case "hidenseek":
-            id = "#hidenseek-panel";
+            id = "#hidenseek-";
             break;
     }
-    if ($(id).css("display") == "none") {
-        $(id).css("display", "");
-    }
-    $("#simri-option-text").val(currentSelectedObject.text);
-    $("#simri-option-score").val("");
+    $(id+"text").val(currentSelectedObject.text);
+    $(id+"score").val("");
      for(var i=0; i<currentSelectedObject.eventList.length; i++){
        if(currentSelectedObject.eventList[i].type=="addScore")
-        $("#simri-option-score").val(currentSelectedObject.eventList[i].arg);
+        $(id+"score").val(currentSelectedObject.eventList[i].arg);
      }
-    $(id).css({ position: "fixed", top: event.clientY, left: event.clientX + 150 });
+
+    if ($(id + "panel").css("display") == "none") {
+        $(id + "panel").css("display", "");
+    }
+
+    $(id+"panel").css({ position: "fixed", top: event.clientY, left: event.clientX + 150 });
 }
 window.getCurrentImgUrl = function(){
     return currentSelectedObject.material.src;

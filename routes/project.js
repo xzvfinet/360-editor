@@ -182,8 +182,8 @@ router.post('/:id/image', uploadImage.array('image_file', 1), function(req, res)
     res.json({ result: req.files[0].location });
 });
 
-router.post('/:id/simri', uploadImage.array('image_file', 1), function(req, res){
-  res.json({result: req.files[0].location});
+router.post('/:id/simri', uploadImage.array('image_file', 2), function(req, res){
+  res.json({image: req.files[0].location, background : req.files[1].location});
 });
 
 router.post('/:id/thumbnail', uploadImage.array('image_file', 1), function(req, res) {
