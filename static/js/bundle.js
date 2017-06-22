@@ -647,8 +647,7 @@ function openObjectPropertyPanel(event) {
     $(id + "text").val(currentSelectedObject.text);
     $(id + "score").val("");
     for (var i = 0; i < currentSelectedObject.eventList.length; i++) {
-        if (currentSelectedObject.eventList[i].type == "addScore")
-            $(id + "score").val(currentSelectedObject.eventList[i].arg);
+        currentSelectedObject.eventList[i].type == "addScore" ? $(id + "score").val(currentSelectedObject.eventList[i].arg) : $(id + "score").val(currentSelectedObject.eventList[i].score);
     }
 
     if ($(id + "panel").css("display") == "none") {
@@ -659,6 +658,16 @@ function openObjectPropertyPanel(event) {
 }
 window.getCurrentImgUrl = function() {
     return currentSelectedObject.material.src;
+}
+
+window.getResultBackgroundUrl = function() {
+    for (var i = 0; i < currentSelectedObject.eventList.length; i++) {
+        if (currentSelectedObject.eventList[i].type == "resultSet") {
+            if (currentSelectedObject.eventList[i].back_url != "")
+                return currentSelectedObject.eventList[i].back_url;
+        }
+    }
+    return "";
 }
 
 function checkScore() {
