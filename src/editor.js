@@ -389,31 +389,7 @@ function initTemplate() {
             setClock.setAttribute('color', 'black');
             gameSetImage.appendChild(setClock);
 
-            cameraEl.appendChild(gameSetImage)
-            /*var newEl = mainFrame.document.createElement("a-text");
-            
-
-            var position = { x: 8.2, y: 3.15, z: -5 };
-            newEl.setAttribute('id', 'object-num');
-            newEl.setAttribute('position', position);
-            newEl.setAttribute('value', "0/" + projectObject.sceneryList[0].objectList.length);
-            newEl.setAttribute('color', 'black');
-            newEl.setAttribute('align', 'center');
-            newEl.setAttribute('width', '10');
-            
-            clockEl.setAttribute('id', 'clock');
-            position = { x: 8.1, y: 3.65, z: -5 };
-            clockEl.setAttribute('position', position);
-            clockEl.setAttribute('value', time);
-            clockEl.setAttribute('color', 'black');
-            clockEl.setAttribute('align', 'center');
-            clockEl.setAttribute('width', '10');
-            
-            
-
-           
-            cameraEl.appendChild(newEl);
-            cameraEl.appendChild(clockEl);;*/
+            cameraEl.appendChild(gameSetImage);
     }
 }
 
@@ -427,7 +403,7 @@ function createTemplateObject() {
         case "simri":
             if (projectObject.getCurrentScenery.sceneryType != "reulst-scenery") {
                 var nextSceneNum = projectObject.getCurrentIndex() + 2
-                latelyCreatedObject.eventList.push({ 'type': "oneClick", 'arg': "" }, { 'type': 'teleport', 'arg': nextSceneNum }, { 'type': 'addScore', 'arg': '20' });
+                latelyCreatedObject.eventList.push({ 'tynpe': "oneClick", 'arg': "" }, { 'type': 'teleport', 'arg': nextSceneNum }, { 'type': 'addScore', 'arg': '20' });
                 //latelyCreatedObject.el.setAttribute('src',"https://traverser360.s3.ap-northeast-2.amazonaws.com/1497782502160.png");
             }
     }
@@ -454,6 +430,7 @@ function templateFunc() {
                     mainFrame.document.getElementById('back-clock').setAttribute('value', time);
                 }, 1000)
             } else {
+                currentSelectedObject = null;
                 clearInterval(timerId);
                 document.getElementById('hidenseek-count').innerHTML = 0;
                 updateObjectNumUI();
@@ -461,9 +438,10 @@ function templateFunc() {
                 mainFrame.document.getElementById('game-set').setAttribute('position', '0 0 3');
                 objects.forEach(function(item) {
                     item.eventList.forEach(function(event){
-                        if(event != null &&event.type == "addScore")
-                            item.addMaterial({ opacity: 1 });
+                        if(event != null && event.type == "addScore"){
                             item.oneClick = false;
+                            item.addMaterial({ opacity: 1 });
+                        }
                     });
                 });
             }
@@ -633,7 +611,7 @@ function onObjectSelect(event) {
     }
 
     currentSelectedObject = selected;
-
+    console.log(currentSelectedObject);
     if (editorMode) {
 
         var position = currentSelectedObject.transform.position;
