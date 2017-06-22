@@ -57,10 +57,9 @@ router.get('/:id', function(req, res) {
         if (req.session.userID == null) {
             res.redirect('/login');
         } else {
-            var projectObject = {
-                projectType: req.query['type']
-            };
-            var base64data = new Buffer(JSON.stringify(projectObject), 'binary');
+            var jsonDir = './static/json/' + req.query['type'] + '.json';
+            var projectObjectString = fs.readFileSync(jsonDir, 'utf8');// json 파일 스트링 로드
+            var base64data = new Buffer(projectObjectString, 'binary');
 
             var query1 = "insert into scene(userID, title) values(?, ?)";
             var params1 = [req.session.userID, "no title"];
