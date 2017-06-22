@@ -13,7 +13,7 @@
         height: 95%;
         padding: 0;
     }
-    
+
     #adjust-button{
             width: 100px;
         height: 30px;
@@ -38,8 +38,8 @@
       background-size: 100% 100%;
       background-image: url('../static/img/bg_input.png')
     }
-    
-        
+
+
     #simri-panel-end-image{
       width:280px;
       height: 250px;
@@ -58,9 +58,9 @@
         /*box-shadow: 0px 2px 5px #666;*/
         z-index: 1;
         background:rgba(0,0,0,0);
-        
+
     }
-    
+
     .panel-floating {
         height: 60px;
         margin-bottom: 10px;
@@ -69,32 +69,32 @@
         cursor: pointer;
         text-align: center;
     }
-    
+
     .panel-floating-inside {
         display: inline-flex;
         align-items: center;
         padding: 5px;
         height: 100%;
     }
-    
+
     .header-item {
         width: 100px;
         height: 50px;
         align-items: center;
         cursor: pointer;
     }
-    
+
     .header-span {
         margin: auto;
     }
-    
+
     .navbar-header {
         width: 48px;
         height: 48px;
         background-size: 100% 100%;
         background-image: url('../static/img/editor_logo.png')
     }
-    
+
     #floating-button {
         width: 65px;
         height: 65px;
@@ -107,12 +107,12 @@
         background-size: 100% 100%;
         background-image: url('../static/img/editor_icon_mouseout.png')
     }
-    
+
     #floating-button:hover {
         background-size: 100% 100%;
         background-image: url('../static/img/editor_icon_mouseon.png')
     }
-    
+
     #floating-panel {
         padding-top: 20px;
         padding-left: 10px;
@@ -126,7 +126,7 @@
         background-size: 100% 100%;
         background-image: url('../static/img/editor_panel.png')
     }
-    
+
     #container {
         width: 100%;
         height: 100%;
@@ -134,28 +134,28 @@
         margin: 0;
         padding: 0;
     }
-    
+
     #main-canvas {
         padding: 10px;
         width: 100%;
         height: 100%;
     }
-    
+
     #newImage {
         background-size: 100% 100%;
         background-image: url('../static/img/editor_newImage_mouseout.png')
     }
-    
+
     #newImage:hover {
         background-size: 100% 100%;
         background-image: url('../static/img/editor_newImage_mouseon.png')
     }
-    
+
     #newChoice {
         background-size: 100% 100%;
         background-image: url('../static/img/editor_option_mouseout.png')
     }
-    
+
     #newChoice:hover {
         background-size: 100% 100%;
         background-image: url('../static/img/editor_option_mouseon.png')
@@ -248,28 +248,28 @@
             <% } %>
         </div>
 
-        <form>
-            <div id="simri-option-panel" class="panel object-panel" style="display:none;">
+
+        <div id="simri-option-panel" class="panel object-panel" style="display:none;">
+            <form action="/project/<%= sceneID %>/simri" id="simri-option-form" method="post" enctype="multipart/form-data" target="uploader_iframe">
                 <div class="panel-body" style="padding:10px;">
                         <div id="simri-panel-image">
-                            <input id="image_file2" type="file" name="image_file" size="30" style="display:inline-flex;margin-left:120px;margin-top:120px"
-                                disabled="true" />
-                            <input type="text" style="margin-top: 17px;margin-left: 120px;width: 40%;">
-                            <input type="text" style="left: 120px;bottom: 153px;position: absolute;width: 40%;">
+                            <input id="simri-option-file" name="image_file" type="file" size="30" style="display:inline-flex;margin-left:120px;margin-top:120px"/>
+                            <input type="text" id="simri-option-score" style="margin-top: 17px;margin-left: 120px;width: 40%;">
+                            <input type="text" id="simri-option-text" style="left: 120px;bottom: 153px;position: absolute;width: 40%;">
                             <div id="remove-button" class="panel panel-default panel-floating" onclick="removeSelectedObject()">
                                 <div class="panel-body panel-floating-inside">
                                     <span>삭제</span>
                                 </div>
                             </div>
-                            <div id="adjust-button" class="panel panel-default panel-floating" onclick="removeSelectedObject()">
+                            <div id="adjust-button" class="panel panel-default panel-floating" onclick="applySimriOption()">
                                 <div class="panel-body panel-floating-inside">
                                     <span>적용</span>
                                 </div>
                             </div>
                         </div>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
         <form>
             <div id="simri-option-panel" class="panel object-panel" style="display:none;">
                 <div class="panel-body" style="padding:10px;">
@@ -292,7 +292,7 @@
                 </div>
             </div>
         </form>
-                
+
         <div id="main-canvas" class="col-md-8" style="height:100%;">
             <iframe id="main_scene" class="main_scene" width="100%" height="100%" allowfullscreen="yes" scrolling="no" allowvr="yes" src="../static/html/canvas.html"></iframe>
         </div>
@@ -427,6 +427,14 @@ $(document).ready(function() {
         });
     });
 
+    $("#simri-option-form").submit(function(){
+      $("#uploader_iframe").unbind().on('load', function() { // This block of code will execute when the response is sent from the server.
+          result = JSON.parse($(this).contents().text()); // Content of the iframe will be the response sent from the server. Parse the response as the JSON object
+          modifyOption($("#simri-option-text").val(), result.result, $("#simri-option-score").val());
+          resetSimriOptionForm();
+      });
+    });
+
     $('#thumbnail_form').submit(function() {
         if (imageFlag == FLAG_THUMBNAIL) {
             // get the canvas image data
@@ -447,6 +455,28 @@ $(document).ready(function() {
         });
     });
 });
+
+function applySimriOption(){
+  if ($('#simri-option-file').get(0).files.length === 0) {
+    alert('please add image file');
+    return;
+  }
+  if($("#simri-option-text").val() == ""){
+    alert('please input text');
+    return;
+  }
+  if($("#simri-option-score").val() == ""){
+    alert('please input score');
+    return;
+  }
+  $("#simri-option-form").submit();
+}
+
+function resetSimriOptionForm(){
+  $("simri-option-score").val("");
+  $("simri-option-text").val("");
+  $("#simri-option-panel").css("display", "none");
+}
 
 function openMenu() {
     if ($("#floating-panel").css("display") == "none") {
