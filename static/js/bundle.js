@@ -63,31 +63,6 @@ window.getBackgroundUrl = function() {
     return projectObject.getCurrentScenery().bgUrl;
 }
 
-function newProject(type) {
-    var tempJson;
-    switch (type) {
-        case 'free':
-            var newScenery = new Scenery(background);
-            projectObject.addScenery(newScenery);
-            break;
-        case 'simri':
-            $.getJSON("../static/json/simri.json", function(data) {
-                tempJson = data;
-                loadProject(JSON.stringify(tempJson));
-            });
-            break;
-        case 'hidenseek':
-            $.getJSON("../static/json/hidenseek.json", function(data) {
-                tempJson = data;
-                loadProject(JSON.stringify(tempJson));
-            });
-            break;
-    }
-
-    //updateSceneNumberList();
-    //updateSceneDropDown();
-}
-
 window.saveProject = function(userID, sceneID) {
     saveJsontoServer(projectObject.toJson(), userID, sceneID);
 }
@@ -96,10 +71,9 @@ window.loadProject = function(projectJson) {
     clearAllObject();
 
     var loadedProject = new Project();
-    if (!loadedProject.fromJson(projectJson)) {
-        newProject(loadedProject.projectType);
-        return false;
-    }
+
+    loadedProject.fromJson(projectJson);
+
     relateSceneryWithDomEl(loadedProject.sceneryList[0]);
     for (var j in loadedProject.sceneryList[0].objectList) {
         relateObjectWithDomEl(loadedProject.sceneryList[0].objectList[j]);
@@ -129,7 +103,9 @@ window.switchEditorMode = function() {
     editorMode = !editorMode;
     $("#floating-panel").css("display", "none");
     hidden_button *= -1;
+    document.getElementById("editor-mode").textContent = "미리보기";
     if (!editorMode) {
+        document.getElementById("editor-mode").textContent = "편집하기";
         onObjectUnselect();
     }
     templateFunc();
@@ -151,6 +127,7 @@ function updateSceneNumberList() {
         } else {
             var a = document.createElement("a");
         }
+        a.setAttribute('style', 'pointer-events: none');
         a.innerHTML = (i + 1);
         if (i != projectObject.getSceneryListLength() - 1)
             a.innerHTML += "-";
@@ -186,6 +163,7 @@ window.removeSelectedObject = function() {
     projectObject.getCurrentScenery().removeObject(currentSelectedObject);
     currentSelectedObject = null;
     $(".object-panel").css("display", "none");
+    updateObjectNumUI();
 }
 
 function clearAllObject(scenery) {
@@ -384,44 +362,25 @@ function removeAllListeners(node, event) {
 function initTemplate() {
     switch (projectObject.projectType) {
         case "hidenseek":
-            var newEl = mainFrame.document.createElement("a-text");
-            var clockEl = mainFrame.document.createElement("a-text");
+            $("#hidenseek-clock").css("display", "");
+            updateObjectNumUI();
             var bgClockEl = mainFrame.document.createElement("a-image");
             var gameSetImage = mainFrame.document.createElement("a-image");
-
-            var position = { x: 8.2, y: 3.15, z: -5 };
-            newEl.setAttribute('id', 'object-num');
-            newEl.setAttribute('position', position);
-            newEl.setAttribute('value', "0/" + projectObject.sceneryList[0].objectList.length);
-            newEl.setAttribute('color', 'black');
-            newEl.setAttribute('align', 'center');
-            newEl.setAttribute('width', '10');
-
-            clockEl.setAttribute('id', 'clock');
-            position = { x: 8.1, y: 3.65, z: -5 };
-            clockEl.setAttribute('position', position);
-            clockEl.setAttribute('value', time);
-            clockEl.setAttribute('color', 'black');
-            clockEl.setAttribute('align', 'center');
-            clockEl.setAttribute('width', '10');
 
             gameSetImage.setAttribute('id', 'game-set');
             gameSetImage.setAttribute('position', '0 0 3');
             gameSetImage.setAttribute('src', '../img/template/results_final.jpg');
             gameSetImage.setAttribute('scale', "2 1 1");
-            var setClock = clockEl.cloneNode(true);
+
+            var setClock = mainFrame.document.createElement("a-text");
             setClock.setAttribute('id', 'back-clock');
             setClock.setAttribute('position', '0.13 0 0');
             setClock.setAttribute('width', '4');
+            setClock.setAttribute('value', 0);
+            setClock.setAttribute('align', 'center');
+            setClock.setAttribute('color', 'black');
             gameSetImage.appendChild(setClock);
 
-            bgClockEl.setAttribute('src', '../img/template/icon_time_final.png')
-            bgClockEl.setAttribute('position', '8 3.5 -5');
-            bgClockEl.setAttribute('scale', '2.5 2.5 0');
-
-            cameraEl.appendChild(bgClockEl);
-            cameraEl.appendChild(newEl);
-            cameraEl.appendChild(clockEl);
             cameraEl.appendChild(gameSetImage);
     }
 }
@@ -436,7 +395,7 @@ function createTemplateObject() {
         case "simri":
             if (projectObject.getCurrentScenery.sceneryType != "reulst-scenery") {
                 var nextSceneNum = projectObject.getCurrentIndex() + 2
-                latelyCreatedObject.eventList.push({ 'type': "oneClick", 'arg': "" }, { 'type': 'teleport', 'arg': nextSceneNum }, { 'type': 'addScore', 'arg': '20' });
+                latelyCreatedObject.eventList.push({ 'tynpe': "oneClick", 'arg': "" }, { 'type': 'teleport', 'arg': nextSceneNum }, { 'type': 'addScore', 'arg': '20' });
                 //latelyCreatedObject.el.setAttribute('src',"https://traverser360.s3.ap-northeast-2.amazonaws.com/1497782502160.png");
             }
     }
@@ -451,24 +410,31 @@ function templateFunc() {
             var objects = projectObject.sceneryList[0].objectList;
             if (!editorMode) {
                 objects.forEach(function(item) {
-                    item.addMaterial({ opacity: 0 });
+                    item.eventList.forEach(function(event) {
+                        if (event != null && event.type == "addScore")
+                            item.addMaterial({ opacity: 0 });
+                    });
                 });
                 time = 0;
                 timerId = setInterval(function() {
                     time += 1;
-                    mainFrame.document.getElementById('clock').setAttribute('value', time);
+                    document.getElementById('hidenseek-count').innerHTML = time;
                     mainFrame.document.getElementById('back-clock').setAttribute('value', time);
                 }, 1000)
             } else {
+                currentSelectedObject = null;
                 clearInterval(timerId);
-                mainFrame.document.getElementById('clock').setAttribute('value', 0);
-                mainFrame.document.getElementById('game-set').setAttribute('position', '0 0 3');
+                document.getElementById('hidenseek-count').innerHTML = 0;
                 updateObjectNumUI();
                 scoreVariable = 0;
+                mainFrame.document.getElementById('game-set').setAttribute('position', '0 0 3');
                 objects.forEach(function(item) {
-                    item.addMaterial({ opacity: 1 });
-
-                    item.oneClick = false;
+                    item.eventList.forEach(function(event) {
+                        if (event != null && event.type == "addScore") {
+                            item.oneClick = false;
+                            item.addMaterial({ opacity: 1 });
+                        }
+                    });
                 });
             }
             break;
@@ -484,7 +450,6 @@ function templateFunc() {
                     return b.eventList[0].score - a.eventList[0].score;
                 })
                 for (var i = 0; i < objects.length; i++) {
-                    console.log(objects[i].eventList[0]);
                     objects[i].addMaterial({ opacity: 0 });
                     if (scoreVariable >= objects[i].eventList[0].score) {
                         console.log(objects[i].eventList[0].back_url);
@@ -498,6 +463,7 @@ function templateFunc() {
                 scoreVariable = 0;
                 scenes.forEach(function(scene) {
                     scene.objectList.forEach(function(item) {
+                        if (projectObject.getCurrentScenery().sceneryType == "result") item.addMaterial({ opacity: 1 });
                         item.oneClick = false;
                     });
                 });
@@ -505,8 +471,21 @@ function templateFunc() {
     }
 }
 
+function getTotalSpot() {
+    var totalSpot = 0;
+    var objects = projectObject.sceneryList[0].objectList;
+    for (var i = 0; i < objects.length; i++) {
+        if (objects[i].eventList[2] != null && objects[i].eventList[2].type == "addScore") {
+            totalSpot++;
+        }
+    }
+    return totalSpot;
+}
+
 function updateObjectNumUI() {
-    mainFrame.document.getElementById('object-num').setAttribute('value', "0/" + projectObject.sceneryList[0].objectList.length);
+    //mainFrame.document.getElementById('object-num').setAttribute('value', "0/" + projectObject.sceneryList[0].objectList.length);
+
+    document.getElementById("hidenseek-num").innerHTML = ("0/") + getTotalSpot();
 }
 
 window.createScene = function() {
@@ -532,6 +511,9 @@ window.modifyOption = function(text, image_url, score) {
     //currentSelectedObject.drawText(mainFrame,text);
     currentSelectedObject.material.src = image_url;
     currentSelectedObject.el.setAttribute("src", image_url);
+    util.getImageSize(image_url, function() {
+        currentSelectedObject.setScale({ x: this.width / BASE_IMG_WIDTH, y: this.height / BASE_IMG_WIDTH });
+    });
     currentSelectedObject.modifyEvent("addScore", score);
 }
 
@@ -546,6 +528,9 @@ window.createSpot = function() {
 window.modifySpot = function(imgage_url) {
     currentSelectedObject.material.src = image_url;
     currentSelectedObject.el.setAttribute("src", image_url);
+    util.getImageSize(image_url, function() {
+        currentSelectedObject.setScale({ x: this.width / BASE_IMG_WIDTH, y: this.height / BASE_IMG_WIDTH });
+    });
 }
 
 window.createLatelyObject = function() {
@@ -576,11 +561,9 @@ window.createLatelyObject = function() {
 window.modifyResult = function(text, image_url, score, background_url) {
     currentSelectedObject.material.src = image_url;
     currentSelectedObject.el.setAttribute("src", image_url);
-    var result = {
-        obj: currentSelectedObject,
-        back_url: background_url,
-        score: score,
-    }
+    util.getImageSize(image_url, function() {
+        currentSelectedObject.setScale({ x: this.width / BASE_IMG_WIDTH, y: this.height / BASE_IMG_WIDTH });
+    });
 }
 
 window.create = function(type) {
@@ -618,7 +601,7 @@ function onObjectSelect(event) {
     onObjectUnselect();
 
     currentSelectedObject = selected;
-
+    console.log(currentSelectedObject);
     if (editorMode) {
         var position = currentSelectedObject.transform.position;
         var rotation = currentSelectedObject.transform.rotation;
@@ -661,8 +644,8 @@ function openObjectPropertyPanel(event) {
 function checkScore() {
     switch (projectObject.projectType) {
         case "hidenseek":
-            mainFrame.document.getElementById("object-num").setAttribute('value', scoreVariable + "/" + projectObject.sceneryList[0].objectList.length);
-            if (scoreVariable == projectObject.sceneryList[0].objectList.length) {
+            document.getElementById("hidenseek-num").innerHTML = scoreVariable + "/" + getTotalSpot();
+            if (scoreVariable == getTotalSpot()) {
                 mainFrame.document.getElementById('game-set').setAttribute('position', '0 0 -1');
                 clearInterval(timerId);
             }

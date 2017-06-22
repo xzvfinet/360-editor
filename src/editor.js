@@ -363,7 +363,6 @@ function initTemplate() {
         case "hidenseek":
             $("#hidenseek-clock").css("display", "");
             updateObjectNumUI();
-            document.getElementById("hidenseek-clock").css
             var bgClockEl = mainFrame.document.createElement("a-image");
             var gameSetImage = mainFrame.document.createElement("a-image");
 
