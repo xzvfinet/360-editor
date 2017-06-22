@@ -370,7 +370,7 @@ function initTemplate() {
 
             gameSetImage.setAttribute('id', 'game-set');
             gameSetImage.setAttribute('position', '0 0 3');
-            gameSetImage.setAttribute('src', '../img/template/results_final.jpg');
+            gameSetImage.setAttribute('src', '../img/template/results_final.png');
             gameSetImage.setAttribute('scale', "2 1 1");
 
             var setClock = mainFrame.document.createElement("a-text");
