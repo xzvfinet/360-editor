@@ -524,12 +524,14 @@ window.createSpot = function() {
     updateObjectNumUI();
     console.log(obj);
 }
-window.modifySpot = function(imgage_url) {
+window.modifySpot = function(imgage_url,sound_url) {
     currentSelectedObject.material.src = image_url;
     currentSelectedObject.el.setAttribute("src", image_url);
+    currentSelectedObject.addEvent("sound",sound_url);
     util.getImageSize(image_url, function() {
         currentSelectedObject.setScale({ x: this.width / BASE_IMG_WIDTH, y: this.height / BASE_IMG_WIDTH });
     });
+    latelyCreatedObject = currentSelectedObject;
 }
 
 window.createLatelyObject = function() {
@@ -756,8 +758,8 @@ function imageEvent(arg) {
 function soundEvent(arg) {
     console.log('sound played :' + arg);
     //var soundEl = mainFrame.document.createElement('a-sound');
-    var soundUrl = SOUND_PREFIX + arg;
-    currentSelectedObject.setSoundSrc(soundUrl);
+    //var soundUrl = SOUND_PREFIX + arg;
+    currentSelectedObject.setSoundSrc(arg);
     //soundEl.setAttribute('src',soundUrl);
     //sceneEl.appendChild(soundEl);
     //soundEl.components.sound.playSound();
