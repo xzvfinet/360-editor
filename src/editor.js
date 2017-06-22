@@ -128,11 +128,14 @@ window.switchEditorMode = function() {
     editorMode = !editorMode;
     $("#floating-panel").css("display", "none");
     hidden_button *= -1;
+    document.getElementById("editor-mode").textContent = "미리보기";
+    console.log(document.getElementById("editor-mode").innerHTML);
     if (!editorMode) {
         if (mover) {
             mover.parentEl.removeChild(mover);
             mover = null;
         }
+        document.getElementById("editor-mode").textContent = "편집하기";
         onObjectUnselect();
     }
     templateFunc();
@@ -507,7 +510,7 @@ function templateFunc() {
                 scoreVariable = 0;
                 scenes.forEach(function(scene) {
                     scene.objectList.forEach(function(item) {
-                        item.addMaterial({ opacity: 1 });
+                         if (projectObject.getCurrentScenery().sceneryType == "result")item.addMaterial({ opacity: 1 });
                         item.oneClick = false;
                     });
                 });
