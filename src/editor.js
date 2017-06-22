@@ -109,9 +109,9 @@ window.switchEditorMode = function() {
 
     } else {
         $("#floating-panel").css("display", "none");
-        sceneEl.enterVR();
         onObjectUnselect();
         document.getElementById("editor-mode").textContent = "편집하기";
+        sceneEl.enterVR();
     }
 
     templateFunc();
@@ -256,10 +256,10 @@ function initCanvas() {
 
             this.el.addEventListener('click', onObjectSelect);
             this.el.addEventListener('mousedown', function(evt) {
-                cameraEl.removeAttribute('look-controls');
-                isDown = true;
 
                 if (editorMode) {
+                    cameraEl.removeAttribute('look-controls');
+                    isDown = true;
                     thisObject.setMaterial({ 'opacity': '0.5' });
 
                     var pos = cameraEl.components['mouse-cursor'].__raycaster.ray.direction;
@@ -518,7 +518,7 @@ window.createOption = function() {
 
 window.modifyOption = function(text, image_url, score) {
     //currentSelectedObject.drawText(mainFrame,text);
-    currentSelectedObject.setMaterial({src: image_url});
+    currentSelectedObject.setMaterial({ src: image_url });
     util.getImageSize(image_url, function() {
         currentSelectedObject.setScale({ x: this.width / BASE_IMG_WIDTH, y: this.height / BASE_IMG_WIDTH });
     });
@@ -533,9 +533,9 @@ window.createSpot = function() {
     updateObjectNumUI();
     console.log(obj);
 }
-window.modifySpot = function(imgage_url,sound_url) {
-    currentSelectedObject.setMaterial({src: image_url});
-    currentSelectedObject.addEvent("sound",sound_url);
+window.modifySpot = function(imgage_url, sound_url) {
+    currentSelectedObject.setMaterial({ src: image_url });
+    currentSelectedObject.addEvent("sound", sound_url);
     util.getImageSize(image_url, function() {
         currentSelectedObject.setScale({ x: this.width / BASE_IMG_WIDTH, y: this.height / BASE_IMG_WIDTH });
     });
@@ -568,7 +568,7 @@ window.createLatelyObject = function() {
 }
 
 window.modifyResult = function(text, image_url, score, background_url) {
-    currentSelectedObject.setMaterial({src: image_url});
+    currentSelectedObject.setMaterial({ src: image_url });
     util.getImageSize(image_url, function() {
         currentSelectedObject.setScale({ x: this.width / BASE_IMG_WIDTH, y: this.height / BASE_IMG_WIDTH });
     });
@@ -643,20 +643,20 @@ function openObjectPropertyPanel(event) {
             id = "#hidenseek-";
             break;
     }
-    $(id+"text").val(currentSelectedObject.text);
-    $(id+"score").val("");
-     for(var i=0; i<currentSelectedObject.eventList.length; i++){
-       if(currentSelectedObject.eventList[i].type=="addScore")
-        $(id+"score").val(currentSelectedObject.eventList[i].arg);
-     }
+    $(id + "text").val(currentSelectedObject.text);
+    $(id + "score").val("");
+    for (var i = 0; i < currentSelectedObject.eventList.length; i++) {
+        if (currentSelectedObject.eventList[i].type == "addScore")
+            $(id + "score").val(currentSelectedObject.eventList[i].arg);
+    }
 
     if ($(id + "panel").css("display") == "none") {
         $(id + "panel").css("display", "");
     }
 
-    $(id+"panel").css({ position: "fixed", top: event.clientY, left: event.clientX + 150 });
+    $(id + "panel").css({ position: "fixed", top: event.clientY, left: event.clientX + 150 });
 }
-window.getCurrentImgUrl = function(){
+window.getCurrentImgUrl = function() {
     return currentSelectedObject.material.src;
 }
 
@@ -674,6 +674,7 @@ function checkScore() {
 function onObjectUnselect() {
     if (!currentSelectedObject) return;
 
+    isDown = false;
     currentSelectedObject.setMaterial({ 'opacity': '1' });
     currentSelectedObject = null;
     $(".object-panel").css("display", "none");
