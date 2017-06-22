@@ -9,7 +9,7 @@ function Objct(el, obj) {
         this.el = el;
         this.type = "";
         this.shape = "";
-        this.text ="";
+        this.text = "";
         this.transform = {};
         this.material = {};
 
@@ -62,30 +62,30 @@ Objct.prototype.setMaterial = function(newMaterial) {
     }
 }
 
-Objct.prototype.drawText = function(frame,text){
+Objct.prototype.drawText = function(frame, text) {
     this.text = text;
     var newEl = frame.document.createElement("a-text");
-    newEl.setAttribute('value',text);
+    newEl.setAttribute('value', text);
     this.el.appendChild(newEl);
 }
 
-Objct.prototype.setFadeInOutAni = function(frame){
-    var fadeIn = frame.document.createElement("a-animation" );
-    var fadeOut = frame.document.createElement("a-animation" );
-    fadeIn.setAttribute("attribute","material.color");
-    fadeOut.setAttribute("attribute","material.color");
-    
-    fadeIn.setAttribute("begin","fade-in");
-    fadeOut.setAttribute("begin","fade-out");
+Objct.prototype.setFadeInOutAni = function(frame) {
+    var fadeIn = frame.document.createElement("a-animation");
+    var fadeOut = frame.document.createElement("a-animation");
+    fadeIn.setAttribute("attribute", "material.color");
+    fadeOut.setAttribute("attribute", "material.color");
 
-    fadeIn.setAttribute("from","black");
-    fadeOut.setAttribute("from","white");
+    fadeIn.setAttribute("begin", "fade-in");
+    fadeOut.setAttribute("begin", "fade-out");
 
-    fadeIn.setAttribute("to","white");
-    fadeOut.setAttribute("to","black");
+    fadeIn.setAttribute("from", "black");
+    fadeOut.setAttribute("from", "white");
 
-    fadeIn.setAttribute("dur","2000");
-    fadeOut.setAttribute("dur","2000");
+    fadeIn.setAttribute("to", "white");
+    fadeOut.setAttribute("to", "black");
+
+    fadeIn.setAttribute("dur", "2000");
+    fadeOut.setAttribute("dur", "2000");
 
     this.el.appendChild(fadeIn);
     this.el.appendChild(fadeOut);
@@ -127,9 +127,9 @@ Objct.prototype.setLookAt = function(target) {
 Objct.prototype.addEvent = function(eventType, eventArgs) {
     this.eventList.push({ 'type': eventType, 'arg': eventArgs });
 }
-Objct.prototype.modifyEvent = function(eventType, eventAgrs){
-    for(var i = 0;i<this.eventList.length;i++){
-        if(this.eventList[i].type == eventType){
+Objct.prototype.modifyEvent = function(eventType, eventAgrs) {
+    for (var i = 0; i < this.eventList.length; i++) {
+        if (this.eventList[i].type == eventType) {
             this.eventList[i].arg = eventAgrs;
             return true;
         }
@@ -173,19 +173,37 @@ Controller.prototype.toJson = function() {
     return json;
 }
 
-Controller.prototype.createElFromObj = function(frame, obj) {
+Controller.prototype.createElFromObj = function(frame, obj, THREE) {
     var newEl = frame.document.createElement("a-" + obj.shape);
     obj.el = newEl;
     obj.setPosition(obj.transform.position);
     obj.setRotation(obj.transform.rotation);
     obj.setScale(obj.transform.scale);
     obj.setMaterial(obj.material);
+    if (obj.material['src']) {
+        this.loadFromUrl(newEl, obj.material['src'], THREE);
+    }
     obj.setClickListener(obj.clickListener);
     obj.setLookAt(obj.lookat);
     obj.setFadeInOutAni(frame);
-    newEl.setAttribute("class","object");
+    newEl.setAttribute("class", "object");
 
     return newEl;
+}
+
+Controller.prototype.loadFromUrl = function(el, url, THREE) {
+    console.log('load objectimage: ' + url);
+    var texture;
+    var imageElement = document.createElement('img');
+    imageElement.setAttribute('crossOrigin', 'anonymous');
+    imageElement.onload = function(e) {
+        texture = new THREE.Texture(this);
+        texture.needsUpdate = true;
+
+        el.components.material.material.map = texture;
+        el.components.material.material.needsUpdate = true;
+    };
+    imageElement.src = url;
 }
 
 module.exports = {

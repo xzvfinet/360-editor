@@ -20,14 +20,32 @@ function Scenery(bgEl, scenery) {
     }
 }
 
-Scenery.prototype.setBackgroundImageUrl = function(url) {
+Scenery.prototype.setBackgroundImageUrl = function(url, THREE) {
     this.bgUrl = url;
-    this.bgEl.setAttribute('src', this.bgUrl);
+    // this.bgEl.setAttribute('src', this.bgUrl);
+    this.loadFromUrl(this.bgUrl, THREE);
 }
 
-Scenery.prototype.setBgEl = function(bgEl) {
+Scenery.prototype.setBgEl = function(bgEl, THREE) {
     this.bgEl = bgEl;
-    bgEl.setAttribute('src', this.bgUrl);
+    // bgEl.setAttribute('src', this.bgUrl);
+    this.loadFromUrl(this.bgUrl, THREE);
+}
+
+Scenery.prototype.loadFromUrl = function(url, THREE) {
+    console.log('load background: ' + url);
+    var bgEl = this.bgEl;
+    var texture;
+    var imageElement = document.createElement('img');
+    imageElement.setAttribute('crossOrigin', 'anonymous');
+    imageElement.onload = function(e) {
+        texture = new THREE.Texture(this);
+        texture.needsUpdate = true;
+
+        bgEl.components.material.material.map = texture;
+        bgEl.components.material.material.needsUpdate = true;
+    };
+    imageElement.src = url;
 }
 
 Scenery.prototype.addObject = function(object) {
