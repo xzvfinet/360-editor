@@ -114,19 +114,40 @@
     }
     
     #floating-panel {
+        border-radius: 15px;
         padding-top: 20px;
+        padding-bottom: 20px;
         padding-left: 10px;
         padding-right: 10px;
         width: 220px;
-        height: 250px;
+        height: auto;
         position: fixed;
-        top: 115px;
+        top: 145px;
         left: 85px;
         z-index: 1;
-        background-size: 100% 100%;
-        background-image: url('../static/img/editor_panel.png')
+        background-color: #3795f3;
+        box-shadow: 1px 1px 40px #000000;
     }
-    
+
+    .floating-panel-item + .floating-panel-item {
+        margin-top: 15px;
+    }
+
+    .floating-panel-item {
+        text-align: center;
+        color: white;
+        font-size: 25px;
+        /*font-style: bold;*/
+    }
+
+    .floating-panel-item:hover {
+        text-align: center;
+        color: white;
+        font-size: 25px;
+        font-style: bold;
+        background-color: #000000;
+    }
+
     #container {
         width: 100%;
         height: 100%;
@@ -141,55 +162,6 @@
         height: 100%;
     }
     
-    #newImage {
-        background-size: 100% 100%;
-        background-image: url('../static/img/editor_newImage_mouseout.png')
-    }
-    
-    #newImage:hover {
-        background-size: 100% 100%;
-        background-image: url('../static/img/editor_newImage_mouseon.png')
-    }
-    
-    #newChoice {
-        background-size: 100% 100%;
-        background-image: url('../static/img/editor_option_mouseout.png')
-    }
-    
-    #newChoice:hover {
-        background-size: 100% 100%;
-        background-image: url('../static/img/editor_option_mouseon.png')
-    }
-
-    #newScene {
-        background-size: 100% 100%;
-        background-image: url('../static/img/btn_scence_off.png')
-    }
-
-    #newScene:hover {
-        background-size: 100% 100%;
-        background-image: url('../static/img/btn_scene_on.png')
-    }
-
-    #newSpot{
-        background-size: 100% 100%;
-        background-image: url('../static/img/btn_newspot_over_blue.png')
-    }
-
-    #newSpot:hover{
-        background-size: 100% 100%;
-        background-image: url('../static/img/btn_newspot_on_blue.png')
-    }
-
-    #latelySpot{
-        background-size: 100% 100%;
-        background-image: url('../static/img/btn_spot_over_blue.png')
-    }
-
-    #latelySpot:hover{
-        background-size: 100% 100%;
-        background-image: url('../static/img/btn_spot_on_blue.png')
-    }
     /*
   .modal-content{
     background-size: 100% 100%;
@@ -234,17 +206,18 @@
     </nav>
     <div id="container">
         <div id="floating-button" data-toggle="tooltip" data-placement="left" data-original-title="Create" onclick="openMenu()"></div>
+
         <div id="floating-panel" style="display:none;">
-            <div id="newImage" class="panel-floating" onclick="getImagePopup()"></div>
+            <div id="newImage" class="floating-panel-item" onclick="getImagePopup()">이미지 추가</div>
             <% if (projectType == "free") { %>
             <% } %>
             <% if (projectType == "simri") { %>
-            <div id="newChoice" class="panel-floating" onclick="createOption()"></div>
-            <div id="newScene" class="panel-floating" onclick="createScene()"></div>
+            <div id="newChoice" class="floating-panel-item" onclick="createOption()">선택지 추가</div>
+            <div id="newScene" class="floating-panel-item" onclick="createScene()">신 추가</div>
             <% } %>
             <% if (projectType == "hidenseek") { %>
-            <div id="newSpot" class="panel-floating" onclick="createSpot()"></div>
-            <div id="latelySpot" class="panel-floating" onclick="createLatelyObject()"></div>
+            <div id="newSpot" class="floating-panel-item" onclick="createSpot()">스팟 추가</div>
+            <div id="latelySpot" class="floating-panel-item" onclick="createLatelyObject()">최근 스팟 재추가</div>
             <% } %>
         </div>
 
