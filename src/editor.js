@@ -643,21 +643,30 @@ function openObjectPropertyPanel(event) {
             id = "#hidenseek-";
             break;
     }
-    $(id + "text").val(currentSelectedObject.text);
-    $(id + "score").val("");
-    for (var i = 0; i < currentSelectedObject.eventList.length; i++) {
-        if (currentSelectedObject.eventList[i].type == "addScore")
-            $(id + "score").val(currentSelectedObject.eventList[i].arg);
-    }
+    $(id+"text").val(currentSelectedObject.text);
+    $(id+"score").val("");
+     for(var i=0; i<currentSelectedObject.eventList.length; i++){
+       currentSelectedObject.eventList[i].type == "addScore" ? $(id+"score").val(currentSelectedObject.eventList[i].arg); : $(id+"score").val(currentSelectedObject.eventList[i].score);
+     }
 
     if ($(id + "panel").css("display") == "none") {
         $(id + "panel").css("display", "");
     }
 
-    $(id + "panel").css({ position: "fixed", top: event.clientY, left: event.clientX + 150 });
+    $(id+"panel").css({ position: "fixed", top: event.clientY, left: event.clientX + 150 });
 }
-window.getCurrentImgUrl = function() {
+window.getCurrentImgUrl = function(){
     return currentSelectedObject.material.src;
+}
+
+window.getResultBackgroundUrl = function(){
+  for(var i=0; i<currentSelectedObject.eventList.length; i++){
+    if(currentSelectedObject.eventList[i].type=="resultSet"){
+      if(currentSelectedObject.eventList[i].back_url != "")
+        return currentSelectedObject.eventList[i].back_url;        
+    }
+  }
+  return "";
 }
 
 function checkScore() {
