@@ -113,6 +113,8 @@ window.loadProject = function(projectJson) {
 }
 
 window.loadAllObjectOfScene = function(sceneNum) {
+
+    $(".object-panel").css("display", "none");
     eraseCanvas();
     for (var j in projectObject.sceneryList[sceneNum].objectList) {
         relateObjectWithDomEl(projectObject.sceneryList[sceneNum].objectList[j]);
@@ -188,7 +190,7 @@ window.removeSelectedObject = function() {
     projectObject.getCurrentScenery().removeObject(currentSelectedObject);
     mover = null;
     currentSelectedObject = null;
-    $("#object-panel").css("display", "none");
+    $(".object-panel").css("display", "none");
 }
 
 function clearAllObject(scenery) {
@@ -318,7 +320,7 @@ function initCanvas() {
                 var pos = cameraEl.components['mouse-cursor'].__raycaster.ray.direction;
                 initialPos = { x: pos.x * radius, y: pos.y * radius, z: pos.z * radius };
                 prevPos = initialPos;
-                $("#object-panel").css("display", "none");
+                $(".object-panel").css("display", "none");
             });
             this.el.addEventListener('mouseup', function(evt) {
                 this.setAttribute('material', 'color', "#000000");
@@ -450,11 +452,6 @@ function createTemplateObject() {
 
 var time = 0;
 var timerId = 0;
-var resultSet = [
-    { score: 90, image_url: "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497425965490.png", background_url: "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497425957447.png" },
-    { score: 60, image_url: "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497425965490.png", background_url: "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497504973734.jpg" },
-    { score: 70, image_url: "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497425965490.png", background_url: "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497616671082.jpg" }
-];
 
 function templateFunc() {
     switch (projectObject.projectType) {
@@ -485,15 +482,22 @@ function templateFunc() {
             break;
         case "simri":
             var scenes = projectObject.sceneryList;
-            if (projectObject.getCurrentScenery().sceneryType == "result-scenery") {
+            if (projectObject.getCurrentScenery().sceneryType == "result") {
                 console.log("sdddd");
-                resultSet.sort(function(a, b) {
-                    return b.score - a.score;
+                
+                var objects = projectObject.getCurrentScenery().objectList;
+                console.log(objects);
+
+                objects.sort(function(a, b) {
+                    return b.eventList[0].score - a.eventList[0].score;
                 })
-                for (var item in resultSet) {
-                    if (scoreVariable > item.score) {
-                        setBackground(item.background_url);
-                        projectObject.getCurrentScenery().objectList[0].el.setAttribute('src', item.image_url);
+                for (var i=0;i<objects.length;i++) {
+                    console.log(objects[i].eventList[0]);
+                    objects[i].addMaterial({ opacity: 0 });
+                    if (scoreVariable >= objects[i].eventList[0].score) {
+                        console.log(objects[i].eventList[0].back_url);
+                        setBackground(objects[i].eventList[0].back_url);
+                        objects[i].addMaterial({ opacity: 1 });
                         break;
                     }
                 }
@@ -577,7 +581,15 @@ window.createLatelyObject = function() {
     }
 }
 
-
+window.modifyResult = function(text,image_url,score,background_url){
+    currentSelectedObject.material.src = image_url;
+    currentSelectedObject.el.setAttribute("src",image_url);
+    var result = {
+        obj: currentSelectedObject,
+        back_url: background_url,
+        score: score,
+    }
+}
 
 window.create = function(type) {
     if (PRIMITIVE_DEFINITIONS.includes(type)) {
@@ -626,7 +638,7 @@ function onObjectSelect(event) {
         // append mover element
         mover = newMover();
         this.appendChild(mover);
-        openObjectPropertyPanel(event.detail.mouseEvent,"#simri-option-panel");
+        openObjectPropertyPanel(event.detail.mouseEvent);
     } else {
         // Execute events assigned to object.
         if (!currentSelectedObject.oneClick) {
@@ -642,7 +654,14 @@ function onObjectSelect(event) {
     }
 }
 
-function openObjectPropertyPanel(event,id) {
+function openObjectPropertyPanel(event) {
+    console.log(projectObject.projectType);
+    switch(projectObject.projectType){
+        case "simri":if(projectObject.getCurrentScenery().sceneryType == "result") id = "#simri-result-panel";
+                    else id = "#simri-option-panel";
+                    break;
+        case "hidenseek" :id ="#hidenseek-panel";break;
+    }
     if ($(id).css("display") == "none") {
         $(id).css("display", "");
     }
@@ -665,7 +684,7 @@ function onObjectUnselect() {
     if (mover)
         mover.parentEl.removeChild(mover);
     mover = null;
-    $("#object-panel").css("display", "none");
+    $(".object-panel").css("display", "none");
 }
 
 window.toggleEditorMode = function() {

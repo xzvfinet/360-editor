@@ -13,9 +13,9 @@
                     "shape": "image",
                     "transform": {
                         "position": {
-                            "x": -0.057704936596440895,
-                            "y": 3.243017425890088,
-                            "z": -5.047723062497153
+                            "x": -4.523072514410719,
+                            "y": -1.4120536220470352,
+                            "z": -3.6807498689596034
                         },
                         "rotation": {
                             "x": 0,
@@ -47,20 +47,919 @@
                     ],
                     "lookat": "#camera",
                     "oneClick": false
+                },
+                {
+                    "el": null,
+                    "type": "primitive",
+                    "shape": "image",
+                    "text": "",
+                    "transform": {
+                        "position": {
+                            "x": 1.8928267624018158,
+                            "y": -1.3604691288341582,
+                            "z": -5.528682537189551
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "scale": {
+                            "x": 2.48,
+                            "y": 1.11
+                        }
+                    },
+                    "material": {
+                        "src": "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497782502160.png"
+                    },
+                    "clickListener": "object-listener",
+                    "eventList": [
+                        {
+                            "type": "teleport",
+                            "arg": 1
+                        },
+                        {
+                            "type": "oneClick",
+                            "arg": ""
+                        },
+                        {
+                            "type": "addScore",
+                            "arg": "1"
+                        }
+                    ],
+                    "lookat": "#camera",
+                    "oneClick": false
+                },
+                {
+                    "el": null,
+                    "type": "primitive",
+                    "shape": "image",
+                    "text": "",
+                    "transform": {
+                        "position": {
+                            "x": 4.583478575816431,
+                            "y": -1.2188906531715555,
+                            "z": -3.6750550636205164
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "scale": {
+                            "x": 2.48,
+                            "y": 1.11
+                        }
+                    },
+                    "material": {
+                        "src": "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497782502160.png"
+                    },
+                    "clickListener": "object-listener",
+                    "eventList": [
+                        {
+                            "type": "teleport",
+                            "arg": 1
+                        },
+                        {
+                            "type": "oneClick",
+                            "arg": ""
+                        },
+                        {
+                            "type": "addScore",
+                            "arg": "1"
+                        }
+                    ],
+                    "lookat": "#camera",
+                    "oneClick": false
+                },
+                {
+                    "el": null,
+                    "type": "primitive",
+                    "shape": "image",
+                    "text": "",
+                    "transform": {
+                        "position": {
+                            "x": -1.8280416318555075,
+                            "y": -1.4133468916197653,
+                            "z": -5.537211785380057
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "scale": {
+                            "x": 2.48,
+                            "y": 1.11
+                        }
+                    },
+                    "material": {
+                        "src": "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497782502160.png"
+                    },
+                    "clickListener": "object-listener",
+                    "eventList": [
+                        {
+                            "type": "teleport",
+                            "arg": 1
+                        },
+                        {
+                            "type": "oneClick",
+                            "arg": ""
+                        },
+                        {
+                            "type": "addScore",
+                            "arg": "1"
+                        }
+                    ],
+                    "lookat": "#camera",
+                    "oneClick": false
+                },
+                {
+                    "el": null,
+                    "type": "primitive",
+                    "shape": "image",
+                    "text": "",
+                    "transform": {
+                        "position": {
+                            "x": 0,
+                            "y": 1.3034174628539397,
+                            "z": -5.856714344880361
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "scale": {
+                            "x": 2.48,
+                            "y": 1.11
+                        }
+                    },
+                    "material": {
+                        "src": "https://traverser360.s3.ap-northeast-2.amazonaws.com/1498057518778.png"
+                    },
+                    "clickListener": "object-listener",
+                    "eventList": [],
+                    "lookat": "#camera",
+                    "oneClick": false
+                }
+            ]
+        },
+        {
+            "bgUrl": "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497936858129.jpg",
+            "name": "Scene",
+            "sceneryType": "",
+            "objectList": [
+                {
+                    "el": null,
+                    "type": "primitive",
+                    "shape": "image",
+                    "transform": {
+                        "position": {
+                            "x": -4.523072514410719,
+                            "y": -1.4120536220470352,
+                            "z": -3.6807498689596034
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "scale": {
+                            "x": 2.48,
+                            "y": 1.11
+                        }
+                    },
+                    "material": {
+                        "src": "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497782502160.png"
+                    },
+                    "clickListener": "object-listener",
+                    "eventList": [
+                        {
+                            "type": "teleport",
+                            "arg": 2
+                        },
+                        {
+                            "type": "oneClick",
+                            "arg": ""
+                        },
+                        {
+                            "type": "addScore",
+                            "arg": "1"
+                        }
+                    ],
+                    "lookat": "#camera",
+                    "oneClick": false
+                },
+                {
+                    "el": null,
+                    "type": "primitive",
+                    "shape": "image",
+                    "text": "",
+                    "transform": {
+                        "position": {
+                            "x": 1.8928267624018158,
+                            "y": -1.3604691288341582,
+                            "z": -5.528682537189551
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "scale": {
+                            "x": 2.48,
+                            "y": 1.11
+                        }
+                    },
+                    "material": {
+                        "src": "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497782502160.png"
+                    },
+                    "clickListener": "object-listener",
+                    "eventList": [
+                        {
+                            "type": "teleport",
+                            "arg": 2
+                        },
+                        {
+                            "type": "oneClick",
+                            "arg": ""
+                        },
+                        {
+                            "type": "addScore",
+                            "arg": "1"
+                        }
+                    ],
+                    "lookat": "#camera",
+                    "oneClick": false
+                },
+                {
+                    "el": null,
+                    "type": "primitive",
+                    "shape": "image",
+                    "text": "",
+                    "transform": {
+                        "position": {
+                            "x": 4.583478575816431,
+                            "y": -1.2188906531715555,
+                            "z": -3.6750550636205164
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "scale": {
+                            "x": 2.48,
+                            "y": 1.11
+                        }
+                    },
+                    "material": {
+                        "src": "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497782502160.png"
+                    },
+                    "clickListener": "object-listener",
+                    "eventList": [
+                        {
+                            "type": "teleport",
+                            "arg": 2
+                        },
+                        {
+                            "type": "oneClick",
+                            "arg": ""
+                        },
+                        {
+                            "type": "addScore",
+                            "arg": "1"
+                        }
+                    ],
+                    "lookat": "#camera",
+                    "oneClick": false
+                },
+                {
+                    "el": null,
+                    "type": "primitive",
+                    "shape": "image",
+                    "text": "",
+                    "transform": {
+                        "position": {
+                            "x": -1.8280416318555075,
+                            "y": -1.4133468916197653,
+                            "z": -5.537211785380057
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "scale": {
+                            "x": 2.48,
+                            "y": 1.11
+                        }
+                    },
+                    "material": {
+                        "src": "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497782502160.png"
+                    },
+                    "clickListener": "object-listener",
+                    "eventList": [
+                        {
+                            "type": "teleport",
+                            "arg": 2
+                        },
+                        {
+                            "type": "oneClick",
+                            "arg": ""
+                        },
+                        {
+                            "type": "addScore",
+                            "arg": "1"
+                        }
+                    ],
+                    "lookat": "#camera",
+                    "oneClick": false
+                },
+                {
+                    "el": null,
+                    "type": "primitive",
+                    "shape": "image",
+                    "text": "",
+                    "transform": {
+                        "position": {
+                            "x": 0,
+                            "y": 1.3034174628539397,
+                            "z": -5.856714344880361
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "scale": {
+                            "x": 2.48,
+                            "y": 1.11
+                        }
+                    },
+                    "material": {
+                        "src": "https://traverser360.s3.ap-northeast-2.amazonaws.com/1498057518778.png"
+                    },
+                    "clickListener": "object-listener",
+                    "eventList": [],
+                    "lookat": "#camera",
+                    "oneClick": false
+                }
+            ]
+        },
+        {
+            "bgUrl": "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497936858129.jpg",
+            "name": "Scene",
+            "sceneryType": "",
+            "objectList": [
+                {
+                    "el": null,
+                    "type": "primitive",
+                    "shape": "image",
+                    "transform": {
+                        "position": {
+                            "x": -4.523072514410719,
+                            "y": -1.4120536220470352,
+                            "z": -3.6807498689596034
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "scale": {
+                            "x": 2.48,
+                            "y": 1.11
+                        }
+                    },
+                    "material": {
+                        "src": "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497782502160.png"
+                    },
+                    "clickListener": "object-listener",
+                    "eventList": [
+                        {
+                            "type": "teleport",
+                            "arg": 3
+                        },
+                        {
+                            "type": "oneClick",
+                            "arg": ""
+                        },
+                        {
+                            "type": "addScore",
+                            "arg": "1"
+                        }
+                    ],
+                    "lookat": "#camera",
+                    "oneClick": false
+                },
+                {
+                    "el": null,
+                    "type": "primitive",
+                    "shape": "image",
+                    "text": "",
+                    "transform": {
+                        "position": {
+                            "x": 1.8928267624018158,
+                            "y": -1.3604691288341582,
+                            "z": -5.528682537189551
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "scale": {
+                            "x": 2.48,
+                            "y": 1.11
+                        }
+                    },
+                    "material": {
+                        "src": "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497782502160.png"
+                    },
+                    "clickListener": "object-listener",
+                    "eventList": [
+                        {
+                            "type": "teleport",
+                            "arg": 3
+                        },
+                        {
+                            "type": "oneClick",
+                            "arg": ""
+                        },
+                        {
+                            "type": "addScore",
+                            "arg": "1"
+                        }
+                    ],
+                    "lookat": "#camera",
+                    "oneClick": false
+                },
+                {
+                    "el": null,
+                    "type": "primitive",
+                    "shape": "image",
+                    "text": "",
+                    "transform": {
+                        "position": {
+                            "x": 4.583478575816431,
+                            "y": -1.2188906531715555,
+                            "z": -3.6750550636205164
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "scale": {
+                            "x": 2.48,
+                            "y": 1.11
+                        }
+                    },
+                    "material": {
+                        "src": "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497782502160.png"
+                    },
+                    "clickListener": "object-listener",
+                    "eventList": [
+                        {
+                            "type": "teleport",
+                            "arg": 3
+                        },
+                        {
+                            "type": "oneClick",
+                            "arg": ""
+                        },
+                        {
+                            "type": "addScore",
+                            "arg": "1"
+                        }
+                    ],
+                    "lookat": "#camera",
+                    "oneClick": false
+                },
+                {
+                    "el": null,
+                    "type": "primitive",
+                    "shape": "image",
+                    "text": "",
+                    "transform": {
+                        "position": {
+                            "x": -1.8280416318555075,
+                            "y": -1.4133468916197653,
+                            "z": -5.537211785380057
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "scale": {
+                            "x": 2.48,
+                            "y": 1.11
+                        }
+                    },
+                    "material": {
+                        "src": "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497782502160.png"
+                    },
+                    "clickListener": "object-listener",
+                    "eventList": [
+                        {
+                            "type": "teleport",
+                            "arg": 3
+                        },
+                        {
+                            "type": "oneClick",
+                            "arg": ""
+                        },
+                        {
+                            "type": "addScore",
+                            "arg": "1"
+                        }
+                    ],
+                    "lookat": "#camera",
+                    "oneClick": false
+                },
+                {
+                    "el": null,
+                    "type": "primitive",
+                    "shape": "image",
+                    "text": "",
+                    "transform": {
+                        "position": {
+                            "x": 0,
+                            "y": 1.3034174628539397,
+                            "z": -5.856714344880361
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "scale": {
+                            "x": 2.48,
+                            "y": 1.11
+                        }
+                    },
+                    "material": {
+                        "src": "https://traverser360.s3.ap-northeast-2.amazonaws.com/1498057518778.png"
+                    },
+                    "clickListener": "object-listener",
+                    "eventList": [],
+                    "lookat": "#camera",
+                    "oneClick": false
+                }
+            ]
+        },
+        {
+            "bgUrl": "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497936858129.jpg",
+            "name": "Scene",
+            "sceneryType": "",
+            "objectList": [
+                {
+                    "el": null,
+                    "type": "primitive",
+                    "shape": "image",
+                    "transform": {
+                        "position": {
+                            "x": -4.523072514410719,
+                            "y": -1.4120536220470352,
+                            "z": -3.6807498689596034
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "scale": {
+                            "x": 2.48,
+                            "y": 1.11
+                        }
+                    },
+                    "material": {
+                        "src": "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497782502160.png"
+                    },
+                    "clickListener": "object-listener",
+                    "eventList": [
+                        {
+                            "type": "teleport",
+                            "arg": 4
+                        },
+                        {
+                            "type": "oneClick",
+                            "arg": ""
+                        },
+                        {
+                            "type": "addScore",
+                            "arg": "1"
+                        }
+                    ],
+                    "lookat": "#camera",
+                    "oneClick": false
+                },
+                {
+                    "el": null,
+                    "type": "primitive",
+                    "shape": "image",
+                    "text": "",
+                    "transform": {
+                        "position": {
+                            "x": 1.8928267624018158,
+                            "y": -1.3604691288341582,
+                            "z": -5.528682537189551
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "scale": {
+                            "x": 2.48,
+                            "y": 1.11
+                        }
+                    },
+                    "material": {
+                        "src": "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497782502160.png"
+                    },
+                    "clickListener": "object-listener",
+                    "eventList": [
+                        {
+                            "type": "teleport",
+                            "arg": 4
+                        },
+                        {
+                            "type": "oneClick",
+                            "arg": ""
+                        },
+                        {
+                            "type": "addScore",
+                            "arg": "1"
+                        }
+                    ],
+                    "lookat": "#camera",
+                    "oneClick": false
+                },
+                {
+                    "el": null,
+                    "type": "primitive",
+                    "shape": "image",
+                    "text": "",
+                    "transform": {
+                        "position": {
+                            "x": 4.583478575816431,
+                            "y": -1.2188906531715555,
+                            "z": -3.6750550636205164
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "scale": {
+                            "x": 2.48,
+                            "y": 1.11
+                        }
+                    },
+                    "material": {
+                        "src": "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497782502160.png"
+                    },
+                    "clickListener": "object-listener",
+                    "eventList": [
+                        {
+                            "type": "teleport",
+                            "arg": 4
+                        },
+                        {
+                            "type": "oneClick",
+                            "arg": ""
+                        },
+                        {
+                            "type": "addScore",
+                            "arg": "1"
+                        }
+                    ],
+                    "lookat": "#camera",
+                    "oneClick": false
+                },
+                {
+                    "el": null,
+                    "type": "primitive",
+                    "shape": "image",
+                    "text": "",
+                    "transform": {
+                        "position": {
+                            "x": -1.8280416318555075,
+                            "y": -1.4133468916197653,
+                            "z": -5.537211785380057
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "scale": {
+                            "x": 2.48,
+                            "y": 1.11
+                        }
+                    },
+                    "material": {
+                        "src": "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497782502160.png"
+                    },
+                    "clickListener": "object-listener",
+                    "eventList": [
+                        {
+                            "type": "teleport",
+                            "arg": 4
+                        },
+                        {
+                            "type": "oneClick",
+                            "arg": ""
+                        },
+                        {
+                            "type": "addScore",
+                            "arg": "1"
+                        }
+                    ],
+                    "lookat": "#camera",
+                    "oneClick": false
+                },
+                {
+                    "el": null,
+                    "type": "primitive",
+                    "shape": "image",
+                    "text": "",
+                    "transform": {
+                        "position": {
+                            "x": 0,
+                            "y": 1.3034174628539397,
+                            "z": -5.856714344880361
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "scale": {
+                            "x": 2.48,
+                            "y": 1.11
+                        }
+                    },
+                    "material": {
+                        "src": "https://traverser360.s3.ap-northeast-2.amazonaws.com/1498057518778.png"
+                    },
+                    "clickListener": "object-listener",
+                    "eventList": [],
+                    "lookat": "#camera",
+                    "oneClick": false
                 }
             ]
         },
         {
             "bgUrl": "",
             "name": "Scene",
-            "sceneryType": "",
-            "objectList": []
-        },
-        {
-            "bgUrl": "",
-            "name": "Scene",
-            "sceneryType": "",
-            "objectList": []
+            "sceneryType": "result",
+            "objectList": [
+                {
+                    "el": null,
+                    "type": "primitive",
+                    "shape": "image",
+                    "text": "",
+                    "transform": {
+                        "position": {
+                            "x": -4.703301343950147,
+                            "y": -0.37886099771638315,
+                            "z": -3.706132864915407
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "scale": {
+                            "x": 2.48,
+                            "y": 1.11
+                        }
+                    },
+                    "material": {
+                        "src": "https://traverser360.s3.ap-northeast-2.amazonaws.com/1498052767693.png"
+                    },
+                    "clickListener": "object-listener",
+                    "eventList": [
+                         {
+                            "type":"resultSet",
+                            "score":"10",
+                            "back_url":""
+                        }
+                    ],
+                    "lookat": "#camera",
+                    "oneClick": false
+                },
+                {
+                    "el": null,
+                    "type": "primitive",
+                    "shape": "image",
+                    "text": "",
+                    "transform": {
+                        "position": {
+                            "x": -1.9200711150557028,
+                            "y": -0.2904160939250894,
+                            "z": -5.677057812416398
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "scale": {
+                            "x": 2.48,
+                            "y": 1.11
+                        }
+                    },
+                    "material": {
+                        "src": "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497782502160.png"
+                    },
+                    "clickListener": "object-listener",
+                    "eventList": [
+                         {
+                            "type":"resultSet",
+                            "score":"8",
+                            "back_url":""
+                        }
+                    ],
+                    "lookat": "#camera",
+                    "oneClick": false
+                },
+                {
+                    "el": null,
+                    "type": "primitive",
+                    "shape": "image",
+                    "text": "",
+                    "transform": {
+                        "position": {
+                            "x": 2.053476162117022,
+                            "y": -0.23228299550999426,
+                            "z": -5.632874955261661
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "scale": {
+                            "x": 2.48,
+                            "y": 1.11
+                        }
+                    },
+                    "material": {
+                        "src": "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497782502160.png"
+                    },
+                    "clickListener": "object-listener",
+                    "eventList": [
+                        {
+                            "type":"resultSet",
+                            "score":"6",
+                            "back_url":""
+                        }
+                    ],
+                    "lookat": "#camera",
+                    "oneClick": false
+                },
+                {
+                    "el": null,
+                    "type": "primitive",
+                    "shape": "image",
+                    "text": "",
+                    "transform": {
+                        "position": {
+                            "x": 4.630756304656328,
+                            "y": -0.2617889665516106,
+                            "z": -3.806253089834872
+                        },
+                        "rotation": {
+                            "x": 0,
+                            "y": 0,
+                            "z": 0
+                        },
+                        "scale": {
+                            "x": 2.48,
+                            "y": 1.11
+                        }
+                    },
+                    "material": {
+                        "src": "https://traverser360.s3.ap-northeast-2.amazonaws.com/1497782502160.png"
+                    },
+                    "clickListener": "object-listener",
+                    "eventList": [
+                         {
+                            "type":"resultSet",
+                            "score":"4",
+                            "back_url":""
+                        }
+                    ],
+                    "lookat": "#camera",
+                    "oneClick": false
+                }
+            ]
         }
     ]
 }

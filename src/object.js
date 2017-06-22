@@ -18,6 +18,7 @@ function Objct(el, obj) {
 
         this.lookat = "";
         this.oneClick = false;
+
     }
 }
 
