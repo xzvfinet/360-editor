@@ -487,11 +487,10 @@ function openMenu() {
 }
 
 function getJson() {
-    <% if (projectType == "free") { %>
+    if(!loadProject('<%-JSON.stringify(projectObjectJson) %>')){
         getBackgroundPopup();
-    <% } %>
+    }
     nothumbnail = true;
-    loadProject('<%-JSON.stringify(projectObjectJson) %>')
 }
 
 function getBackgroundPopup() {

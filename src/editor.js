@@ -69,15 +69,17 @@ window.saveProject = function(userID, sceneID) {
 window.loadProject = function(projectJson) {
     clearAllObject();
 
-    var loadedProject = new Project();
-
-    loadedProject.fromJson(projectJson);
-
-    relateSceneryWithDomEl(loadedProject.sceneryList[0]);
-    for (var j in loadedProject.sceneryList[0].objectList) {
-        relateObjectWithDomEl(loadedProject.sceneryList[0].objectList[j]);
+    projectObject = new Project();
+    if(!projectObject.fromJson(projectJson)){
+        var newScenery = new Scenery(background);
+        projectObject.addScenery(newScenery);
+        return false;
     }
-    projectObject = loadedProject;
+
+    relateSceneryWithDomEl(projectObject.sceneryList[0]);
+    for (var j in projectObject.sceneryList[0].objectList) {
+        relateObjectWithDomEl(projectObject.sceneryList[0].objectList[j]);
+    }
     //scene number
     updateSceneNumberList();
     updateSceneDropDown();
