@@ -232,6 +232,27 @@
 				jQuery('iframe').height(jQuery(window).height() - jQuery('.main_header').height());
 			}
 			jQuery('html').addClass('without_border');
+
+            for (var k in chlist) {
+        var a = Math.floor((Math.random() * 10)) % colors.length;
+        var color = colors[a];
+        for (var i = 0; i < 7; ++i) {
+            for (var j = 0; j < 5; ++j) {
+                if (CH[chlist[k]][i][j]) {
+                    $("." + chlist[k]).each(function(index) {
+                        var box = document.createElement('a-box');
+                        box.setAttribute('material', "color:#" + color);
+
+                        pos.x = j;
+                        pos.y = -i + 3;
+
+                        box.setAttribute('position', pos.x + ' ' + pos.y + ' ' + pos.z);
+                        this.appendChild(box);
+                    });
+                }
+            }
+        }
+    }
 		});
 		jQuery(window).resize(function() {
 			"use strict";
@@ -255,26 +276,7 @@
 				jQuery('iframe').height(jQuery(window).height() - jQuery('.main_header').height());
 			}
 
-            for (var k in chlist) {
-        var a = Math.floor((Math.random() * 10)) % colors.length;
-        var color = colors[a];
-        for (var i = 0; i < 7; ++i) {
-            for (var j = 0; j < 5; ++j) {
-                if (CH[chlist[k]][i][j]) {
-                    $("." + chlist[k]).each(function(index) {
-                        var box = document.createElement('a-box');
-                        box.setAttribute('material', "color:#" + color);
-
-                        pos.x = j;
-                        pos.y = -i + 3;
-
-                        box.setAttribute('position', pos.x + ' ' + pos.y + ' ' + pos.z);
-                        this.appendChild(box);
-                    });
-                }
-            }
-        }
-    }
+            
 		});
 
 
