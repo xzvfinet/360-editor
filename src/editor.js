@@ -55,7 +55,7 @@ window.onLoadCanvas = function(frame) {
 }
 
 window.setBackground = function(url) {
-    projectObject.getCurrentScenery().setBackgroundImageUrl(url);
+    projectObject.getCurrentScenery().setBackgroundImageUrl(url, mainFrame.THREE);
 }
 
 window.getBackgroundUrl = function() {
@@ -157,11 +157,11 @@ function updateSceneDropDown() {
 }
 
 function relateSceneryWithDomEl(scenery) {
-    scenery.setBgEl(background);
+    scenery.setBgEl(background, mainFrame.THREE);
 }
 
 function relateObjectWithDomEl(object) {
-    var newEl = obj.Controller.createElFromObj(mainFrame, object);
+    var newEl = obj.Controller.createElFromObj(mainFrame, object, mainFrame.THREE);
     sceneEl.appendChild(newEl)
 }
 
@@ -378,7 +378,7 @@ function initTemplate() {
 
             gameSetImage.setAttribute('id', 'game-set');
             gameSetImage.setAttribute('position', '0 0 3');
-            gameSetImage.setAttribute('src', '../img/template/results_final.png');
+            loadImage(gameSetImage, '../img/template/results_final.png');
             gameSetImage.setAttribute('scale', "2 1 1");
 
             var setClock = mainFrame.document.createElement("a-text");
@@ -518,7 +518,7 @@ window.createOption = function() {
 
 window.modifyOption = function(text, image_url, score) {
     //currentSelectedObject.drawText(mainFrame,text);
-    currentSelectedObject.setMaterial({ src: image_url });
+    loadImage(currentSelectedObject.el, image_url);
     util.getImageSize(image_url, function() {
         currentSelectedObject.setScale({ x: this.width / BASE_IMG_WIDTH, y: this.height / BASE_IMG_WIDTH });
     });
@@ -534,7 +534,7 @@ window.createSpot = function() {
     console.log(obj);
 }
 window.modifySpot = function(imgage_url, sound_url) {
-    currentSelectedObject.setMaterial({ src: image_url });
+    loadImage(currentSelectedObject.el, image_url);
     currentSelectedObject.addEvent("sound", sound_url);
     util.getImageSize(image_url, function() {
         currentSelectedObject.setScale({ x: this.width / BASE_IMG_WIDTH, y: this.height / BASE_IMG_WIDTH });
@@ -557,7 +557,7 @@ window.createLatelyObject = function() {
         newObj.setClickListener(OBJECT_LISTENER);
         newObj.setLookAt('#camera');
 
-        newEl.setAttribute('src', newObj.material.src);
+        loadImage(newEl, newObj.material.src);
         newEl.setAttribute('class', 'object');
 
         sceneEl.appendChild(newEl);
@@ -711,7 +711,7 @@ function newObject(type, shape, url, position, rotation, scale) {
         util.getImageSize(url, function() {
             newObj.setScale({ x: this.width / BASE_IMG_WIDTH, y: this.height / BASE_IMG_WIDTH });
         });
-        newObj.setMaterial({ 'src': url });
+        loadImage(newObj.el, url);
     } else {
         newObj.setMaterial({ 'color': util.getRandomHexColor() });
     }
@@ -732,6 +732,25 @@ function newObject(type, shape, url, position, rotation, scale) {
     setObjectOnMiniMap(position);
 
     return newObj;
+}
+
+function loadImage(aframeEl, src) {
+    console.log('load: ' + src);
+    var texture;
+    var imageElement = document.createElement('img');
+    imageElement.setAttribute('crossOrigin', 'anonymous');
+    imageElement.onload = function(e) {
+        console.log('onload image');
+        texture = new THREE.Texture(this);
+        texture.needsUpdate = true;
+
+        // console.log(sky);
+        console.log(aframeEl.components);
+
+        aframeEl.components.material.material.map = texture;
+        aframeEl.components.material.material.needsUpdate = true;
+    };
+    imageElement.src = src;
 }
 
 function fadeInOutAll(fade) {
@@ -770,7 +789,7 @@ function imageEvent(arg) {
         height: 1.2,
         width: 2
     });
-    imageEl.setAttribute('material', 'src', BACKGROUND_PREFIX + arg);
+    loadImage(imageEl, BACKGROUND_PREFIX + arg);
     imageEl.setAttribute('position', { x: 0, y: 0, z: -1 });
 }
 

@@ -56,7 +56,7 @@ window.onLoadCanvas = function(frame) {
 }
 
 window.setBackground = function(url) {
-    projectObject.getCurrentScenery().setBackgroundImageUrl(url);
+    projectObject.getCurrentScenery().setBackgroundImageUrl(url, mainFrame.THREE);
 }
 
 window.getBackgroundUrl = function() {
@@ -158,11 +158,11 @@ function updateSceneDropDown() {
 }
 
 function relateSceneryWithDomEl(scenery) {
-    scenery.setBgEl(background);
+    scenery.setBgEl(background, mainFrame.THREE);
 }
 
 function relateObjectWithDomEl(object) {
-    var newEl = obj.Controller.createElFromObj(mainFrame, object);
+    var newEl = obj.Controller.createElFromObj(mainFrame, object, mainFrame.THREE);
     sceneEl.appendChild(newEl)
 }
 
@@ -379,7 +379,7 @@ function initTemplate() {
 
             gameSetImage.setAttribute('id', 'game-set');
             gameSetImage.setAttribute('position', '0 0 3');
-            gameSetImage.setAttribute('src', '../img/template/results_final.png');
+            loadImage(gameSetImage, '../img/template/results_final.png');
             gameSetImage.setAttribute('scale', "2 1 1");
 
             var setClock = mainFrame.document.createElement("a-text");
@@ -519,7 +519,7 @@ window.createOption = function() {
 
 window.modifyOption = function(text, image_url, score) {
     //currentSelectedObject.drawText(mainFrame,text);
-    currentSelectedObject.setMaterial({ src: image_url });
+    loadImage(currentSelectedObject.el, image_url);
     util.getImageSize(image_url, function() {
         currentSelectedObject.setScale({ x: this.width / BASE_IMG_WIDTH, y: this.height / BASE_IMG_WIDTH });
     });
@@ -535,7 +535,7 @@ window.createSpot = function() {
     console.log(obj);
 }
 window.modifySpot = function(imgage_url, sound_url) {
-    currentSelectedObject.setMaterial({ src: image_url });
+    loadImage(currentSelectedObject.el, image_url);
     currentSelectedObject.addEvent("sound", sound_url);
     util.getImageSize(image_url, function() {
         currentSelectedObject.setScale({ x: this.width / BASE_IMG_WIDTH, y: this.height / BASE_IMG_WIDTH });
@@ -558,7 +558,7 @@ window.createLatelyObject = function() {
         newObj.setClickListener(OBJECT_LISTENER);
         newObj.setLookAt('#camera');
 
-        newEl.setAttribute('src', newObj.material.src);
+        loadImage(newEl, newObj.material.src);
         newEl.setAttribute('class', 'object');
 
         sceneEl.appendChild(newEl);
@@ -712,7 +712,7 @@ function newObject(type, shape, url, position, rotation, scale) {
         util.getImageSize(url, function() {
             newObj.setScale({ x: this.width / BASE_IMG_WIDTH, y: this.height / BASE_IMG_WIDTH });
         });
-        newObj.setMaterial({ 'src': url });
+        loadImage(newObj.el, url);
     } else {
         newObj.setMaterial({ 'color': util.getRandomHexColor() });
     }
@@ -733,6 +733,25 @@ function newObject(type, shape, url, position, rotation, scale) {
     setObjectOnMiniMap(position);
 
     return newObj;
+}
+
+function loadImage(aframeEl, src) {
+    console.log('load: ' + src);
+    var texture;
+    var imageElement = document.createElement('img');
+    imageElement.setAttribute('crossOrigin', 'anonymous');
+    imageElement.onload = function(e) {
+        console.log('onload image');
+        texture = new THREE.Texture(this);
+        texture.needsUpdate = true;
+
+        // console.log(sky);
+        console.log(aframeEl.components);
+
+        aframeEl.components.material.material.map = texture;
+        aframeEl.components.material.material.needsUpdate = true;
+    };
+    imageElement.src = src;
 }
 
 function fadeInOutAll(fade) {
@@ -771,7 +790,7 @@ function imageEvent(arg) {
         height: 1.2,
         width: 2
     });
-    imageEl.setAttribute('material', 'src', BACKGROUND_PREFIX + arg);
+    loadImage(imageEl, BACKGROUND_PREFIX + arg);
     imageEl.setAttribute('position', { x: 0, y: 0, z: -1 });
 }
 
@@ -884,7 +903,7 @@ function Objct(el, obj) {
         this.el = el;
         this.type = "";
         this.shape = "";
-        this.text ="";
+        this.text = "";
         this.transform = {};
         this.material = {};
 
@@ -937,30 +956,30 @@ Objct.prototype.setMaterial = function(newMaterial) {
     }
 }
 
-Objct.prototype.drawText = function(frame,text){
+Objct.prototype.drawText = function(frame, text) {
     this.text = text;
     var newEl = frame.document.createElement("a-text");
-    newEl.setAttribute('value',text);
+    newEl.setAttribute('value', text);
     this.el.appendChild(newEl);
 }
 
-Objct.prototype.setFadeInOutAni = function(frame){
-    var fadeIn = frame.document.createElement("a-animation" );
-    var fadeOut = frame.document.createElement("a-animation" );
-    fadeIn.setAttribute("attribute","material.color");
-    fadeOut.setAttribute("attribute","material.color");
-    
-    fadeIn.setAttribute("begin","fade-in");
-    fadeOut.setAttribute("begin","fade-out");
+Objct.prototype.setFadeInOutAni = function(frame) {
+    var fadeIn = frame.document.createElement("a-animation");
+    var fadeOut = frame.document.createElement("a-animation");
+    fadeIn.setAttribute("attribute", "material.color");
+    fadeOut.setAttribute("attribute", "material.color");
 
-    fadeIn.setAttribute("from","black");
-    fadeOut.setAttribute("from","white");
+    fadeIn.setAttribute("begin", "fade-in");
+    fadeOut.setAttribute("begin", "fade-out");
 
-    fadeIn.setAttribute("to","white");
-    fadeOut.setAttribute("to","black");
+    fadeIn.setAttribute("from", "black");
+    fadeOut.setAttribute("from", "white");
 
-    fadeIn.setAttribute("dur","2000");
-    fadeOut.setAttribute("dur","2000");
+    fadeIn.setAttribute("to", "white");
+    fadeOut.setAttribute("to", "black");
+
+    fadeIn.setAttribute("dur", "2000");
+    fadeOut.setAttribute("dur", "2000");
 
     this.el.appendChild(fadeIn);
     this.el.appendChild(fadeOut);
@@ -1002,9 +1021,9 @@ Objct.prototype.setLookAt = function(target) {
 Objct.prototype.addEvent = function(eventType, eventArgs) {
     this.eventList.push({ 'type': eventType, 'arg': eventArgs });
 }
-Objct.prototype.modifyEvent = function(eventType, eventAgrs){
-    for(var i = 0;i<this.eventList.length;i++){
-        if(this.eventList[i].type == eventType){
+Objct.prototype.modifyEvent = function(eventType, eventAgrs) {
+    for (var i = 0; i < this.eventList.length; i++) {
+        if (this.eventList[i].type == eventType) {
             this.eventList[i].arg = eventAgrs;
             return true;
         }
@@ -1048,19 +1067,37 @@ Controller.prototype.toJson = function() {
     return json;
 }
 
-Controller.prototype.createElFromObj = function(frame, obj) {
+Controller.prototype.createElFromObj = function(frame, obj, THREE) {
     var newEl = frame.document.createElement("a-" + obj.shape);
     obj.el = newEl;
     obj.setPosition(obj.transform.position);
     obj.setRotation(obj.transform.rotation);
     obj.setScale(obj.transform.scale);
     obj.setMaterial(obj.material);
+    if (obj.material['src']) {
+        this.loadFromUrl(newEl, obj.material['src'], THREE);
+    }
     obj.setClickListener(obj.clickListener);
     obj.setLookAt(obj.lookat);
     obj.setFadeInOutAni(frame);
-    newEl.setAttribute("class","object");
+    newEl.setAttribute("class", "object");
 
     return newEl;
+}
+
+Controller.prototype.loadFromUrl = function(el, url, THREE) {
+    console.log('load objectimage: ' + url);
+    var texture;
+    var imageElement = document.createElement('img');
+    imageElement.setAttribute('crossOrigin', 'anonymous');
+    imageElement.onload = function(e) {
+        texture = new THREE.Texture(this);
+        texture.needsUpdate = true;
+
+        el.components.material.material.map = texture;
+        el.components.material.material.needsUpdate = true;
+    };
+    imageElement.src = url;
 }
 
 module.exports = {
@@ -1178,14 +1215,32 @@ function Scenery(bgEl, scenery) {
     }
 }
 
-Scenery.prototype.setBackgroundImageUrl = function(url) {
+Scenery.prototype.setBackgroundImageUrl = function(url, THREE) {
     this.bgUrl = url;
-    this.bgEl.setAttribute('src', this.bgUrl);
+    // this.bgEl.setAttribute('src', this.bgUrl);
+    this.loadFromUrl(this.bgUrl, THREE);
 }
 
-Scenery.prototype.setBgEl = function(bgEl) {
+Scenery.prototype.setBgEl = function(bgEl, THREE) {
     this.bgEl = bgEl;
-    bgEl.setAttribute('src', this.bgUrl);
+    // bgEl.setAttribute('src', this.bgUrl);
+    this.loadFromUrl(this.bgUrl, THREE);
+}
+
+Scenery.prototype.loadFromUrl = function(url, THREE) {
+    console.log('load background: ' + url);
+    var bgEl = this.bgEl;
+    var texture;
+    var imageElement = document.createElement('img');
+    imageElement.setAttribute('crossOrigin', 'anonymous');
+    imageElement.onload = function(e) {
+        texture = new THREE.Texture(this);
+        texture.needsUpdate = true;
+
+        bgEl.components.material.material.map = texture;
+        bgEl.components.material.material.needsUpdate = true;
+    };
+    imageElement.src = url;
 }
 
 Scenery.prototype.addObject = function(object) {
