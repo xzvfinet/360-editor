@@ -23,17 +23,15 @@
         <% if(scenes.length > 0){ %>
         <div class="fs_blog_module image-grid">
             <% scenes.forEach(function(scene){ %>
-            <div class="blogpost_preview_fw element stuff">
+            <div class="blogpost_preview_fw element stuff" onClick="location.href='/project/<%=scene.idscene%>'" style="cursor:pointer;">
                 <div class="fw_preview_wrapper">
                     <div class="gallery_item_wrapper">
-                        <a href="/project/<%=scene.idscene%>"".html">
                             <img src=<%= scene.thumbnail%> alt="" class="fw_featured_image" width="540">
                             <div class="gallery_fadder"></div>
                             <span class="gallery_ico"><i class="stand_icon icon-eye"></i></span>
-                            </a>
                     </div>
                     <div class="grid-port-cont">
-                        <h6><a href="simple_fullwidth_image_post.html"><%= scene.title %></a></h6>
+                        <h6><%= scene.title %></h6>
                         <div class="block_likes">
                             <div class="post-views"><i class="stand_icon icon-eye"></i> <span><%= scene.view %></span></div>
                             <div class="gallery_likes gallery_likes_add already_liked">

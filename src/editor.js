@@ -62,8 +62,8 @@ window.getBackgroundUrl = function() {
     return projectObject.getCurrentScenery().bgUrl;
 }
 
-window.saveProject = function(userID, sceneID) {
-    saveJsontoServer(projectObject.toJson(), userID, sceneID);
+window.saveProject = function(userID, sceneID, title) {
+    saveJsontoServer(projectObject.toJson(), userID, sceneID, title);
 }
 
 window.loadProject = function(projectJson) {
@@ -187,14 +187,15 @@ function eraseCanvas() {
     }
 }
 
-function saveJsontoServer(json, userID, sceneID) {
+function saveJsontoServer(json, userID, sceneID, title) {
     $.ajax({
         url: '/project/save',
         method: 'post',
         data: {
             user: userID,
             json: json,
-            scene: sceneID
+            scene: sceneID,
+            title : title
         },
         success: function(data) {
             alert("Save success");

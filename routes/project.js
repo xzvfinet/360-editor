@@ -121,7 +121,8 @@ router.get('/:id', function(req, res) {
                                 user: temp,
                                 sceneID: id,
                                 projectType: projectType,
-                                projectObjectJson: projectObject
+                                projectObjectJson: projectObject,
+                                title : info[0].title
                             });
                         }
                         // res.end(json);
@@ -215,7 +216,6 @@ router.post('/:id/thumbnail', uploadImage.array('image_file', 1), function(req, 
 router.post('/save', function(req, res) {
     var data = req.body
     var base64data = new Buffer(data.json, 'binary');
-
     s3.upload({
         Bucket: 'traverser360',
         Key: data.scene + "/" + Date.now() + ".json",
@@ -225,8 +225,11 @@ router.post('/save', function(req, res) {
         if (err) {
             console.log(err);
         } else {
-            var query = "update scene set path=?, date=? where idscene=?"
-            var params = [host + "/" + result.key, new Date().toISOString().replace(/T/, ' ').replace(/\..+/, ''), data.scene];
+            var query = "update scene set path=?, date=?, title=? where idscene=?"
+            var title = data.title;
+            if(title=="")
+              title = "No title";
+            var params = [host + "/" + result.key, new Date().toISOString().replace(/T/, ' ').replace(/\..+/, ''), title, data.scene];
             connection.query(query, params, function(error, info) {
                 var temp;
                 req.session.userID == null ? temp = -1 : temp = req.session;
