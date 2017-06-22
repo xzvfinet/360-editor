@@ -189,6 +189,38 @@
         height: 200px;
         right: 10px;
     }
+
+    .thumbnail-controller form {
+        display: table;
+    }
+    
+    .thumbnail-controller p {
+        display: table-row;
+    }
+    
+    .thumbnail-controller label {
+        display: table-cell;
+    }
+    
+    .thumbnail-controller input {
+        display: table-cell;
+    }
+    
+    input[type="range"] {
+        position: relative;
+    }
+    
+    input[type="range"]:before {
+        position: absolute;
+        top: -17px;
+        left: 50%;
+        margin-left: -10px;
+        content: attr(value);
+        display: block;
+        text-align: center;
+        width: 20px;
+        height: 10px;
+    }
     /*
   .modal-content{
     background-size: 100% 100%;
@@ -374,13 +406,23 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <button type="button" class="close" data-dismiss="modal">&times;</button>
-                    <h4 class="modal-title">Thumbnail</h4>
+                    <h4 class="modal-title">썸네일로 사용할 영역을 선택하세요.</h4>
                 </div>
                 <div class="modal-body">
+                    <div class="thumbnail-controller">
+                        <form>
+                            <p>
+                                <label>영역 넓이</label>
+                                <input id="fovController" type="range" value=1 min=0.5 max=1.5 step="0.01" name="input-fov">
+                            </p>
+                        </form>
+                    </div>
                     <div style="display:none;">
                         <canvas id="original-360"></canvas>
                     </div>
                     <canvas id="canvas-360" onclick="mymouseclick(event)"></canvas>
+                    <hr>
+                    <p>미리보기</p>      
                     <canvas id="base-canvas"></canvas>
                 </div>
                 <div class="modal-footer">
@@ -426,6 +468,16 @@ var gYaw = 0,
 
 
 $(document).ready(function() {
+    document.querySelector('input[type=range]').addEventListener('input', function rangeChange() {
+        this.setAttribute('value', this.value);
+    });
+
+    $("div.thumbnail-controller input").change(function() {
+        var newFov = Math.floor(Number($('input[name=input-fov]')[0].value)*80);
+        var params = [newFov, dstWidth, dstHeight];
+        updateByParameter(params[0], params[1], params[2]);
+    });
+
     $('#inlineradio1').click(function() {
         $("#img-url").prop('disabled', false);
         $("#image_file").prop('disabled', true);
@@ -574,12 +626,29 @@ function setupEquirectangularApp() {
 }
 
 function mymouseclick(event) {
-    var a = equiToLatlon(event.layerX / ratio, event.layerY / ratio, orig_img.width, orig_img.height);
+    updateByPostion(event.layerX, event.layerY);
+}
+
+function updateByPostion(x, y) {
+    var a = equiToLatlon(x / ratio, y / ratio, orig_img.width, orig_img.height);
+
     setDirection(a.lon, a.lat, 0);
-    // move(1);
 
     clearCanvas();
 
+    updateFrame();
+    updateBase();
+}
+
+window.updateByParameter = function(fov, width, height) {
+    hfov = fov;
+    dstWidth = width;
+    dstHeight = height;
+
+    // base_canvas.width = dstWidth;
+    // base_canvas.height = dstHeight;
+
+    clearCanvas();
     updateFrame();
     updateBase();
 }
