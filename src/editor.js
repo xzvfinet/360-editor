@@ -421,7 +421,7 @@ function templateFunc() {
                 objects.forEach(function(item) {
                     item.eventList.forEach(function(event) {
                         if (event != null && event.type == "addScore")
-                            item.addMaterial({ opacity: 0 });
+                            item.setMaterial({ opacity: 0 });
                     });
                 });
                 time = 0;
@@ -441,7 +441,7 @@ function templateFunc() {
                     item.eventList.forEach(function(event) {
                         if (event != null && event.type == "addScore") {
                             item.oneClick = false;
-                            item.addMaterial({ opacity: 1 });
+                            item.setMaterial({ opacity: 1 });
                         }
                     });
                 });
@@ -459,11 +459,11 @@ function templateFunc() {
                     return b.eventList[0].score - a.eventList[0].score;
                 })
                 for (var i = 0; i < objects.length; i++) {
-                    objects[i].addMaterial({ opacity: 0 });
+                    objects[i].setMaterial({ opacity: 0 });
                     if (scoreVariable >= objects[i].eventList[0].score) {
                         console.log(objects[i].eventList[0].back_url);
                         setBackground(objects[i].eventList[0].back_url);
-                        objects[i].addMaterial({ opacity: 1 });
+                        objects[i].setMaterial({ opacity: 1 });
                         break;
                     }
                 }
@@ -472,7 +472,7 @@ function templateFunc() {
                 scoreVariable = 0;
                 scenes.forEach(function(scene) {
                     scene.objectList.forEach(function(item) {
-                        if (projectObject.getCurrentScenery().sceneryType == "result") item.addMaterial({ opacity: 1 });
+                        if (projectObject.getCurrentScenery().sceneryType == "result") item.setMaterial({ opacity: 1 });
                         item.oneClick = false;
                     });
                 });
@@ -518,8 +518,7 @@ window.createOption = function() {
 
 window.modifyOption = function(text, image_url, score) {
     //currentSelectedObject.drawText(mainFrame,text);
-    currentSelectedObject.material.src = image_url;
-    currentSelectedObject.el.setAttribute("src", image_url);
+    currentSelectedObject.setMaterial({src: image_url});
     util.getImageSize(image_url, function() {
         currentSelectedObject.setScale({ x: this.width / BASE_IMG_WIDTH, y: this.height / BASE_IMG_WIDTH });
     });
@@ -534,10 +533,9 @@ window.createSpot = function() {
     updateObjectNumUI();
     console.log(obj);
 }
-window.modifySpot = function(imgage_url, sound_url) {
-    currentSelectedObject.material.src = image_url;
-    currentSelectedObject.el.setAttribute("src", image_url);
-    currentSelectedObject.addEvent("sound", sound_url);
+window.modifySpot = function(imgage_url,sound_url) {
+    currentSelectedObject.setMaterial({src: image_url});
+    currentSelectedObject.addEvent("sound",sound_url);
     util.getImageSize(image_url, function() {
         currentSelectedObject.setScale({ x: this.width / BASE_IMG_WIDTH, y: this.height / BASE_IMG_WIDTH });
     });
@@ -570,8 +568,7 @@ window.createLatelyObject = function() {
 }
 
 window.modifyResult = function(text, image_url, score, background_url) {
-    currentSelectedObject.material.src = image_url;
-    currentSelectedObject.el.setAttribute("src", image_url);
+    currentSelectedObject.setMaterial({src: image_url});
     util.getImageSize(image_url, function() {
         currentSelectedObject.setScale({ x: this.width / BASE_IMG_WIDTH, y: this.height / BASE_IMG_WIDTH });
     });
@@ -649,7 +646,16 @@ function openObjectPropertyPanel(event) {
     if ($(id).css("display") == "none") {
         $(id).css("display", "");
     }
+    $("#simri-option-text").val(currentSelectedObject.text);
+    $("#simri-option-score").val("");
+     for(var i=0; i<currentSelectedObject.eventList.length; i++){
+       if(currentSelectedObject.eventList[i].type=="addScore")
+        $("#simri-option-score").val(currentSelectedObject.eventList[i].arg);
+     }
     $(id).css({ position: "fixed", top: event.clientY, left: event.clientX + 150 });
+}
+window.getCurrentImgUrl = function(){
+    return currentSelectedObject.material.src;
 }
 
 function checkScore() {
@@ -777,7 +783,7 @@ function soundEvent(arg) {
 
 function onVisibleEvent(arg) {
     newMaterial = { opacity: 1 }
-    currentSelectedObject.addMaterial(newMaterial);
+    currentSelectedObject.setMaterial(newMaterial);
 }
 
 function oneClickEvent(arg) {

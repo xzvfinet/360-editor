@@ -248,7 +248,7 @@
         text-align: center;
         width: 20px;
         height: 10px;
-
+    }
     .image-upload > input{
         display: none;
     }
@@ -331,12 +331,12 @@
                             </div>
                             <input type="text" id="simri-option-score" style="margin-top: 6px;margin-left: 120px;width: 40%;">
                             <input type="text" id="simri-option-text" style="left: 120px;bottom: 153px;position: absolute;width: 40%;">
-                            <div id="remove-button" class="panel panel-default panel-floating" onclick="removeSelectedObject()">
+                            <div id="remove-button" class="panel-default panel-floating" onclick="removeSelectedObject()">
                                 <div class="panel-body panel-floating-inside">
                                     <span></span>
                                 </div>
                             </div>
-                            <div id="adjust-button" class="panel panel-default panel-floating" onclick="applySimriOption()">
+                            <div id="adjust-button" class="panel-default panel-floating" onclick="applySimriOption()">
                                 <div class="panel-body panel-floating-inside">
                                     <span></span>
                                 </div>
@@ -562,6 +562,7 @@ $(document).ready(function() {
     });
 
     $("#simri-option-form").submit(function(){
+        
       $("#uploader_iframe").unbind().on('load', function() { // This block of code will execute when the response is sent from the server.
           result = JSON.parse($(this).contents().text()); // Content of the iframe will be the response sent from the server. Parse the response as the JSON object
           modifyOption($("#simri-option-text").val(), result.result, $("#simri-option-score").val());
@@ -592,10 +593,7 @@ $(document).ready(function() {
 });
 
 function applySimriOption(){
-  if ($('#simri-option-file').get(0).files.length === 0) {
-    alert('please add image file');
-    return;
-  }
+  /*
   if($("#simri-option-text").val() == ""){
     alert('please input text');
     return;
@@ -603,7 +601,12 @@ function applySimriOption(){
   if($("#simri-option-score").val() == ""){
     alert('please input score');
     return;
-  }
+  }*/
+    if ($('#simri-option-file').get(0).files.length === 0) {
+        modifyOption($("#simri-option-text").val(), getCurrentImgUrl(), $("#simri-option-score").val());
+        $("#simri-option-panel").css("display", "none");
+        return;
+    }
   $("#simri-option-form").submit();
 }
 
