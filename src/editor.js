@@ -402,7 +402,7 @@ function initTemplate() {
             newEl.setAttribute('color', 'black');
             newEl.setAttribute('align', 'center');
             newEl.setAttribute('width', '10');
-            
+
             clockEl.setAttribute('id', 'clock');
             position = { x: 8.1, y: 3.65, z: -5 };
             clockEl.setAttribute('position', position);
@@ -410,7 +410,7 @@ function initTemplate() {
             clockEl.setAttribute('color', 'black');
             clockEl.setAttribute('align', 'center');
             clockEl.setAttribute('width', '10');
-            
+
             gameSetImage.setAttribute('id', 'game-set');
             gameSetImage.setAttribute('position', '0 0 3');
             gameSetImage.setAttribute('src', '../img/template/results_final.jpg');
@@ -424,7 +424,7 @@ function initTemplate() {
             bgClockEl.setAttribute('src','../img/template/icon_time_final.png')
             bgClockEl.setAttribute('position','8 3.5 -5');
             bgClockEl.setAttribute('scale','2.5 2.5 0');
-            
+
             cameraEl.appendChild(bgClockEl);
             cameraEl.appendChild(newEl);
             cameraEl.appendChild(clockEl);
@@ -529,6 +529,7 @@ window.createOption = function() {
     obj.addEvent('teleport', projectObject.getCurrentIndex() + 1);
     obj.addEvent('oneClick',"");
     obj.addEvent('addScore',"1");
+    $("#img-url").val("");
     console.log(obj);
 }
 
@@ -537,6 +538,7 @@ window.modifyOption = function(text,image_url,score){
     currentSelectedObject.material.src = image_url;
     currentSelectedObject.el.setAttribute("src",image_url);
     currentSelectedObject.modifyEvent("addScore",score);
+    currentSelectedObject.text = text;
 }
 
 window.createSpot = function() {
@@ -647,6 +649,12 @@ function openObjectPropertyPanel(event,id) {
         $(id).css("display", "");
     }
     $(id).css({ position: "fixed", top: event.clientY, left: event.clientX+150 });
+
+    $("#simri-option-text").val(currentSelectedObject.text);
+    for(var i=0; i<currentSelectedObject.eventList.length; i++){
+      if(currentSelectedObject.eventList[i].type=="addScore")
+        $("#simri-option-score").val(currentSelectedObject.eventList[i].arg);
+    }
 }
 
 function checkScore() {
