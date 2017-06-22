@@ -518,6 +518,7 @@ window.createOption = function() {
 
 window.modifyOption = function(text, image_url, score) {
     //currentSelectedObject.drawText(mainFrame,text);
+    currentSelectedObject.material['src'] = image_url;
     loadImage(currentSelectedObject.el, image_url);
     util.getImageSize(image_url, function() {
         currentSelectedObject.setScale({ x: this.width / BASE_IMG_WIDTH, y: this.height / BASE_IMG_WIDTH });
@@ -534,6 +535,7 @@ window.createSpot = function() {
     console.log(obj);
 }
 window.modifySpot = function(imgage_url, sound_url) {
+    currentSelectedObject.material['src'] = image_url;
     loadImage(currentSelectedObject.el, image_url);
     currentSelectedObject.addEvent("sound", sound_url);
     util.getImageSize(image_url, function() {
@@ -568,6 +570,7 @@ window.createLatelyObject = function() {
 }
 
 window.modifyResult = function(text, image_url, score, background_url) {
+    currentSelectedObject.material['src'] = image_url;
     loadImage(currentSelectedObject.el, image_url);
     util.getImageSize(image_url, function() {
         currentSelectedObject.setScale({ x: this.width / BASE_IMG_WIDTH, y: this.height / BASE_IMG_WIDTH });
@@ -720,6 +723,7 @@ function newObject(type, shape, url, position, rotation, scale) {
         util.getImageSize(url, function() {
             newObj.setScale({ x: this.width / BASE_IMG_WIDTH, y: this.height / BASE_IMG_WIDTH });
         });
+        newObj.material['src'] = url;
         loadImage(newObj.el, url);
     } else {
         newObj.setMaterial({ 'color': util.getRandomHexColor() });
