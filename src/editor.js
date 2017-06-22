@@ -491,9 +491,10 @@ function templateFunc() {
                 objects.sort(function(a, b) {
                     return b.eventList[0].score - a.eventList[0].score;
                 })
+                for (var i=0;i<objects.length;i++){
+                     objects[i].addMaterial({ opacity: 0 });
+                }
                 for (var i=0;i<objects.length;i++) {
-                    console.log(objects[i].eventList[0]);
-                    objects[i].addMaterial({ opacity: 0 });
                     if (scoreVariable >= objects[i].eventList[0].score) {
                         console.log(objects[i].eventList[0].back_url);
                         setBackground(objects[i].eventList[0].back_url);
@@ -506,6 +507,7 @@ function templateFunc() {
                 scoreVariable = 0;
                 scenes.forEach(function(scene) {
                     scene.objectList.forEach(function(item) {
+                        item.addMaterial({ opacity: 1 });
                         item.oneClick = false;
                     });
                 });
