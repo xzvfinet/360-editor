@@ -70,7 +70,7 @@ window.loadProject = function(projectJson) {
     clearAllObject();
 
     projectObject = new Project();
-    if(!projectObject.fromJson(projectJson)){
+    if (!projectObject.fromJson(projectJson)) {
         var newScenery = new Scenery(background);
         projectObject.addScenery(newScenery);
         return false;
@@ -102,13 +102,18 @@ window.loadAllObjectOfScene = function(sceneNum) {
 var hidden_button = 150;
 window.switchEditorMode = function() {
     editorMode = !editorMode;
-    $("#floating-panel").css("display", "none");
     hidden_button *= -1;
-    document.getElementById("editor-mode").textContent = "미리보기";
-    if (!editorMode) {
-        document.getElementById("editor-mode").textContent = "편집하기";
+
+    if (editorMode) {
+        document.getElementById("editor-mode").textContent = "미리보기";
+
+    } else {
+        $("#floating-panel").css("display", "none");
+        sceneEl.enterVR();
         onObjectUnselect();
+        document.getElementById("editor-mode").textContent = "편집하기";
     }
+
     templateFunc();
     $('#floating-button').animate({
         left: "+=" + hidden_button
@@ -218,6 +223,9 @@ function initCanvas() {
     cameraEl = mainFrame.document.querySelector('[camera]');
     background = mainFrame.document.querySelector('a-sky');
 
+    sceneEl.addEventListener('exit-vr', function() {
+        switchEditorMode();
+    });
 
     // background listener
     mainFrame.AFRAME.registerComponent("background-listener", {
@@ -526,10 +534,10 @@ window.createSpot = function() {
     updateObjectNumUI();
     console.log(obj);
 }
-window.modifySpot = function(imgage_url,sound_url) {
+window.modifySpot = function(imgage_url, sound_url) {
     currentSelectedObject.material.src = image_url;
     currentSelectedObject.el.setAttribute("src", image_url);
-    currentSelectedObject.addEvent("sound",sound_url);
+    currentSelectedObject.addEvent("sound", sound_url);
     util.getImageSize(image_url, function() {
         currentSelectedObject.setScale({ x: this.width / BASE_IMG_WIDTH, y: this.height / BASE_IMG_WIDTH });
     });
