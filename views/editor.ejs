@@ -248,7 +248,7 @@
         text-align: center;
         width: 20px;
         height: 10px;
-
+    }
     .image-upload > input{
         display: none;
     }
@@ -331,7 +331,7 @@
                             </div>
                             <input type="text" id="simri-option-score" style="margin-top: 6px;margin-left: 120px;width: 40%;">
                             <input type="text" id="simri-option-text" style="left: 120px;bottom: 153px;position: absolute;width: 40%;">
-                            <div id="remove-button" class="panel panel-default panel-floating" onclick="removeSelectedObject()">
+                            <div id="remove-button" class="panel-default panel-floating" onclick="removeSelectedObject()">
                                 <div class="panel-body panel-floating-inside">
                                     <span></span>
                                 </div>
@@ -346,7 +346,7 @@
             </form>
         </div>
         <div id="simri-result-panel" class="panel object-panel" style="display:none;">
-            <form action="/project/<%= sceneID %>/simri" id="simri-result-form" method="post" enctype="multipart/form-data" target="uploader_iframe">
+            <form id="simri-result-form" method="post" enctype="multipart/form-data" target="uploader_iframe">
                 <div class="panel-body" style="padding:10px;">
                         <div id="simri-panel-end-image">
                           <div class="image-upload" style="display:inline-flex;margin-left:160px;margin-top:115px">
@@ -499,6 +499,8 @@ var FLAG_IMAGE = 1;
 var FLAG_BACKGROUND = 2;
 var FLAG_THUMBNAIL = 3;
 var nothumbnail = false;
+var uploadResultBackground;
+var uploadResultImage;
 
 // Thumbnail
 var segmentNum = 36;
@@ -566,6 +568,7 @@ $(document).ready(function() {
     });
 
     $("#simri-option-form").submit(function(){
+
       $("#uploader_iframe").unbind().on('load', function() { // This block of code will execute when the response is sent from the server.
           result = JSON.parse($(this).contents().text()); // Content of the iframe will be the response sent from the server. Parse the response as the JSON object
           modifyOption($("#simri-option-text").val(), result.result, $("#simri-option-score").val());
@@ -574,10 +577,22 @@ $(document).ready(function() {
     });
 
     $("#simri-result-form").submit(function(){
+      if(uploadResultImage==1 && uploadResultBackground==1){
+        $("#simri-result-form").attr('action', "/project/<%= sceneID %>/simri");
+      }else{
+        $("#simri-result-form").attr('action', "/project/<%= sceneID %>/image");
+      }
+
       $("#uploader_iframe").unbind().on('load', function() { // This block of code will execute when the response is sent from the server.
           result = JSON.parse($(this).contents().text()); // Content of the iframe will be the response sent from the server. Parse the response as the JSON object
-          modifyResult($("#simri-result-text").val(), result.image, $("#simri-result-score").val(), result.background);
-          $("#simri-result-panel").css("display", "none");
+          if(uploadResultImage==1 && uploadResultBackground==1){
+            modifyResult($("#simri-result-text").val(), result.image, $("#simri-result-score").val(), result.background);
+          }else if(uploadResultImage==1 && uploadResultBackground==0){
+            modifyResult($("#simri-result-text").val(), result.result, $("#simri-result-score").val(), getResultBackgroundUrl());
+          }else{
+            modifyResult($("#simri-result-text").val(), getCurrentImgUrl(), $("#simri-result-score").val(), result.result);
+          }
+          resetResultPanel();
       });
     });
 
@@ -610,20 +625,53 @@ $(document).ready(function() {
     });
 });
 
-function submitPanel(type){
-  if(type=='option'){
-    $("#simri-option-form").submit();
-    return;
-  }
-  if(type=='result'){
-    $("#simri-result-form").submit();
-    return;
-  }
-  if(type=='hidden'){
-    $("#simri-hidden-form").submit();
-    return;
-  }
+function resetResultPanel(){
+  $("#simri-result-panel").css("display", "none");
+  $("#result-back-file").val("");
+  $("#simri-result-file").val("");
+  uploadResultImage = 0;
+  uploadResultBackground = 0;
 }
+
+  function submitPanel(type){
+    if(type=='option'){
+      if ($('#simri-option-file').get(0).files.length == 0) {
+          modifyOption($("#simri-option-text").val(), getCurrentImgUrl(), $("#simri-option-score").val());
+          $("#simri-option-panel").css("display", "none");
+          return;
+      }
+      $("#simri-option-form").submit();
+      return;
+    }
+    if(type=='result'){
+      if($('#simri-result-file').get(0).files.length == 0 && $('#result-back-file').get(0).files.length == 0){
+        // 둘다  현재껄로
+        modifyResult($("#simri-result-text").val(), getCurrentImgUrl(), $("#simri-result-score").val(), getResultBackgroundUrl());
+        resetResultPanel();
+        return;
+      }
+
+      if($('#simri-result-file').get(0).files.length == 0 && $('#result-back-file').get(0).files.length != 0){
+        // 이미지는 원래 있던걸로, 배경은 업로드
+        uploadResultBackground = 1;
+        uploadResultImage = 0;
+      }else if($('#simri-result-file').get(0).files.length != 0 && $('#result-back-file').get(0).files.length == 0){
+        // 이미지는 업로드, 배경은 있던걸로
+        uploadResultBackground = 0;
+        uploadResultImage = 1;
+      }else{
+        // 둘다 업로드
+        uploadResultBackground = 1;
+        uploadResultImage = 1;
+      }
+      $("#simri-result-form").submit();
+      return;
+    }
+    if(type=='hidden'){
+      $("#simri-hidden-form").submit();
+      return;
+    }
+  }
 
 function openMenu() {
     if ($("#floating-panel").css("display") == "none") {
