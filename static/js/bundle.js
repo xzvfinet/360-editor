@@ -271,19 +271,25 @@ function initCanvas() {
             this.el.addEventListener('mousedown', function(evt) {
                 cameraEl.removeAttribute('look-controls');
                 isDown = true;
-                thisObject.setMaterial({ 'opacity': '0.5' });
 
-                var pos = cameraEl.components['mouse-cursor'].__raycaster.ray.direction;
-                initialPos = { x: pos.x * RADIUS, y: pos.y * RADIUS, z: pos.z * RADIUS };
-                prevPos = initialPos;
+                if (editorMode) {
+                    thisObject.setMaterial({ 'opacity': '0.5' });
 
-                removeAllListeners(mainFrame.window, 'mousemove');
-                addListener(mainFrame.window, 'mousemove', onObjectMove(thisObject));
+                    var pos = cameraEl.components['mouse-cursor'].__raycaster.ray.direction;
+                    initialPos = { x: pos.x * RADIUS, y: pos.y * RADIUS, z: pos.z * RADIUS };
+                    prevPos = initialPos;
+
+                    removeAllListeners(mainFrame.window, 'mousemove');
+                    addListener(mainFrame.window, 'mousemove', onObjectMove(thisObject));
+                }
             });
             this.el.addEventListener('mouseup', function(evt) {
-                thisObject.setMaterial({ 'opacity': '1' });
                 cameraEl.setAttribute('look-controls', "");
                 isDown = false;
+
+                if (editorMode) {
+                    thisObject.setMaterial({ 'opacity': '1' });
+                }
             });
         },
         tick: function(time, timeDelta) {}
