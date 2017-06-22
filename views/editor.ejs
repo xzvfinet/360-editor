@@ -288,7 +288,7 @@
 
 
         <div id="simri-option-panel" class="panel object-panel" style="display:none;">
-            <form action="/project/<%= sceneID %>/simri" id="simri-option-form" method="post" enctype="multipart/form-data" target="uploader_iframe">
+            <form action="/project/<%= sceneID %>/image" id="simri-option-form" method="post" enctype="multipart/form-data" target="uploader_iframe">
                 <div class="panel-body" style="padding:10px;">
                         <div id="simri-panel-image">
                             <div class="image-upload" style="display:inline-flex;margin-left:160px;margin-top:115px">
@@ -304,7 +304,7 @@
                                     <span></span>
                                 </div>
                             </div>
-                            <div id="adjust-button" class="panel panel-default panel-floating" onclick="applySimriOption()">
+                            <div id="adjust-button" class="panel panel-default panel-floating" onclick="submitPanel('option')">
                                 <div class="panel-body panel-floating-inside">
                                     <span></span>
                                 </div>
@@ -313,36 +313,40 @@
                 </div>
             </form>
         </div>
-        <form>
-            <div id="simri-result-panel" class="panel object-panel" style="display:none;">
+        <div id="simri-result-panel" class="panel object-panel" style="display:none;">
+            <form action="/project/<%= sceneID %>/simri" id="simri-result-form" method="post" enctype="multipart/form-data" target="uploader_iframe">
                 <div class="panel-body" style="padding:10px;">
                         <div id="simri-panel-end-image">
                           <div class="image-upload" style="display:inline-flex;margin-left:160px;margin-top:115px">
-                            <label for="simri-image-file">
+                            <label for="simri-result-file">
                                 <img src="../static/img/editor_option_upload_btn.png"/>
                             </label>
-                            <input id="simri-image-file" name="image_file" type="file"/>
+                            <input id="simri-result-file" name="image_file" type="file"/>
                           </div>
-                            <input type="text" style="margin-top: 17px;margin-left: 120px;width: 40%;">
-                            <input type="text" style="left: 120px;bottom: 153px;position: absolute;width: 40%;">
-                            <input id="result-back-file" type="file" name="image_file" size="30" style="display:inline-flex;margin-left:120px;margin-top:20px"
-                                disabled="true" />
+                            <input id="simri-result-score" type="text" style="margin-top: 6px;margin-left: 120px;width: 40%;">
+                            <input id="simri-result-text" type="text" style="left: 120px;bottom: 153px;position: absolute;width: 40%;">
+                            <div class="image-upload" style="display:inline-flex;margin-left:160px;margin-top:12px">
+                              <label for="result-back-file">
+                                  <img src="../static/img/editor_option_upload_btn.png"/>
+                              </label>
+                              <input id="result-back-file" name="image_file" type="file"/>
+                            </div>
                             <div id="remove-button" class="panel-default panel-floating" onclick="removeSelectedObject()" style="margin-top:21">
                                 <div class="panel-body panel-floating-inside">
                                     <span></span>
                                 </div>
                             </div>
-                            <div id="adjust-button" class="panel-default panel-floating" onclick="removeSelectedObject()">
+                            <div id="adjust-button" class="panel-default panel-floating" onclick="submitPanel('result')">
                                 <div class="panel-body panel-floating-inside">
                                     <span></span>
                                 </div>
                             </div>
                         </div>
                 </div>
-            </div>
-        </form>
-        <form>
-            <div id="hidenseek-panel" class="panel object-panel" style="display:none;">
+            </form>
+        </div>
+        <div id="hidenseek-panel" class="panel object-panel" style="display:none;">
+            <form action="/project/<%= sceneID %>/image" id="hidden-seek-form" method="post" enctype="multipart/form-data" target="uploader_iframe">>
                 <div class="panel-body" style="padding:10px;">
                         <div id="hidenseek-panel-image">
                           <div class="image-upload" style="display:inline-flex;margin-left:160px;margin-top:110px">
@@ -362,15 +366,15 @@
                                     <span></span>
                                 </div>
                             </div>
-                            <div id="hidden-adjust-button" class="panel-default panel-floating" onclick="removeSelectedObject()">
+                            <div id="hidden-adjust-button" class="panel-default panel-floating" onclick="submitPanel('hidden')">
                                 <div class="panel-body panel-floating-inside">
                                     <span></span>
                                 </div>
                             </div>
                         </div>
                 </div>
-            </div>
-        </form>
+            </form>
+        </div>
         <div id="hidenseek-clock" style="display:none">
             <div id="hidenseek-count" style="margin-top: 65px;margin-left: 100px;font-size: 35px">0</div>
             <div id="hidenseek-num" style="margin-top: 4px;margin-left: 100px;">0/0</div>
@@ -513,8 +517,23 @@ $(document).ready(function() {
       $("#uploader_iframe").unbind().on('load', function() { // This block of code will execute when the response is sent from the server.
           result = JSON.parse($(this).contents().text()); // Content of the iframe will be the response sent from the server. Parse the response as the JSON object
           modifyOption($("#simri-option-text").val(), result.result, $("#simri-option-score").val());
-          //resetSimriOptionForm();
           $("#simri-option-panel").css("display", "none");
+      });
+    });
+
+    $("#simri-result-form").submit(function(){
+      $("#uploader_iframe").unbind().on('load', function() { // This block of code will execute when the response is sent from the server.
+          result = JSON.parse($(this).contents().text()); // Content of the iframe will be the response sent from the server. Parse the response as the JSON object
+          modifyResult($("#simri-result-text").val(), result.image, $("#simri-result-score").val(), result.background);
+          $("#simri-result-panel").css("display", "none");
+      });
+    });
+
+    $("#hidden-seek-form").submit(function(){
+      $("#uploader_iframe").unbind().on('load', function() { // This block of code will execute when the response is sent from the server.
+          result = JSON.parse($(this).contents().text()); // Content of the iframe will be the response sent from the server. Parse the response as the JSON object
+          modifySpot($("#simri-option-text").val(), result.result, $("#simri-option-score").val());
+          $("#hidenseek-panel").css("display", "none");
       });
     });
 
@@ -539,26 +558,19 @@ $(document).ready(function() {
     });
 });
 
-function applySimriOption(){
-  if ($('#simri-option-file').get(0).files.length === 0) {
-    alert('please add image file');
+function submitPanel(type){
+  if(type=='option'){
+    $("#simri-option-form").submit();
     return;
   }
-  if($("#simri-option-text").val() == ""){
-    alert('please input text');
+  if(type=='result'){
+    $("#simri-result-form").submit();
     return;
   }
-  if($("#simri-option-score").val() == ""){
-    alert('please input score');
+  if(type=='hidden'){
+    $("#simri-hidden-form").submit();
     return;
   }
-  $("#simri-option-form").submit();
-}
-
-function resetSimriOptionForm(){
-  $("simri-option-score").val("");
-  $("simri-option-text").val("");
-  $("#simri-option-panel").css("display", "none");
 }
 
 function openMenu() {
