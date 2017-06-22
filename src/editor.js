@@ -149,6 +149,7 @@ function updateSceneDropDown() {
         var sceneName = projectObject.sceneryList[i].name;
         var op = document.createElement("li");
         var a = document.createElement("a");
+        op.setAttribute("style", "cursor:pointer;");
         op.appendChild(a);
         a.setAttribute("onclick", "loadAllObjectOfScene(" + i + ")");
         a.innerHTML = sceneName + (i + 1);
@@ -458,8 +459,10 @@ function templateFunc() {
                 objects.sort(function(a, b) {
                     return b.eventList[0].score - a.eventList[0].score;
                 })
-                for (var i = 0; i < objects.length; i++) {
+                for (var i = 0; i < objects.length; i++){
                     objects[i].setMaterial({ opacity: 0 });
+                }
+                for (var i = 0; i < objects.length; i++) {;
                     if (scoreVariable >= objects[i].eventList[0].score) {
                         console.log(objects[i].eventList[0].back_url);
                         setBackground(objects[i].eventList[0].back_url);
