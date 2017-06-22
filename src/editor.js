@@ -15,6 +15,8 @@ var EVENT_DICTIONARY = {
     'oneClick': oneClickEvent
 }
 var BASE_IMG_WIDTH = 200;
+var RADIUS = 6;
+
 
 var util = require('./util.js');
 var nodeUtil = require('util');
@@ -33,7 +35,6 @@ var mainFrame;
 var sceneEl = null;
 var cameraEl = null;
 var background = null;
-var mover = null;
 
 var miniMap = null;
 var miniMapDirector = null;
@@ -44,7 +45,6 @@ var editorMode = true;
 var currentSelectedObject = null;
 var latelyCreatedObject = null;
 var isDown = false;
-var currentSelectedArrowEl = null;
 var scoreVariable = 0;
 
 window.onLoadCanvas = function(frame) {
@@ -70,13 +70,13 @@ function newProject(type) {
             projectObject.addScenery(newScenery);
             break;
         case 'simri':
-            $.getJSON("../static/json/simri.json",function(data){
+            $.getJSON("../static/json/simri.json", function(data) {
                 tempJson = data;
                 loadProject(JSON.stringify(tempJson));
             });
             break;
         case 'hidenseek':
-            $.getJSON("../static/json/hidenseek.json",function(data){
+            $.getJSON("../static/json/hidenseek.json", function(data) {
                 tempJson = data;
                 loadProject(JSON.stringify(tempJson));
             });
@@ -129,10 +129,6 @@ window.switchEditorMode = function() {
     $("#floating-panel").css("display", "none");
     hidden_button *= -1;
     if (!editorMode) {
-        if (mover) {
-            mover.parentEl.removeChild(mover);
-            mover = null;
-        }
         onObjectUnselect();
     }
     templateFunc();
@@ -148,7 +144,6 @@ function updateSceneNumberList() {
     //remove all child
     while (sceneNum.hasChildNodes()) { sceneNum.removeChild(sceneNum.firstChild); }
 
-    console.log(projectObject);
     for (var i = 0; i < projectObject.getSceneryListLength(); i++) {
         if (projectObject.getCurrentIndex() == i) {
             var a = document.createElement("b");
@@ -188,7 +183,6 @@ function relateObjectWithDomEl(object) {
 
 window.removeSelectedObject = function() {
     projectObject.getCurrentScenery().removeObject(currentSelectedObject);
-    mover = null;
     currentSelectedObject = null;
     $(".object-panel").css("display", "none");
 }
@@ -201,7 +195,6 @@ function clearAllObject(scenery) {
 
 function eraseCanvas() {
     currentSelectedObject = null;
-    mover = null;
     var objects = mainFrame.document.querySelectorAll(".object");
     for (var i = 0; i < objects.length; i++) {
         objects[i].parentNode.removeChild(objects[i]);
@@ -236,8 +229,6 @@ function initEditor() {
 
     $('#scene-dropdown').change(function() {
         loadAllObjectOfScene($(this).val());
-        //console.log(projectObject.getCurrentIndex());
-        //console.log($(this).val());
     });
     imageUrlInputEl = document.getElementById('img-url');
 }
@@ -267,83 +258,34 @@ function initCanvas() {
             }
         },
         init: function() {
-            this.el.addEventListener('click', onObjectSelect);
-        },
-        tick: function(time, timeDelta) {}
-    });
-    mainFrame.AFRAME.registerComponent('mover-listener', {
-        schema: {},
-        init: function() {
             var initialPos = null;
             var prevPos = null;
-            var radius = 6;
 
-            var parentObject = projectObject.getCurrentScenery().findObjectByEl(this.el.parentEl);
+            var thisObject = projectObject.getCurrentScenery().findObjectByEl(this.el);
 
             var originalScale = this.el.getAttribute('scale');
             var parentScale = this.el.parentEl.getAttribute('scale');
 
-            var initialScale = {
-                x: originalScale.x / parentScale.x,
-                y: originalScale.y / parentScale.y,
-                z: 1
-            };
-            this.el.setAttribute('scale', initialScale);
-
-            var factor = 2;
-            var xFactor = factor / parentScale.x;
-            var yFactor = factor / parentScale.y;
-
-            this.el.addEventListener('mouseenter', function() {
-                var newScale = {
-                    x: originalScale.x * xFactor,
-                    y: originalScale.y * yFactor,
-                    z: 1
-                };
-                this.setAttribute('scale', newScale);
-            });
-            this.el.addEventListener('mouseleave', function() {
-                var newScale = {
-                    x: initialScale.x,
-                    y: initialScale.y,
-                    z: 1
-                };
-                this.setAttribute('scale', newScale);
-                this.emit('mouseup');
-            });
+            this.el.addEventListener('click', onObjectSelect);
             this.el.addEventListener('mousedown', function(evt) {
-                this.setAttribute('material', 'color', "#FFFFFF");
                 cameraEl.removeAttribute('look-controls');
                 isDown = true;
-                currentSelectedArrowEl = this;
+                thisObject.setMaterial({ 'opacity': '0.5' });
 
                 var pos = cameraEl.components['mouse-cursor'].__raycaster.ray.direction;
-                initialPos = { x: pos.x * radius, y: pos.y * radius, z: pos.z * radius };
+                initialPos = { x: pos.x * RADIUS, y: pos.y * RADIUS, z: pos.z * RADIUS };
                 prevPos = initialPos;
-                $(".object-panel").css("display", "none");
+
+                removeAllListeners(mainFrame.window, 'mousemove');
+                addListener(mainFrame.window, 'mousemove', onObjectMove(thisObject));
             });
             this.el.addEventListener('mouseup', function(evt) {
-                this.setAttribute('material', 'color', "#000000");
+                thisObject.setMaterial({ 'opacity': '1' });
                 cameraEl.setAttribute('look-controls', "");
                 isDown = false;
-                currentSelectedArrowEl = null;
-            });
-            this.el.addEventListener('mymousemove', function(evt) {
-                if (isDown) {
-                    var direction = cameraEl.components['mouse-cursor'].__raycaster.ray.direction;
-                    var newPos = {
-                        x: direction.x * radius,
-                        y: direction.y * radius,
-                        z: direction.z * radius
-                    };
-                    parentObject.setPosition(newPos);
-                }
             });
         },
-        tick: function(time, timeDelta) {
-            // console.log(time + ', ' + timeDelta);
-            // console.log(cameraEl.getAttribute('rotation'));
-        }
+        tick: function(time, timeDelta) {}
     });
 
     mainFrame.AFRAME.registerComponent('minimap-direction', {
@@ -389,6 +331,49 @@ function initCanvas() {
     });
 }
 
+function onObjectMove(parentObject) {
+    return function(evt) {
+        if (isDown) {
+            var direction = cameraEl.components['mouse-cursor'].__raycaster.ray.direction;
+            var newPos = {
+                x: direction.x * RADIUS,
+                y: direction.y * RADIUS,
+                z: direction.z * RADIUS
+            };
+            parentObject.setPosition(newPos);
+        }
+    };
+}
+
+var _eventHandlers = {}; // somewhere global
+
+function addListener(node, event, handler, capture) {
+    if (!(node in _eventHandlers)) {
+        // _eventHandlers stores references to nodes
+        _eventHandlers[node] = {};
+    }
+    if (!(event in _eventHandlers[node])) {
+        // each entry contains another entry for each event type
+        _eventHandlers[node][event] = [];
+    }
+    // capture reference
+    _eventHandlers[node][event].push([handler, capture]);
+    node.addEventListener(event, handler, capture);
+}
+
+function removeAllListeners(node, event) {
+    if (node in _eventHandlers) {
+        var handlers = _eventHandlers[node];
+        if (event in handlers) {
+            var eventHandlers = handlers[event];
+            for (var i = eventHandlers.length; i--;) {
+                var handler = eventHandlers[i];
+                node.removeEventListener(event, handler[0], handler[1]);
+            }
+        }
+    }
+}
+
 function initTemplate() {
     switch (projectObject.projectType) {
         case "hidenseek":
@@ -404,7 +389,7 @@ function initTemplate() {
             newEl.setAttribute('color', 'black');
             newEl.setAttribute('align', 'center');
             newEl.setAttribute('width', '10');
-            
+
             clockEl.setAttribute('id', 'clock');
             position = { x: 8.1, y: 3.65, z: -5 };
             clockEl.setAttribute('position', position);
@@ -412,21 +397,21 @@ function initTemplate() {
             clockEl.setAttribute('color', 'black');
             clockEl.setAttribute('align', 'center');
             clockEl.setAttribute('width', '10');
-            
+
             gameSetImage.setAttribute('id', 'game-set');
             gameSetImage.setAttribute('position', '0 0 3');
             gameSetImage.setAttribute('src', '../img/template/results_final.jpg');
-            gameSetImage.setAttribute('scale',"2 1 1");
+            gameSetImage.setAttribute('scale', "2 1 1");
             var setClock = clockEl.cloneNode(true);
-            setClock.setAttribute('id','back-clock');
-            setClock.setAttribute('position','0.13 0 0');
-            setClock.setAttribute('width','4');
+            setClock.setAttribute('id', 'back-clock');
+            setClock.setAttribute('position', '0.13 0 0');
+            setClock.setAttribute('width', '4');
             gameSetImage.appendChild(setClock);
 
-            bgClockEl.setAttribute('src','../img/template/icon_time_final.png')
-            bgClockEl.setAttribute('position','8 3.5 -5');
-            bgClockEl.setAttribute('scale','2.5 2.5 0');
-            
+            bgClockEl.setAttribute('src', '../img/template/icon_time_final.png')
+            bgClockEl.setAttribute('position', '8 3.5 -5');
+            bgClockEl.setAttribute('scale', '2.5 2.5 0');
+
             cameraEl.appendChild(bgClockEl);
             cameraEl.appendChild(newEl);
             cameraEl.appendChild(clockEl);
@@ -484,14 +469,14 @@ function templateFunc() {
             var scenes = projectObject.sceneryList;
             if (projectObject.getCurrentScenery().sceneryType == "result") {
                 console.log("sdddd");
-                
+
                 var objects = projectObject.getCurrentScenery().objectList;
                 console.log(objects);
 
                 objects.sort(function(a, b) {
                     return b.eventList[0].score - a.eventList[0].score;
                 })
-                for (var i=0;i<objects.length;i++) {
+                for (var i = 0; i < objects.length; i++) {
                     console.log(objects[i].eventList[0]);
                     objects[i].addMaterial({ opacity: 0 });
                     if (scoreVariable >= objects[i].eventList[0].score) {
@@ -523,7 +508,7 @@ window.createScene = function() {
 
     updateSceneDropDown();
 
-    projectObject.changeScenery(projectObject.sceneryList.length-1);
+    projectObject.changeScenery(projectObject.sceneryList.length - 1);
 
     eraseCanvas();
     updateSceneNumberList();
@@ -531,29 +516,29 @@ window.createScene = function() {
 window.createOption = function() {
     var obj = createImage('https://traverser360.s3.ap-northeast-2.amazonaws.com/1497782502160.png');
     obj.addEvent('teleport', projectObject.getCurrentIndex() + 1);
-    obj.addEvent('oneClick',"");
-    obj.addEvent('addScore',"1");
+    obj.addEvent('oneClick', "");
+    obj.addEvent('addScore', "1");
     console.log(obj);
 }
 
-window.modifyOption = function(text,image_url,score){
+window.modifyOption = function(text, image_url, score) {
     //currentSelectedObject.drawText(mainFrame,text);
     currentSelectedObject.material.src = image_url;
-    currentSelectedObject.el.setAttribute("src",image_url);
-    currentSelectedObject.modifyEvent("addScore",score);
+    currentSelectedObject.el.setAttribute("src", image_url);
+    currentSelectedObject.modifyEvent("addScore", score);
 }
 
 window.createSpot = function() {
     var obj = createImage('https://traverser360.s3.ap-northeast-2.amazonaws.com/1497977716404.png');
-    obj.addEvent('onVisible',"");
-    obj.addEvent('oneClick',"");
-    obj.addEvent('addScore',"1");
+    obj.addEvent('onVisible', "");
+    obj.addEvent('oneClick', "");
+    obj.addEvent('addScore', "1");
     updateObjectNumUI();
     console.log(obj);
 }
 window.modifySpot = function(imgage_url) {
     currentSelectedObject.material.src = image_url;
-    currentSelectedObject.el.setAttribute("src",image_url);
+    currentSelectedObject.el.setAttribute("src", image_url);
 }
 
 window.createLatelyObject = function() {
@@ -581,9 +566,9 @@ window.createLatelyObject = function() {
     }
 }
 
-window.modifyResult = function(text,image_url,score,background_url){
+window.modifyResult = function(text, image_url, score, background_url) {
     currentSelectedObject.material.src = image_url;
-    currentSelectedObject.el.setAttribute("src",image_url);
+    currentSelectedObject.el.setAttribute("src", image_url);
     var result = {
         obj: currentSelectedObject,
         back_url: background_url,
@@ -623,22 +608,17 @@ function createObject(type) {
 function onObjectSelect(event) {
     var selected = projectObject.getCurrentScenery().findObjectByEl(this);
 
-    if (editorMode && currentSelectedObject == selected) {
-        return;
-    }
+    onObjectUnselect();
 
     currentSelectedObject = selected;
 
     if (editorMode) {
-
         var position = currentSelectedObject.transform.position;
         var rotation = currentSelectedObject.transform.rotation;
         scale = currentSelectedObject.transform.scale;
+        currentSelectedObject.setMaterial({ 'opacity': 0.5 });
 
-        // append mover element
-        mover = newMover();
-        this.appendChild(mover);
-        openObjectPropertyPanel(event.detail.mouseEvent);
+        openObjectPropertyPanel(event.detail.mouseEvent, "#simri-option-panel");
     } else {
         // Execute events assigned to object.
         if (!currentSelectedObject.oneClick) {
@@ -656,16 +636,19 @@ function onObjectSelect(event) {
 
 function openObjectPropertyPanel(event) {
     console.log(projectObject.projectType);
-    switch(projectObject.projectType){
-        case "simri":if(projectObject.getCurrentScenery().sceneryType == "result") id = "#simri-result-panel";
-                    else id = "#simri-option-panel";
-                    break;
-        case "hidenseek" :id ="#hidenseek-panel";break;
+    switch (projectObject.projectType) {
+        case "simri":
+            if (projectObject.getCurrentScenery().sceneryType == "result") id = "#simri-result-panel";
+            else id = "#simri-option-panel";
+            break;
+        case "hidenseek":
+            id = "#hidenseek-panel";
+            break;
     }
     if ($(id).css("display") == "none") {
         $(id).css("display", "");
     }
-    $(id).css({ position: "fixed", top: event.clientY, left: event.clientX+150 });
+    $(id).css({ position: "fixed", top: event.clientY, left: event.clientX + 150 });
 }
 
 function checkScore() {
@@ -680,10 +663,10 @@ function checkScore() {
 }
 
 function onObjectUnselect() {
+    if (!currentSelectedObject) return;
+
+    currentSelectedObject.setMaterial({ 'opacity': '1' });
     currentSelectedObject = null;
-    if (mover)
-        mover.parentEl.removeChild(mover);
-    mover = null;
     $(".object-panel").css("display", "none");
 }
 
@@ -694,19 +677,6 @@ window.toggleEditorMode = function() {
     } else {
         console.log("Preview Mode")
     }
-}
-
-function newMover() {
-    if (mover)
-        mover.parentEl.removeChild(mover);
-    var newMover;
-    newMover = mainFrame.document.createElement('a-plane');
-    newMover.setAttribute('position', { x: 0, y: 0, z: 5 });
-    newMover.setAttribute('scale', { x: 0.1, y: 0.1, z: 1 });
-    newMover.setAttribute('material', "color:#000000");
-    newMover.setAttribute('mover-listener', "");
-
-    return newMover;
 }
 
 function newObject(type, shape, url, position, rotation, scale) {
