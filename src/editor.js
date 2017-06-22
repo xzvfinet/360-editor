@@ -750,7 +750,7 @@ function loadImage(aframeEl, src) {
     imageElement.setAttribute('crossOrigin', 'anonymous');
     imageElement.onload = function(e) {
         console.log('onload image');
-        texture = new THREE.Texture(this);
+        texture = new mainFrame.THREE.Texture(this);
         texture.needsUpdate = true;
 
         // console.log(sky);
