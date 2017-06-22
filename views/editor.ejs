@@ -15,21 +15,31 @@
     }
     
     #adjust-button{
-            width: 100px;
-        height: 30px;
+        width: 25px;
+        height: 25px;
         float: left;
-        margin-left: 30px;
         position: absolute;
-        top: 240px;
+        top: 27px;
+        right: 25px;
+        background-size: 100% 100%;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-image: url(../static/img/adjust_icon.png);
+        border-color: #ffffff;
     }
 
     #remove-button{
-        top: 240px;
-        margin-left: 150px;
-        width: 100px;
-        height: 30px;
+        top: 27px;
+        right: 53px;
+        width: 25px;
+        height: 25px;
         float: right;
-        position: absolute; 
+        position: absolute;
+        background-size: 100% 100%;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-image: url(../static/img/delete_icon.png);
+        border-color: #ffffff;
     }
 
     #simri-panel-image{
@@ -275,14 +285,14 @@
                                 disabled="true" />
                             <input type="text" style="margin-top: 17px;margin-left: 120px;width: 40%;">
                             <input type="text" style="left: 120px;bottom: 153px;position: absolute;width: 40%;">
-                            <div id="remove-button" class="panel panel-default panel-floating" onclick="removeSelectedObject()">
+                            <div id="remove-button" class="panel-default panel-floating" onclick="removeSelectedObject()">
                                 <div class="panel-body panel-floating-inside">
-                                    <span>삭제</span>
+                                    <span></span>
                                 </div>
                             </div>
-                            <div id="adjust-button" class="panel panel-default panel-floating" onclick="removeSelectedObject()">
+                            <div id="adjust-button" class="panel-default panel-floating" onclick="removeSelectedObject()">
                                 <div class="panel-body panel-floating-inside">
-                                    <span>적용</span>
+                                    <span></span>
                                 </div>
                             </div>
                         </div>
@@ -299,14 +309,14 @@
                             <input type="text" style="left: 120px;bottom: 153px;position: absolute;width: 40%;">
                             <input id="result-back-file" type="file" name="image_file" size="30" style="display:inline-flex;margin-left:120px;margin-top:20px"
                                 disabled="true" />
-                            <div id="remove-button" class="panel panel-default panel-floating" onclick="removeSelectedObject()" style="margin-top:21">
+                            <div id="remove-button" class="panel-default panel-floating" onclick="removeSelectedObject()" style="margin-top:21">
                                 <div class="panel-body panel-floating-inside">
-                                    <span>삭제</span>
+                                    <span></span>
                                 </div>
                             </div>
-                            <div id="adjust-button" class="panel panel-default panel-floating" onclick="removeSelectedObject()">
+                            <div id="adjust-button" class="panel-default panel-floating" onclick="removeSelectedObject()">
                                 <div class="panel-body panel-floating-inside">
-                                    <span>적용</span>
+                                    <span></span>
                                 </div>
                             </div>
                         </div>
@@ -321,14 +331,14 @@
                                 disabled="true" />
                             <input id="hidenseek-sound-file" type="file" name="image_file" size="30" style="display:inline-flex;margin-left:120px;margin-top:55px"
                                 disabled="true" />
-                            <div id="remove-button" class="panel panel-default panel-floating" onclick="removeSelectedObject()" style="margin-top:21">
+                            <div id="remove-button" class="panel-default panel-floating" onclick="removeSelectedObject()" style="margin-top:21">
                                 <div class="panel-body panel-floating-inside">
-                                    <span>삭제</span>
+                                    <span></span>
                                 </div>
                             </div>
-                            <div id="adjust-button" class="panel panel-default panel-floating" onclick="removeSelectedObject()">
+                            <div id="adjust-button" class="panel-default panel-floating" onclick="removeSelectedObject()">
                                 <div class="panel-body panel-floating-inside">
-                                    <span>적용</span>
+                                    <span></span>
                                 </div>
                             </div>
                         </div>
@@ -336,8 +346,8 @@
             </div>
         </form>
         <div id="hidenseek-clock"style="display:none">
-            <div id="hidenseek-count"style="margin-top: 80px;margin-left: 100px;">0</div>
-            <div id="hidenseek-num"style="margin-top: 18px;margin-left: 100px;">0/0</div>
+            <div id="hidenseek-count"style="margin-top: 65px;margin-left: 100px;font-size: 35px">0</div>
+            <div id="hidenseek-num"style="margin-top: 4px;margin-left: 100px;">0/0</div>
         </div>        
         <div id="main-canvas" class="col-md-8" style="height:100%;">
             <iframe id="main_scene" class="main_scene" width="100%" height="100%" allowfullscreen="yes" scrolling="no" allowvr="yes" src="../static/html/canvas.html"></iframe>
