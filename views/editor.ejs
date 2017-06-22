@@ -231,7 +231,7 @@
                         </ul>
                     </li>
                     <li>
-                        <div id="scene-list" style="margin-top: 14px;"></div>
+                        <div id="scene-list" style="margin-top: 14px;margin-left:10px"></div>
                     </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right" style="text-align:center;">
@@ -335,7 +335,7 @@
                 </div>
             </div>
         </form>
-        <div id="hidenseek-clock">
+        <div id="hidenseek-clock"style="display:none">
             <div id="hidenseek-count"style="margin-top: 80px;margin-left: 100px;">0</div>
             <div id="hidenseek-num"style="margin-top: 18px;margin-left: 100px;">0/0</div>
         </div>        
@@ -505,9 +505,11 @@ function openMenu() {
 }
 
 function getJson() {
-    if (!loadProject('<%-JSON.stringify(projectObjectJson) %>')) {
+    <% if (projectType == "free") { %>
         getBackgroundPopup();
-    }
+    <% } %>
+    nothumbnail = true;
+    loadProject('<%-JSON.stringify(projectObjectJson) %>')
 }
 
 function getBackgroundPopup() {

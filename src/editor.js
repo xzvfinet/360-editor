@@ -62,31 +62,6 @@ window.getBackgroundUrl = function() {
     return projectObject.getCurrentScenery().bgUrl;
 }
 
-function newProject(type) {
-    var tempJson;
-    switch (type) {
-        case 'free':
-            var newScenery = new Scenery(background);
-            projectObject.addScenery(newScenery);
-            break;
-        case 'simri':
-            $.getJSON("../static/json/simri.json",function(data){
-                tempJson = data;
-                loadProject(JSON.stringify(tempJson));
-            });
-            break;
-        case 'hidenseek':
-            $.getJSON("../static/json/hidenseek.json",function(data){
-                tempJson = data;
-                loadProject(JSON.stringify(tempJson));
-            });
-            break;
-    }
-
-    //updateSceneNumberList();
-    //updateSceneDropDown();
-}
-
 window.saveProject = function(userID, sceneID) {
     saveJsontoServer(projectObject.toJson(), userID, sceneID);
 }
@@ -95,10 +70,9 @@ window.loadProject = function(projectJson) {
     clearAllObject();
 
     var loadedProject = new Project();
-    if (!loadedProject.fromJson(projectJson)) {
-        newProject(loadedProject.projectType);
-        return false;
-    }
+
+    loadedProject.fromJson(projectJson);
+
     relateSceneryWithDomEl(loadedProject.sceneryList[0]);
     for (var j in loadedProject.sceneryList[0].objectList) {
         relateObjectWithDomEl(loadedProject.sceneryList[0].objectList[j]);
@@ -157,6 +131,7 @@ function updateSceneNumberList() {
         } else {
             var a = document.createElement("a");
         }
+        a.setAttribute('style','pointer-events: none');
         a.innerHTML = (i + 1);
         if (i != projectObject.getSceneryListLength() - 1)
             a.innerHTML += "-";
@@ -395,7 +370,9 @@ function initCanvas() {
 function initTemplate() {
     switch (projectObject.projectType) {
         case "hidenseek":
+            $("#hidenseek-clock").css("display", "");
             updateObjectNumUI();
+            document.getElementById("hidenseek-clock").css
             var bgClockEl = mainFrame.document.createElement("a-image");
             var gameSetImage = mainFrame.document.createElement("a-image");
             gameSetImage.setAttribute('id', 'game-set');
