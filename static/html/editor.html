@@ -1,0 +1,989 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="shortcut icon" href="../static/img/favico.ico" type="image/x-icon">
+    <link href="http://fonts.googleapis.com/css?family=PT+Sans" rel="stylesheet" type="text/css">
+    <link href="http://fonts.googleapis.com/css?family=Roboto:400,300,500,900" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="../css/bootstrap.min.css" type="text/css" media="all" />
+    <!-- <link rel="stylesheet" href="../css/theme.css" type="text/css" media="all" /> -->
+    <link rel="stylesheet" href="../css/responsive.css" type="text/css" media="all" />
+    <link rel="stylesheet" href="../css/custom.css" type="text/css" media="all" />
+    <script type="text/javascript" src="../js/jquery.min.js"></script>
+    <script type="text/javascript" src="../js/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="../js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="../js/bundle.js"></script>
+    <style>
+    body,
+    html {
+        height: 95%;
+        padding: 0;
+    }
+
+    #adjust-button {
+        width: 25px;
+        height: 25px;
+        float: left;
+        position: absolute;
+        top: 28px;
+        right: 35px;
+        background-size: 100% 100%;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-image: url(../img/adjust_icon.png);
+        border-color: #ffffff;
+    }
+
+    #remove-button {
+        top: 28px;
+        right: 70px;
+        width: 25px;
+        height: 25px;
+        float: right;
+        position: absolute;
+        background-size: 100% 100%;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-image: url(../img/delete_icon.png);
+        border-color: #ffffff;
+    }
+
+    #hidden-adjust-button {
+        width: 25px;
+        height: 25px;
+        float: left;
+        position: absolute;
+        top: 48px;
+        right: 35px;
+        background-size: 100% 100%;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-image: url(../img/adjust_icon.png);
+        border-color: #ffffff;
+    }
+
+    #hidden-remove-button {
+        top: 48px;
+        right: 70px;
+        width: 25px;
+        height: 25px;
+        float: right;
+        position: absolute;
+        background-size: 100% 100%;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-image: url(../img/delete_icon.png);
+        border-color: #ffffff;
+    }
+
+    #simri-panel-image {
+        width: 280px;
+        height: 250px;
+        position: fixed;
+        background-size: 100% 100%;
+        background-image: url('../img/bg_input.png')
+    }
+
+
+    #simri-panel-end-image {
+        width: 280px;
+        height: 250px;
+        position: fixed;
+        background-size: 100% 100%;
+        background-image: url('../img/popup_end.png')
+    }
+
+    #hidenseek-panel-image {
+        width: 280px;
+        height: 250px;
+        position: fixed;
+        background-size: 100% 100%;
+        background-image: url('../img/popup_spot.png')
+    }
+
+    .object-panel {
+        width: 300px;
+        height: 300px;
+        /*border-radius: 1%;*/
+        position: fixed;
+        top: 100px;
+        left: 100px;
+        /*box-shadow: 0px 2px 5px #666;*/
+        z-index: 1;
+        background: rgba(0, 0, 0, 0);
+    }
+
+    .panel-floating {
+        height: 60px;
+        margin-bottom: 10px;
+        margin-right: 0px;
+        z-index: 1;
+        cursor: pointer;
+        text-align: center;
+    }
+
+    .panel-floating-inside {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px;
+        height: 100%;
+    }
+
+    .header-item {
+        width: 100px;
+        height: 50px;
+        align-items: center;
+        cursor: pointer;
+    }
+
+    .header-span {
+        margin: auto;
+    }
+
+    .navbar-header {
+        width: 48px;
+        height: 48px;
+        background-size: 100% 100%;
+        background-image: url('../img/editor_logo.png')
+    }
+
+    #floating-button {
+        width: 65px;
+        height: 65px;
+        border-radius: 50%;
+        position: fixed;
+        top: 150px;
+        left: 20px;
+        cursor: pointer;
+        z-index: 2;
+        background-size: 100% 100%;
+        background-image: url('../img/editor_icon_mouseout.png')
+    }
+
+    #floating-button:hover {
+        background-size: 100% 100%;
+        background-image: url('../img/editor_icon_mouseon.png')
+    }
+
+    #floating-panel {
+        border-radius: 15px;
+        padding-top: 20px;
+        padding-bottom: 20px;
+        padding-left: 10px;
+        padding-right: 10px;
+        width: 220px;
+        height: auto;
+        position: fixed;
+        top: 145px;
+        left: 85px;
+        z-index: 1;
+        background-color: #3795f3;
+        box-shadow: 1px 1px 40px #000000;
+    }
+
+    .floating-panel-item+.floating-panel-item {
+        margin-top: 15px;
+    }
+
+    .floating-panel-item {
+        text-align: center;
+        color: white;
+        font-size: 25px;
+        /*font-style: bold;*/
+    }
+
+    .floating-panel-item:hover {
+        text-align: center;
+        color: white;
+        font-size: 25px;
+        font-style: bold;
+        background-color: #000000;
+    }
+
+    #container {
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        margin: 0;
+        padding: 0;
+    }
+
+    #main-canvas {
+        padding: 10px;
+        width: 100%;
+        height: 100%;
+    }
+
+    #hidenseek-clock {
+        background-size: 100% 100%;
+        background-image: url(../img/template/icon_time_final.png);
+        z-index: 1;
+        position: fixed;
+        width: 200px;
+        height: 200px;
+        right: 10px;
+    }
+
+    .thumbnail-controller form {
+        display: table;
+    }
+
+    .thumbnail-controller p {
+        display: table-row;
+    }
+
+    .thumbnail-controller label {
+        display: table-cell;
+    }
+
+    .thumbnail-controller input {
+        display: table-cell;
+    }
+
+    input[type="range"] {
+        position: relative;
+    }
+
+    input[type="range"]:before {
+        position: absolute;
+        top: -17px;
+        left: 50%;
+        margin-left: -10px;
+        content: attr(value);
+        display: block;
+        text-align: center;
+        width: 20px;
+        height: 10px;
+    }
+
+    .image-upload>input {
+        display: none;
+    }
+
+    .image-upload img {
+        width: 70px;
+        height: 30px;
+        cursor: pointer;
+    }
+    /*
+  .modal-content{
+    background-size: 100% 100%;
+    background-image:url('../img/editor_modal_bg.png')
+  }*/
+    </style>
+</head>
+
+<body onload="getJson();" style="background-color:white;">
+    <nav class="navbar navbar-default" style="height:50px;margin-bottom:0px;">
+        <div class="container-fluid">
+            <!-- Brand and toggle get grouped for better mobile display -->
+            <a style="display:block" href="/project">
+                <div class="navbar-header"></div>
+            </a>
+            <!-- Collect the nav links, forms, and other content for toggling -->
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1" style="padding-right:0px;">
+                <ul class="nav navbar-nav">
+                    <li style="margin-left:10px;margin-top:7px;margin-right:5px;">
+                        <input type="text" class="form-control" id="project-title" value="TITLE" placeholder="Project Name" style="width:200px;">
+                    </li>
+                    <li class="dropdown" style="width:80px;">
+                        <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">페이지<span class="caret"></span></a>
+                        <ul class="dropdown-menu" id="scene-dropdown">
+                        </ul>
+                    </li>
+                    <li>
+                        <div id="scene-list" style="margin-top: 14px;margin-left:10px"></div>
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right" style="text-align:center;">
+                    <li class="header-item" style="display:inline-flex;" onclick="getBackgroundPopup()">
+                        <span class="header-span">배경바꾸기</span>
+                    </li>
+                    <li class="header-item" style="display:inline-flex;" onclick="switchEditorMode()">
+                        <span id="editor-mode" class="header-span">미리보기</span>
+                    </li>
+                    <li class="header-item" style="display:inline-flex;" onclick="getThumbnailPopup()">
+                        <span class="header-span">저장</span>
+                    </li>
+                </ul>
+            </div>
+            <!-- /.navbar-collapse -->
+        </div>
+        <!-- /.container-fluid -->
+    </nav>
+    <div id="container">
+        <div id="floating-button" data-toggle="tooltip" data-placement="left" data-original-title="Create" onclick="openMenu()"></div>
+        <div id="floating-panel" style="display:none;">
+            <div id="newImage" class="floating-panel-item" onclick="getImagePopup()">이미지 추가</div>
+            <div id="newScene" class="floating-panel-item" onclick="createScene()">신 추가</div>
+            <div id="newChoice" class="floating-panel-item" onclick="createOption()">선택지 추가</div>
+            <div id="newScene" class="floating-panel-item" onclick="createScene()">신 추가</div>
+            <div id="newSpot" class="floating-panel-item" onclick="createSpot()">스팟 추가</div>
+            <div id="latelySpot" class="floating-panel-item" onclick="createLatelyObject()">최근 스팟 재추가</div>
+        </div>
+        <div id="simri-option-panel" class="panel object-panel" style="display:none;">
+            <form action="/project/<%= sceneID %>/image" id="simri-option-form" method="post" enctype="multipart/form-data" target="uploader_iframe">
+                <div class="panel-body" style="padding:10px;">
+                    <div id="simri-panel-image">
+                        <div class="image-upload" style="display:inline-flex;margin-left:160px;margin-top:115px">
+                            <label for="simri-option-file">
+                                <img src="../img/editor_option_upload_btn.png" />
+                            </label>
+                            <input id="simri-option-file" name="image_file" type="file" />
+                        </div>
+                        <input type="text" id="simri-option-score" style="margin-top: 6px;margin-left: 120px;width: 40%;">
+                        <input type="text" id="simri-option-text" style="left: 120px;bottom: 153px;position: absolute;width: 40%;">
+                        <div id="remove-button" class="panel-default panel-floating" onclick="removeSelectedObject()">
+                            <div class="panel-body panel-floating-inside">
+                                <span></span>
+                            </div>
+                        </div>
+                        <div id="adjust-button" class="panel panel-default panel-floating" onclick="submitPanel('option')">
+                            <div class="panel-body panel-floating-inside">
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div id="simri-result-panel" class="panel object-panel" style="display:none;">
+            <form id="simri-result-form" method="post" enctype="multipart/form-data" target="uploader_iframe">
+                <div class="panel-body" style="padding:10px;">
+                    <div id="simri-panel-end-image">
+                        <div class="image-upload" style="display:inline-flex;margin-left:160px;margin-top:115px">
+                            <label for="simri-result-file">
+                                <img src="../img/editor_option_upload_btn.png" />
+                            </label>
+                            <input id="simri-result-file" name="image_file" type="file" />
+                        </div>
+                        <input id="simri-result-score" type="text" style="margin-top: 6px;margin-left: 120px;width: 40%;">
+                        <input id="simri-result-text" type="text" style="left: 120px;bottom: 153px;position: absolute;width: 40%;">
+                        <div class="image-upload" style="display:inline-flex;margin-left:160px;margin-top:12px">
+                            <label for="result-back-file">
+                                <img src="../img/editor_option_upload_btn.png" />
+                            </label>
+                            <input id="result-back-file" name="image_file" type="file" />
+                        </div>
+                        <div id="remove-button" class="panel-default panel-floating" onclick="removeSelectedObject()" style="margin-top:21">
+                            <div class="panel-body panel-floating-inside">
+                                <span></span>
+                            </div>
+                        </div>
+                        <div id="adjust-button" class="panel-default panel-floating" onclick="submitPanel('result')">
+                            <div class="panel-body panel-floating-inside">
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div id="hidenseek-panel" class="panel object-panel" style="display:none;">
+            <form action="/project/<%= sceneID %>/image" id="hidden-seek-form" method="post" enctype="multipart/form-data" target="uploader_iframe">>
+                <div class="panel-body" style="padding:10px;">
+                    <div id="hidenseek-panel-image">
+                        <div class="image-upload" style="display:inline-flex;margin-left:160px;margin-top:110px">
+                            <label for="hidenseek-image-file">
+                                <img src="../img/editor_option_upload_btn.png" />
+                            </label>
+                            <input id="hidenseek-image-file" name="image_file" type="file" />
+                        </div>
+                        <div class="image-upload" style="display:inline-flex;margin-left:160px;margin-top:20px">
+                            <label for="hidenseek-sound-file">
+                                <img src="../img/editor_option_upload_btn.png" />
+                            </label>
+                            <input id="hidenseek-sound-file" name="image_file" type="file" />
+                        </div>
+                        <div id="hidden-remove-button" class="panel-default panel-floating" onclick="removeSelectedObject()" style="margin-top:21">
+                            <div class="panel-body panel-floating-inside">
+                                <span></span>
+                            </div>
+                        </div>
+                        <div id="hidden-adjust-button" class="panel-default panel-floating" onclick="submitPanel('hidden')">
+                            <div class="panel-body panel-floating-inside">
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div id="hidenseek-clock" style="display:none">
+            <div id="hidenseek-count" style="margin-top: 65px;margin-left: 100px;font-size: 35px">0</div>
+            <div id="hidenseek-num" style="margin-top: 4px;margin-left: 100px;">0/0</div>
+        </div>
+        <div id="main-canvas" class="col-md-8" style="height:100%;">
+            <iframe id="main_scene" class="main_scene" width="100%" height="100%" allowfullscreen="yes" scrolling="no" allowvr="yes" src="canvas.html"></iframe>
+        </div>
+    </div>
+</body>
+<!-- Modal -->
+<div id="imageModal" class="modal fade" role="dialog">
+    <form id="image_form" method="post" enctype="multipart/form-data" target="uploader_iframe">
+        <input type="submit" style="position: absolute; left: -9999px" />
+        <div class="modal-dialog">
+            <!-- Modal content-->
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 id="image-modal-title" class="modal-title" style="text-align:center;">Image</h4>
+                </div>
+                <div class="modal-body">
+                    <fieldset>
+                        <div class="form-group">
+                            <div class="col-lg-12">
+                                <div class="radio" style="display:flex;">
+                                    <label>
+                                        <input id="inlineradio1" name="sampleinlineradio" value="option1" type="radio" checked/>URL :
+                                    </label>
+                                    <input id="img-url" type="" name="" style="width:400px;margin-left:50px" />
+                                </div>
+                                <div class="radio" style="display:flex;">
+                                    <label>
+                                        <input id="inlineradio2" name="sampleinlineradio" value="option2" type="radio" />File :
+                                    </label>
+                                    <input id="image_file" type="file" name="image_file" size="30" style="display:inline-flex;margin-left:50px;margin-top:3px" disabled="true" />
+                                    <iframe id="uploader_iframe" name="uploader_iframe" style="display: none;"></iframe>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="modal-close" class="btn btn-default" data-dismiss="modal" onClick="resetForm()">Close</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal" value="OK" onClick="submitImage();">OK</button>
+                </div>
+                <div id="preview">
+                    <p>No files currently selected for upload</p>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+<div id="thumbnailModal" class="modal fade" role="dialog">
+    <form id="thumbnail_form" method="post" enctype="multipart/form-data" target="uploader_iframe">
+        <input type="hidden" name="imageData" id="imageData" value="merong" />
+        <input type="submit" style="position: absolute; left: -9999px" />
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal">&times;</button>
+                    <h4 class="modal-title" style="text-align:center;">썸네일로 사용할 영역을 선택하세요.</h4>
+                </div>
+                <div class="modal-body">
+                    <div class="thumbnail-controller">
+                        <form>
+                            <p>
+                                <label>영역 넓이</label>
+                                <input id="fovController" type="range" value=1 min=0.5 max=1.5 step="0.01" name="input-fov">
+                            </p>
+                        </form>
+                    </div>
+                    <div style="display:none;">
+                        <canvas id="original-360"></canvas>
+                    </div>
+                    <canvas id="canvas-360" onclick="mymouseclick(event)"></canvas>
+                    <hr>
+                    <p>미리보기</p>
+                    <canvas id="base-canvas"></canvas>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" id="modal-close" class="btn btn-default" data-dismiss="modal" onClick="resetForm()">Close</button>
+                    <button type="button" class="btn btn-default" data-dismiss="modal" value="OK" onclick="submitThumbnail()">OK</button>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+</html>
+<script type="text/javascript">
+var imageFlag = -1;
+var FLAG_IMAGE = 1;
+var FLAG_BACKGROUND = 2;
+var FLAG_THUMBNAIL = 3;
+var nothumbnail = false;
+var uploadResultBackground;
+var uploadResultImage;
+
+// Thumbnail
+var segmentNum = 36;
+var corners = [];
+var unitPoint = {};
+
+var orig_img;
+var ratio;
+var orig_canvas;
+var orig_ctx;
+var resized_canvas;
+var resized_ctx;
+var base_canvas;
+var base_ctx;
+
+var worker = null;
+
+var resizedWidth = 512;
+var dstWidth = 300;
+var dstHeight = 300;
+var hfov = 80; //  in degrees
+var gYaw = 0,
+    gPitch = 0,
+    gRoll = 0;
+
+
+$(document).ready(function() {
+    document.querySelector('input[type=range]').addEventListener('input', function rangeChange() {
+        this.setAttribute('value', this.value);
+    });
+
+    $("div.thumbnail-controller input").change(function() {
+        var newFov = Math.floor(Number($('input[name=input-fov]')[0].value) * 80);
+        var params = [newFov, dstWidth, dstHeight];
+        updateByParameter(params[0], params[1], params[2]);
+    });
+
+    $('#inlineradio1').click(function() {
+        $("#img-url").prop('disabled', false);
+        $("#image_file").prop('disabled', true);
+    });
+    $('#inlineradio2').click(function() {
+        $("#img-url").prop('disabled', true);
+        $("#image_file").prop('disabled', false);
+    });
+
+    $('#image_form').submit(function() {
+        if (imageFlag == FLAG_IMAGE) {
+            // $(this).attr('action', "/project/<%= sceneID %>/image");
+        } else if (imageFlag == FLAG_BACKGROUND) {
+            // $(this).attr('action', "/project/<%= sceneID %>/background");
+        } else {
+            return;
+        }
+
+        $("#uploader_iframe").unbind().on('load', function() { // This block of code will execute when the response is sent from the server.
+            console.log(this)
+            // result = JSON.parse($(this).contents().text()); // Content of the iframe will be the response sent from the server. Parse the response as the JSON object
+            // if (imageFlag == FLAG_IMAGE) {
+            //     createImage(result.result);
+            // } else if (imageFlag == FLAG_BACKGROUND) {
+            //     setBackground(result.result);
+            // }
+            // resetForm();
+        });
+    });
+
+    $("#simri-option-form").submit(function() {
+
+        $("#uploader_iframe").unbind().on('load', function() { // This block of code will execute when the response is sent from the server.
+            result = JSON.parse($(this).contents().text()); // Content of the iframe will be the response sent from the server. Parse the response as the JSON object
+            modifyOption($("#simri-option-text").val(), result.result, $("#simri-option-score").val());
+            $("#simri-option-panel").css("display", "none");
+            $("#simri-option-file").val("");
+        });
+    });
+
+    $("#simri-result-form").submit(function() {
+        if (uploadResultImage == 1 && uploadResultBackground == 1) {
+            // $("#simri-result-form").attr('action', "/project/<%= sceneID %>/simri");
+        } else {
+            // $("#simri-result-form").attr('action', "/project/<%= sceneID %>/image");
+        }
+
+        $("#uploader_iframe").unbind().on('load', function() { // This block of code will execute when the response is sent from the server.
+            result = JSON.parse($(this).contents().text()); // Content of the iframe will be the response sent from the server. Parse the response as the JSON object
+            if (uploadResultImage == 1 && uploadResultBackground == 1) {
+                modifyResult($("#simri-result-text").val(), result.image, $("#simri-result-score").val(), result.background);
+            } else if (uploadResultImage == 1 && uploadResultBackground == 0) {
+                modifyResult($("#simri-result-text").val(), result.result, $("#simri-result-score").val(), getResultBackgroundUrl());
+            } else {
+                modifyResult($("#simri-result-text").val(), getCurrentImgUrl(), $("#simri-result-score").val(), result.result);
+            }
+            resetResultPanel();
+        });
+    });
+
+    $("#hidden-seek-form").submit(function() {
+        $("#uploader_iframe").unbind().on('load', function() { // This block of code will execute when the response is sent from the server.
+            result = JSON.parse($(this).contents().text()); // Content of the iframe will be the response sent from the server. Parse the response as the JSON object
+            modifySpot($("#simri-option-text").val(), result.result, $("#simri-option-score").val());
+            $("#hidenseek-panel").css("display", "none");
+        });
+    });
+
+    $('#thumbnail_form').submit(function() {
+        if (imageFlag == FLAG_THUMBNAIL) {
+            // get the canvas image data
+            var imageData = base_canvas.toDataURL("image/png");
+
+            // let the hidden field we added earlier carry the image data into the upload handler
+            $("#imageData").val(imageData);
+
+            // submit the form
+            // $(this).attr('action', "/project/<%= sceneID %>/thumbnail");
+        }
+
+        $("#uploader_iframe").unbind().on('load', function() { // This block of code will execute when the response is sent from the server.
+            result = JSON.parse($(this).contents().text()); // Content of the iframe will be the response sent from the server. Parse the response as the JSON object
+            if (imageFlag == FLAG_THUMBNAIL) {
+                // saveProject(1, <%= sceneID %>, $("#project-title").val());
+            }
+        });
+    });
+});
+
+function resetResultPanel() {
+    $("#simri-result-panel").css("display", "none");
+    $("#result-back-file").val("");
+    $("#simri-result-file").val("");
+    uploadResultImage = 0;
+    uploadResultBackground = 0;
+}
+
+function submitPanel(type) {
+    if (type == 'option') {
+        if ($('#simri-option-file').get(0).files.length == 0) {
+            modifyOption($("#simri-option-text").val(), getCurrentImgUrl(), $("#simri-option-score").val());
+            $("#simri-option-panel").css("display", "none");
+            return;
+        }
+        $("#simri-option-form").submit();
+        return;
+    }
+    if (type == 'result') {
+        if ($('#simri-result-file').get(0).files.length == 0 && $('#result-back-file').get(0).files.length == 0) {
+            // 둘다  현재껄로
+            modifyResult($("#simri-result-text").val(), getCurrentImgUrl(), $("#simri-result-score").val(), getResultBackgroundUrl());
+            resetResultPanel();
+            return;
+        }
+
+        if ($('#simri-result-file').get(0).files.length == 0 && $('#result-back-file').get(0).files.length != 0) {
+            // 이미지는 원래 있던걸로, 배경은 업로드
+            uploadResultBackground = 1;
+            uploadResultImage = 0;
+        } else if ($('#simri-result-file').get(0).files.length != 0 && $('#result-back-file').get(0).files.length == 0) {
+            // 이미지는 업로드, 배경은 있던걸로
+            uploadResultBackground = 0;
+            uploadResultImage = 1;
+        } else {
+            // 둘다 업로드
+            uploadResultBackground = 1;
+            uploadResultImage = 1;
+        }
+        $("#simri-result-form").submit();
+        return;
+    }
+    if (type == 'hidden') {
+        $("#simri-hidden-form").submit();
+        return;
+    }
+}
+
+function openMenu() {
+    if ($("#floating-panel").css("display") == "none") {
+        $("#floating-panel").css("display", "");
+        $("#floating-button").css('background-image', 'url(../img/editor_icon_mouseout.png)')
+        return;
+    }
+    $("#floating-panel").css("display", "none");
+    $("#floating-button").css('background-image', '')
+}
+
+function getJson() {
+    // if(!loadProject('<%-JSON.stringify(projectObjectJson) %>')){
+    if (true) {
+        getBackgroundPopup();
+    }
+    nothumbnail = true;
+}
+
+function getBackgroundPopup() {
+    $("#image-modal-title").text("배경이미지 업로드");
+    nothumbnail = true;
+    imageFlag = FLAG_BACKGROUND;
+    $('#imageModal').modal('show');
+}
+
+function getImagePopup() {
+    $("#image-modal-title").text("이미지 업로드");
+    imageFlag = FLAG_IMAGE;
+    $('#imageModal').modal('show');
+}
+
+function submitImage() {
+    if ($("#inlineradio1:checked").val()) {
+        if (imageFlag == FLAG_IMAGE)
+            create('image');
+
+        if (imageFlag == FLAG_BACKGROUND)
+            setBackground($("#img-url").val());
+
+        $("#modal-close").click();
+    } else {
+        // $("#image_form").submit();
+        console.log($("#image_form")[0]);
+        // updateImageDisplay();
+    }
+}
+
+var fileTypes = [
+    'image/jpeg',
+    'image/pjpeg',
+    'image/png'
+]
+
+function validFileType(file) {
+    for (var i = 0; i < fileTypes.length; i++) {
+        if (file.type === fileTypes[i]) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+var input = document.getElementById("image_file");
+var preview = document.getElementById("preview");
+input.addEventListener('change', updateImageDisplay);
+
+function updateImageDisplay() {
+    console.log(preview);
+    if (!input.files) return;
+
+    while (preview.firstChild) {
+        preview.removeChild(preview.firstChild);
+    }
+
+    var curFiles = input.files;
+    if (curFiles.length === 0) {
+        var para = document.createElement('p');
+        para.textContent = 'No files currently selected for upload';
+        preview.appendChild(para);
+    } else {
+        var para = document.createElement('p');
+        if (validFileType(curFiles[0])) {
+            para.textContent = 'File name ' + curFiles[0].name;
+            var image = document.createElement('img');
+            image.src = window.URL.createObjectURL(curFiles[0]);
+            para.appendChild(image);
+
+        } else {
+            para.textContent = 'File name ' + curFiles[0].name + ': Not a valid file type. Update your selection.';
+        }
+        preview.appendChild(para);
+    }
+}
+
+function submitThumbnail() {
+    $("#thumbnail_form").submit();
+}
+
+function resetForm() {
+    $("#img-url").val("");
+    $("#image_file").val("");
+}
+
+function getThumbnailPopup() {
+    if (nothumbnail) {
+        setupEquirectangularApp();
+        imageFlag = FLAG_THUMBNAIL;
+        $('#thumbnailModal').modal('show');
+    } else {
+        // saveProject(1, <%= sceneID %>, $("#project-title").val());
+    }
+}
+
+function setupEquirectangularApp() {
+    // Equirectangular-to-pinhole app
+    orig_img = new Image;
+    ratio = 1;
+    orig_canvas = $("#original-360")[0];
+    orig_ctx = orig_canvas.getContext('2d');
+    resized_canvas = $("#canvas-360")[0];
+    resized_ctx = resized_canvas.getContext('2d');
+    base_canvas = $("#base-canvas")[0];
+    base_ctx = base_canvas.getContext("2d");
+
+    orig_img.onload = function() {
+        ratio = resizedWidth / orig_img.width;
+
+        resized_canvas.width = resizedWidth;
+        resized_canvas.height = orig_img.height * ratio;
+
+        // draw original image (not show)
+        orig_canvas.width = orig_img.width;
+        orig_canvas.height = orig_img.height;
+
+        drawImageAntialiasing(orig_img, orig_img.width, orig_img.height, orig_ctx);
+
+        // draw resized image
+        resized_ctx.drawImage(orig_canvas, 0, 0, orig_img.width * ratio, orig_img.height * ratio);
+    }
+    orig_img.crossOrigin = "anonymous";
+    orig_img.src = getBackgroundUrl();
+
+    base_canvas.width = dstWidth;
+    base_canvas.height = dstHeight;
+
+    worker = new Worker("../js/equiprocess.js");
+    worker.addEventListener("message", onmessage);
+}
+
+function mymouseclick(event) {
+    updateByPostion(event.layerX, event.layerY);
+}
+
+function updateByPostion(x, y) {
+    var a = equiToLatlon(x / ratio, y / ratio, orig_img.width, orig_img.height);
+
+    setDirection(a.lon, a.lat, 0);
+
+    clearCanvas();
+
+    updateFrame();
+    updateBase();
+}
+
+window.updateByParameter = function(fov, width, height) {
+    hfov = fov;
+    dstWidth = width;
+    dstHeight = height;
+
+    // base_canvas.width = dstWidth;
+    // base_canvas.height = dstHeight;
+
+    clearCanvas();
+    updateFrame();
+    updateBase();
+}
+
+function updateFrame() {
+    resized_ctx.drawImage(orig_canvas, 0, 0, orig_img.width * ratio, orig_img.height * ratio);
+
+    var points = [];
+
+    points = points.concat(getLinePoints(0, 0, dstWidth, 0, segmentNum));
+    points = points.concat(getLinePoints(dstWidth, 0, dstWidth, dstHeight, segmentNum));
+    points = points.concat(getLinePoints(dstWidth, dstHeight, 0, dstHeight, segmentNum));
+    points = points.concat(getLinePoints(0, dstHeight, 0, 0, segmentNum));
+
+    worker.postMessage({
+        direction: "unit",
+        points: points,
+        srcWidth: orig_img.width,
+        srcHeight: orig_img.height,
+        dstWidth: base_canvas.width,
+        dstHeight: base_canvas.height,
+        hfov: hfov, //  in degrees
+        gYaw: gYaw,
+        gPitch: gPitch,
+        gRoll: gRoll
+    });
+}
+
+function updateBase() {
+    var params = {
+        direction: "forward",
+        srcData: orig_ctx.getImageData(0, 0, orig_canvas.width, orig_canvas.height),
+        dstData: base_ctx.createImageData(base_canvas.width, base_canvas.height),
+        srcWidth: orig_img.width,
+        srcHeight: orig_img.height,
+        dstWidth: base_canvas.width,
+        dstHeight: base_canvas.height,
+        hfov: hfov, //  in degrees
+        gYaw: gYaw,
+        gPitch: gPitch,
+        gRoll: gRoll
+    };
+    worker.postMessage(params);
+}
+
+function onmessage(event) {
+    var result = event.data.result;
+    if (event.data.finished) {
+        switch (event.data.direction) {
+            case "forward":
+                base_ctx.putImageData(result.dstData, 0, 0);
+                break;
+            case "unit":
+                corners = result.equiPoints;
+
+                resized_ctx.lineWidth = 7;
+                resized_ctx.strokeStyle = '#ff0000';
+
+                resized_ctx.beginPath();
+                resized_ctx.moveTo(corners[0].x * ratio, corners[0].y * ratio);
+                for (var i = 0; i < corners.length; ++i) {
+                    var j = (i + 1);
+                    if (j >= corners.length) break;
+
+                    var dist = Math.sqrt(Math.pow(corners[i].x - corners[j].x, 2) + Math.pow(corners[i].y - corners[j].y, 2));
+                    if (dist < orig_canvas.width / 2) {
+                        resized_ctx.lineTo(corners[j].x * ratio, corners[j].y * ratio);
+                    } else {
+                        resized_ctx.stroke();
+                        resized_ctx.beginPath();
+                        resized_ctx.moveTo(corners[j].x * ratio, corners[j].y * ratio);
+                    }
+                }
+                resized_ctx.stroke();
+                break;
+        }
+    } else {
+        // move();
+    }
+}
+
+function equiToLatlon(x, y, width, height) {
+    var lon = (x / width - 0.5) * Math.PI * 2;
+    var lat = ((height - y - 1.0) / (height - 1) - 0.5) * Math.PI;
+    return {
+        lon: lon,
+        lat: lat
+    }
+}
+
+function setDirection(yaw, pitch, roll) {
+    gYaw = yaw;
+    gPitch = pitch;
+    gRoll = roll;
+}
+
+function drawImageAntialiasing(img, width, height, dstCtx) {
+    var off_canvas = document.createElement('canvas'),
+        off_ctx = off_canvas.getContext('2d');
+
+    off_canvas.width = img.width * 0.5;
+    off_canvas.height = img.height * 0.5;
+
+    off_ctx.drawImage(img, 0, 0, off_canvas.width, off_canvas.height);
+    off_ctx.drawImage(off_canvas, 0, 0, off_canvas.width * 0.5, off_canvas.height * 0.5);
+
+    dstCtx.drawImage(off_canvas, 0, 0, off_canvas.width * 0.5, off_canvas.height * 0.5, 0, 0, width, height);
+}
+
+function getLinePoints(x0, y0, x1, y1, segments) {
+    var linePoints = [];
+
+    var dx = (x1 - x0) / segments;
+    var dy = (y1 - y0) / segments;
+    for (var i = 0; i < segments; ++i) {
+        var x = x0 + dx * i;
+        var y = y0 + dy * i;
+
+        linePoints.push({
+            x: x,
+            y: y
+        });
+    }
+    return linePoints;
+}
+
+function clearCanvas() {
+    base_ctx.clearRect(0, 0, base_canvas.width, base_canvas.height);
+    resized_ctx.clearRect(0, 0, resized_canvas.width, resized_canvas.height);
+}
+</script>
