@@ -11,6 +11,7 @@ function Scenery(bgEl, scenery) {
         this.sceneryType = "";
         this.objectList = [];
         if (bgEl) {
+
             this.bgEl = bgEl;
             this.bgUrl = this.bgEl.getAttribute('src');
         } else {
@@ -22,30 +23,12 @@ function Scenery(bgEl, scenery) {
 
 Scenery.prototype.setBackgroundImageUrl = function(url, THREE) {
     this.bgUrl = url;
-    // this.bgEl.setAttribute('src', this.bgUrl);
-    this.loadFromUrl(this.bgUrl, THREE);
+    this.bgEl.setAttribute('src', url);
 }
 
 Scenery.prototype.setBgEl = function(bgEl, THREE) {
     this.bgEl = bgEl;
-    // bgEl.setAttribute('src', this.bgUrl);
-    this.loadFromUrl(this.bgUrl, THREE);
-}
-
-Scenery.prototype.loadFromUrl = function(url, THREE) {
-    console.log('load background: ' + url);
-    var bgEl = this.bgEl;
-    var texture;
-    var imageElement = document.createElement('img');
-    imageElement.setAttribute('crossOrigin', 'anonymous');
-    imageElement.onload = function(e) {
-        texture = new THREE.Texture(this);
-        texture.needsUpdate = true;
-
-        bgEl.components.material.material.map = texture;
-        bgEl.components.material.material.needsUpdate = true;
-    };
-    imageElement.src = url;
+    this.bgEl.setAttribute('src', this.bgUrl);
 }
 
 Scenery.prototype.addObject = function(object) {

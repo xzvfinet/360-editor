@@ -145,7 +145,7 @@
         </div>
     </form>
 </div>
-
+<img id="uploaded_image" src="" hidden="true">
 </html>
 <script type="text/javascript">
 var imageFlag = -1;
@@ -201,25 +201,6 @@ $(document).ready(function() {
         $("#image_file").prop('disabled', false);
     });
 
-    $('#thumbnail_form').submit(function() {
-        if (imageFlag == FLAG_THUMBNAIL) {
-            // get the canvas image data
-            var imageData = base_canvas.toDataURL("image/png");
-
-            // let the hidden field we added earlier carry the image data into the upload handler
-            $("#imageData").val(imageData);
-
-            // submit the form
-            // $(this).attr('action', "/project/<%= sceneID %>/thumbnail");
-        }
-
-        $("#uploader_iframe").unbind().on('load', function() { // This block of code will execute when the response is sent from the server.
-            result = JSON.parse($(this).contents().text()); // Content of the iframe will be the response sent from the server. Parse the response as the JSON object
-            if (imageFlag == FLAG_THUMBNAIL) {
-                // saveProject(1, <%= sceneID %>, $("#project-title").val());
-            }
-        });
-    });
 });
 
 function openMenu() {
@@ -253,17 +234,17 @@ function getImagePopup() {
 }
 
 function submitImage() {
-    if ($("#inlineradio1:checked").val()) {
-        if (imageFlag == FLAG_IMAGE)
-            create('image');
-
-        if (imageFlag == FLAG_BACKGROUND)
-            setBackground($("#img-url").val());
-
-        $("#modal-close").click();
-    } else {
-        setBackground(document.getElementById("uploaded_image").src);
+    if (!$("#inlineradio1:checked").val()) {
+        $("#img-url").val(document.getElementById("uploaded_image").src);
     }
+
+    if (imageFlag == FLAG_IMAGE) {
+        create('image');
+    } else if (imageFlag == FLAG_BACKGROUND) {
+        setBackground($("#img-url").val());
+    }
+
+    $("#modal-close").click();
 }
 
 var fileTypes = [
@@ -291,17 +272,14 @@ function updateImageDisplay() {
     var curFiles = input.files;
     if (curFiles.length != 0) {
         if (validFileType(curFiles[0])) {
-            var image = document.createElement('img');
+            var image = document.getElementById("uploaded_image");
             image.src = window.URL.createObjectURL(curFiles[0]);
-            image.id = "uploaded_image";
-            image.hidden = true;
-            document.body.appendChild(image);
         }
     }
 }
 
 function submitThumbnail() {
-    $("#thumbnail_form").submit();
+    alert("저장 기능을 제공할 서버가 없습니다.");
 }
 
 function resetForm() {

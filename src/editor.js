@@ -195,7 +195,7 @@ function saveJsontoServer(json, userID, sceneID, title) {
             user: userID,
             json: json,
             scene: sceneID,
-            title : title
+            title: title
         },
         success: function(data) {
             alert("Save success");
@@ -460,7 +460,7 @@ function templateFunc() {
                 objects.sort(function(a, b) {
                     return b.eventList[0].score - a.eventList[0].score;
                 })
-                for (var i = 0; i < objects.length; i++){
+                for (var i = 0; i < objects.length; i++) {
                     objects[i].setMaterial({ opacity: 0 });
                 }
                 for (var i = 0; i < objects.length; i++) {;
@@ -506,6 +506,7 @@ window.createScene = function() {
     projectObject.addScenery(newScenery);
 
     updateSceneDropDown();
+
 
     projectObject.changeScenery(projectObject.sceneryList.length - 1);
 

@@ -29,17 +29,14 @@ Project.prototype.changeScenery = function(scenery) {
     this.sceneryList[currentIndex].bgEl = null;
 
     if (typeof scenery == 'object') {
-        for (var i = this.sceneryList.length - 1; i >= 0; i--) {
-            if (this.sceneryList[i] == scenery) {
-                currentIndex = i;
-                break;
-            }
-        }
+        currentIndex = this.sceneryList.indexOf(scenery);
     } else if (typeof scenery == 'number') {
         currentIndex = scenery;
     }
 
-    this.sceneryList[currentIndex].setBgEl(bgEl);
+    if (bgEl) {
+        this.sceneryList[currentIndex].setBgEl(bgEl);
+    }    
 }
 
 Project.prototype.getCurrentScenery = function() {
