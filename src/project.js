@@ -63,7 +63,12 @@ Project.prototype.toJson = function() {
 }
 
 Project.prototype.fromJson = function(json) {
-    var saveForm = JSON.parse(json);
+    try {
+        var saveForm = JSON.parse(json);
+    } catch(e) {
+        return undefined;
+    }
+    
     this.projectType = saveForm.projectType;
     if (saveForm.sceneryList[0].bgUrl == undefined) {
         return undefined;

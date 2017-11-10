@@ -318,102 +318,6 @@
         <div id="floating-panel" style="display:none;">
             <div id="newImage" class="floating-panel-item" onclick="getImagePopup()">이미지 추가</div>
             <div id="newScene" class="floating-panel-item" onclick="createScene()">신 추가</div>
-            <div id="newChoice" class="floating-panel-item" onclick="createOption()">선택지 추가</div>
-            <div id="newScene" class="floating-panel-item" onclick="createScene()">신 추가</div>
-            <div id="newSpot" class="floating-panel-item" onclick="createSpot()">스팟 추가</div>
-            <div id="latelySpot" class="floating-panel-item" onclick="createLatelyObject()">최근 스팟 재추가</div>
-        </div>
-        <div id="simri-option-panel" class="panel object-panel" style="display:none;">
-            <form action="/project/<%= sceneID %>/image" id="simri-option-form" method="post" enctype="multipart/form-data" target="uploader_iframe">
-                <div class="panel-body" style="padding:10px;">
-                    <div id="simri-panel-image">
-                        <div class="image-upload" style="display:inline-flex;margin-left:160px;margin-top:115px">
-                            <label for="simri-option-file">
-                                <img src="../img/editor_option_upload_btn.png" />
-                            </label>
-                            <input id="simri-option-file" name="image_file" type="file" />
-                        </div>
-                        <input type="text" id="simri-option-score" style="margin-top: 6px;margin-left: 120px;width: 40%;">
-                        <input type="text" id="simri-option-text" style="left: 120px;bottom: 153px;position: absolute;width: 40%;">
-                        <div id="remove-button" class="panel-default panel-floating" onclick="removeSelectedObject()">
-                            <div class="panel-body panel-floating-inside">
-                                <span></span>
-                            </div>
-                        </div>
-                        <div id="adjust-button" class="panel panel-default panel-floating" onclick="submitPanel('option')">
-                            <div class="panel-body panel-floating-inside">
-                                <span></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
-        <div id="simri-result-panel" class="panel object-panel" style="display:none;">
-            <form id="simri-result-form" method="post" enctype="multipart/form-data" target="uploader_iframe">
-                <div class="panel-body" style="padding:10px;">
-                    <div id="simri-panel-end-image">
-                        <div class="image-upload" style="display:inline-flex;margin-left:160px;margin-top:115px">
-                            <label for="simri-result-file">
-                                <img src="../img/editor_option_upload_btn.png" />
-                            </label>
-                            <input id="simri-result-file" name="image_file" type="file" />
-                        </div>
-                        <input id="simri-result-score" type="text" style="margin-top: 6px;margin-left: 120px;width: 40%;">
-                        <input id="simri-result-text" type="text" style="left: 120px;bottom: 153px;position: absolute;width: 40%;">
-                        <div class="image-upload" style="display:inline-flex;margin-left:160px;margin-top:12px">
-                            <label for="result-back-file">
-                                <img src="../img/editor_option_upload_btn.png" />
-                            </label>
-                            <input id="result-back-file" name="image_file" type="file" />
-                        </div>
-                        <div id="remove-button" class="panel-default panel-floating" onclick="removeSelectedObject()" style="margin-top:21">
-                            <div class="panel-body panel-floating-inside">
-                                <span></span>
-                            </div>
-                        </div>
-                        <div id="adjust-button" class="panel-default panel-floating" onclick="submitPanel('result')">
-                            <div class="panel-body panel-floating-inside">
-                                <span></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
-        <div id="hidenseek-panel" class="panel object-panel" style="display:none;">
-            <form action="/project/<%= sceneID %>/image" id="hidden-seek-form" method="post" enctype="multipart/form-data" target="uploader_iframe">>
-                <div class="panel-body" style="padding:10px;">
-                    <div id="hidenseek-panel-image">
-                        <div class="image-upload" style="display:inline-flex;margin-left:160px;margin-top:110px">
-                            <label for="hidenseek-image-file">
-                                <img src="../img/editor_option_upload_btn.png" />
-                            </label>
-                            <input id="hidenseek-image-file" name="image_file" type="file" />
-                        </div>
-                        <div class="image-upload" style="display:inline-flex;margin-left:160px;margin-top:20px">
-                            <label for="hidenseek-sound-file">
-                                <img src="../img/editor_option_upload_btn.png" />
-                            </label>
-                            <input id="hidenseek-sound-file" name="image_file" type="file" />
-                        </div>
-                        <div id="hidden-remove-button" class="panel-default panel-floating" onclick="removeSelectedObject()" style="margin-top:21">
-                            <div class="panel-body panel-floating-inside">
-                                <span></span>
-                            </div>
-                        </div>
-                        <div id="hidden-adjust-button" class="panel-default panel-floating" onclick="submitPanel('hidden')">
-                            <div class="panel-body panel-floating-inside">
-                                <span></span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </form>
-        </div>
-        <div id="hidenseek-clock" style="display:none">
-            <div id="hidenseek-count" style="margin-top: 65px;margin-left: 100px;font-size: 35px">0</div>
-            <div id="hidenseek-num" style="margin-top: 4px;margin-left: 100px;">0/0</div>
         </div>
         <div id="main-canvas" class="col-md-8" style="height:100%;">
             <iframe id="main_scene" class="main_scene" width="100%" height="100%" allowfullscreen="yes" scrolling="no" allowvr="yes" src="canvas.html"></iframe>
@@ -439,7 +343,7 @@
                                     <label>
                                         <input id="inlineradio1" name="sampleinlineradio" value="option1" type="radio" checked/>URL :
                                     </label>
-                                    <input id="img-url" type="" name="" style="width:400px;margin-left:50px" />
+                                    <input id="img-url" type="" name="" value="/static/img/bg1.jpg" style="width:400px;margin-left:50px" />
                                 </div>
                                 <div class="radio" style="display:flex;">
                                     <label>
@@ -455,9 +359,6 @@
                 <div class="modal-footer">
                     <button type="button" id="modal-close" class="btn btn-default" data-dismiss="modal" onClick="resetForm()">Close</button>
                     <button type="button" class="btn btn-default" data-dismiss="modal" value="OK" onClick="submitImage();">OK</button>
-                </div>
-                <div id="preview">
-                    <p>No files currently selected for upload</p>
                 </div>
             </div>
         </div>
@@ -693,8 +594,7 @@ function openMenu() {
 }
 
 function getJson() {
-    // if(!loadProject('<%-JSON.stringify(projectObjectJson) %>')){
-    if (true) {
+    if(!loadProject()){
         getBackgroundPopup();
     }
     nothumbnail = true;
@@ -723,9 +623,7 @@ function submitImage() {
 
         $("#modal-close").click();
     } else {
-        // $("#image_form").submit();
-        console.log($("#image_form")[0]);
-        // updateImageDisplay();
+        setBackground(document.getElementById("uploaded_image").src);
     }
 }
 
@@ -746,34 +644,20 @@ function validFileType(file) {
 }
 
 var input = document.getElementById("image_file");
-var preview = document.getElementById("preview");
 input.addEventListener('change', updateImageDisplay);
 
 function updateImageDisplay() {
-    console.log(preview);
     if (!input.files) return;
 
-    while (preview.firstChild) {
-        preview.removeChild(preview.firstChild);
-    }
-
     var curFiles = input.files;
-    if (curFiles.length === 0) {
-        var para = document.createElement('p');
-        para.textContent = 'No files currently selected for upload';
-        preview.appendChild(para);
-    } else {
-        var para = document.createElement('p');
+    if (curFiles.length != 0) {
         if (validFileType(curFiles[0])) {
-            para.textContent = 'File name ' + curFiles[0].name;
             var image = document.createElement('img');
             image.src = window.URL.createObjectURL(curFiles[0]);
-            para.appendChild(image);
-
-        } else {
-            para.textContent = 'File name ' + curFiles[0].name + ': Not a valid file type. Update your selection.';
-        }
-        preview.appendChild(para);
+            image.id = "uploaded_image";
+            image.hidden = true;
+            document.body.appendChild(image);
+        } 
     }
 }
 
