@@ -65,7 +65,32 @@
             <div id="newImage" class="floating-panel-item" onclick="getImagePopup()">이미지 추가</div>
             <div id="newScene" class="floating-panel-item" onclick="createScene()">신 추가</div>
         </div>
-        <div id="main-canvas" class="col-md-8" style="height:100%; padding:0;" >
+        <div id="default-panel" class="panel object-panel" style="display: none;">
+            <form action="" id="default-form" method="post" enctype="multipart/form-data" target="uploader_iframe">
+                <div class="panel-body" style="padding:10px;">
+                    <div id="panel-image">
+                        <div class="image-upload" style="display:inline-flex;margin-left:160px;margin-top:115px">
+                            <label for="default_image_file">
+                                <img src="../img/editor_option_upload_btn.png" />
+                            </label>
+                            <input id="default_image_file" name="image_file" type="file" />
+                        </div>
+                        <select id="scene-select-list" style="left: 120px;top:73px;position: absolute;width: 40%;"></select>
+                        <div id="remove-button" class="panel-default panel-floating" onclick="removeSelectedObject()">
+                            <div class="panel-body panel-floating-inside">
+                                <span></span>
+                            </div>
+                        </div>
+                        <div id="adjust-button" class="panel panel-default panel-floating" onclick="submitPanel('default')">
+                            <div class="panel-body panel-floating-inside">
+                                <span></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+        <div id="main-canvas" class="col-md-8" style="height:100%; padding:0;">
             <iframe id="main_scene" class="main_scene" width="100%" height="100%" allowfullscreen="yes" scrolling="no" allowvr="yes" src="canvas.html" frameborder="0"></iframe>
         </div>
     </div>
@@ -201,6 +226,10 @@ $(document).ready(function() {
         $("#image_file").prop('disabled', false);
     });
 
+    var input = document.getElementById("image_file");
+    input.addEventListener('change', updateImageDisplay);
+    var input2 = document.getElementById("default_image_file");
+    input2.addEventListener('change', updateImageDisplay);
 });
 
 function openMenu() {
@@ -231,6 +260,7 @@ function getImagePopup() {
     $("#image-modal-title").text("이미지 업로드");
     imageFlag = FLAG_IMAGE;
     $('#imageModal').modal('show');
+    $("#floating-panel").css("display", "none");
 }
 
 function submitImage() {
@@ -245,6 +275,17 @@ function submitImage() {
     }
 
     $("#modal-close").click();
+}
+
+function submitPanel() {
+    if ($('#default_image_file').get(0).files.length != 0) {
+        modifyCurrentObjectImage(document.getElementById("uploaded_image").src);
+    }
+    var val = $("#scene-select-list option:selected").val();
+    if (val) {
+        modifyCurrentObjectTeleport(val);
+    }
+    $("#default-panel").css("display", "none");
 }
 
 var fileTypes = [
@@ -263,13 +304,10 @@ function validFileType(file) {
     return false;
 }
 
-var input = document.getElementById("image_file");
-input.addEventListener('change', updateImageDisplay);
-
 function updateImageDisplay() {
-    if (!input.files) return;
+    if (!this.files) return;
 
-    var curFiles = input.files;
+    var curFiles = this.files;
     if (curFiles.length != 0) {
         if (validFileType(curFiles[0])) {
             var image = document.getElementById("uploaded_image");

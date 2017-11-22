@@ -4,7 +4,7 @@ var Objct = require('./object.js').Objct;
 
 function Project() {
     this.title = "";
-    this.projectType = "";
+    this.projectType = "default";
     this.sceneryList = [];
 }
 

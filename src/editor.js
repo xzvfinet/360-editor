@@ -497,8 +497,9 @@ function getTotalSpot() {
 
 function updateObjectNumUI() {
     //mainFrame.document.getElementById('object-num').setAttribute('value', "0/" + projectObject.sceneryList[0].objectList.length);
-
-    document.getElementById("hidenseek-num").innerHTML = ("0/") + getTotalSpot();
+    if (projectObject.projectType == "hidenseek") {
+        document.getElementById("hidenseek-num").innerHTML = ("0/") + getTotalSpot();
+    }
 }
 
 window.createScene = function() {
@@ -512,7 +513,10 @@ window.createScene = function() {
 
     eraseCanvas();
     updateSceneNumberList();
+
+    $("#floating-panel").css("display", "none");
 }
+
 window.createOption = function() {
     var obj = createImage('https://traverser360.s3.ap-northeast-2.amazonaws.com/1497782502160.png');
     obj.addEvent('teleport', projectObject.getCurrentIndex() + 1);
@@ -521,13 +525,31 @@ window.createOption = function() {
     console.log(obj);
 }
 
-window.modifyOption = function(text, image_url, score) {
-    //currentSelectedObject.drawText(mainFrame,text);
+window.modifyCurrentObjectImage = function(image_url) {
     currentSelectedObject.material['src'] = image_url;
     loadImage(currentSelectedObject.el, image_url);
     util.getImageSize(image_url, function() {
         currentSelectedObject.setScale({ x: this.width / BASE_IMG_WIDTH, y: this.height / BASE_IMG_WIDTH });
     });
+}
+
+window.modifyCurrentObjectTeleport = function(scenery_index) {
+    var modified = false;
+    currentSelectedObject.eventList.forEach(function(event) {
+        if (event.type == "teleport") {
+            currentSelectedObject.modifyEvent("teleport", scenery_index);
+            modified = true;
+        }
+    });
+
+    if (modified == false) {
+        currentSelectedObject.addEvent("teleport", scenery_index);
+    }
+}
+
+window.modifyOption = function(text, image_url, score) {
+    //currentSelectedObject.drawText(mainFrame,text);
+    modifyCurrentObjectImage(image_url);
     currentSelectedObject.modifyEvent("addScore", score);
 }
 
@@ -540,12 +562,8 @@ window.createSpot = function() {
     console.log(obj);
 }
 window.modifySpot = function(imgage_url, sound_url) {
-    currentSelectedObject.material['src'] = image_url;
-    loadImage(currentSelectedObject.el, image_url);
+    modifyCurrentObjectImage(image_url);
     currentSelectedObject.addEvent("sound", sound_url);
-    util.getImageSize(image_url, function() {
-        currentSelectedObject.setScale({ x: this.width / BASE_IMG_WIDTH, y: this.height / BASE_IMG_WIDTH });
-    });
     latelyCreatedObject = currentSelectedObject;
 }
 
@@ -624,11 +642,12 @@ function onObjectSelect(event) {
         scale = currentSelectedObject.transform.scale;
         currentSelectedObject.setMaterial({ 'opacity': 0.5 });
 
-        openObjectPropertyPanel(event.detail.mouseEvent, "#simri-option-panel");
+        openObjectPropertyPanel(event.detail.mouseEvent);
     } else {
         // Execute events assigned to object.
         if (!currentSelectedObject.oneClick) {
             for (var i = 0; i < currentSelectedObject.eventList.length; ++i) {
+
                 var event = currentSelectedObject.eventList[i];
                 var eventType = event['type'];
                 var func = EVENT_DICTIONARY[eventType];
@@ -641,7 +660,6 @@ function onObjectSelect(event) {
 }
 
 function openObjectPropertyPanel(event) {
-    console.log(projectObject.projectType);
     switch (projectObject.projectType) {
         case "simri":
             if (projectObject.getCurrentScenery().sceneryType == "result") id = "#simri-result-";
@@ -649,6 +667,20 @@ function openObjectPropertyPanel(event) {
             break;
         case "hidenseek":
             id = "#hidenseek-";
+            break;
+        default:
+            id = "#default-";
+            var selectList = $("#scene-select-list");
+            selectList.empty();
+            projectObject.sceneryList.forEach(function(el, i) {
+                if (el != projectObject.getCurrentScenery()) {
+                    selectList.append($('<option>', {
+                        value: i,
+                        text: el.name
+                    }));
+                }
+            });
+
             break;
     }
     $(id + "text").val(currentSelectedObject.text);
@@ -661,7 +693,7 @@ function openObjectPropertyPanel(event) {
         $(id + "panel").css("display", "");
     }
 
-    $(id + "panel").css({ position: "fixed", top: event.clientY, left: event.clientX + 150 });
+    $(id + "panel").css({ position: "fixed", top: event.clientY, left: event.clientX + 100 });
 }
 window.getCurrentImgUrl = function() {
     return currentSelectedObject.material.src;
@@ -730,6 +762,7 @@ function newObject(type, shape, url, position, rotation, scale) {
         });
         newObj.material['src'] = url;
         loadImage(newObj.el, url);
+
     } else {
         newObj.setMaterial({ 'color': util.getRandomHexColor() });
     }

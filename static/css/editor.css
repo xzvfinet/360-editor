@@ -1,255 +1,277 @@
 body,
-    html {
-        height: 95%;
-        padding: 0;
-    }
+html {
+    height: 95%;
+    padding: 0;
+}
 
-    #adjust-button {
-        width: 25px;
-        height: 25px;
-        float: left;
-        position: absolute;
-        top: 28px;
-        right: 35px;
-        background-size: 100% 100%;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-image: url(../img/adjust_icon.png);
-        border-color: #ffffff;
-    }
+#adjust-button {
+    width: 25px;
+    height: 25px;
+    float: left;
+    position: absolute;
+    top: 28px;
+    right: 35px;
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url(../img/adjust_icon.png);
+    border-color: #ffffff;
+}
 
-    #remove-button {
-        top: 28px;
-        right: 70px;
-        width: 25px;
-        height: 25px;
-        float: right;
-        position: absolute;
-        background-size: 100% 100%;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-image: url(../img/delete_icon.png);
-        border-color: #ffffff;
-    }
+#remove-button {
+    top: 28px;
+    right: 70px;
+    width: 25px;
+    height: 25px;
+    float: right;
+    position: absolute;
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url(../img/delete_icon.png);
+    border-color: #ffffff;
+}
 
-    #hidden-adjust-button {
-        width: 25px;
-        height: 25px;
-        float: left;
-        position: absolute;
-        top: 48px;
-        right: 35px;
-        background-size: 100% 100%;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-image: url(../img/adjust_icon.png);
-        border-color: #ffffff;
-    }
+#hidden-adjust-button {
+    width: 25px;
+    height: 25px;
+    float: left;
+    position: absolute;
+    top: 48px;
+    right: 35px;
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url(../img/adjust_icon.png);
+    border-color: #ffffff;
+}
 
-    #hidden-remove-button {
-        top: 48px;
-        right: 70px;
-        width: 25px;
-        height: 25px;
-        float: right;
-        position: absolute;
-        background-size: 100% 100%;
-        background-position: center;
-        background-repeat: no-repeat;
-        background-image: url(../img/delete_icon.png);
-        border-color: #ffffff;
-    }
+#hidden-remove-button {
+    top: 48px;
+    right: 70px;
+    width: 25px;
+    height: 25px;
+    float: right;
+    position: absolute;
+    background-size: 100% 100%;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-image: url(../img/delete_icon.png);
+    border-color: #ffffff;
+}
 
-    #simri-panel-image {
-        width: 280px;
-        height: 250px;
-        position: fixed;
-        background-size: 100% 100%;
-        background-image: url('../img/bg_input.png')
-    }
+#panel-image {
+    width: 280px;
+    height: 206px;
+    position: fixed;
+    background-size: 100% 100%;
+    background-image: url('../img/editor_default_popup.png')
+}
 
 
-    #simri-panel-end-image {
-        width: 280px;
-        height: 250px;
-        position: fixed;
-        background-size: 100% 100%;
-        background-image: url('../img/popup_end.png')
-    }
+#panel-end-image {
+    width: 280px;
+    height: 250px;
+    position: fixed;
+    background-size: 100% 100%;
+    background-image: url('../img/popup_end.png')
+}
 
-    #hidenseek-panel-image {
-        width: 280px;
-        height: 250px;
-        position: fixed;
-        background-size: 100% 100%;
-        background-image: url('../img/popup_spot.png')
-    }
+#simri-panel-image {
+    width: 280px;
+    height: 250px;
+    position: fixed;
+    background-size: 100% 100%;
+    background-image: url('../img/bg_input.png')
+}
 
-    .object-panel {
-        width: 300px;
-        height: 300px;
-        /*border-radius: 1%;*/
-        position: fixed;
-        top: 100px;
-        left: 100px;
-        /*box-shadow: 0px 2px 5px #666;*/
-        z-index: 1;
-        background: rgba(0, 0, 0, 0);
-    }
 
-    .panel-floating {
-        height: 60px;
-        margin-bottom: 10px;
-        margin-right: 0px;
-        z-index: 1;
-        cursor: pointer;
-        text-align: center;
-    }
+#simri-panel-end-image {
+    width: 280px;
+    height: 250px;
+    position: fixed;
+    background-size: 100% 100%;
+    background-image: url('../img/popup_end.png')
+}
 
-    .panel-floating-inside {
-        display: inline-flex;
-        align-items: center;
-        padding: 5px;
-        height: 100%;
-    }
+#hidenseek-panel-image {
+    width: 280px;
+    height: 250px;
+    position: fixed;
+    background-size: 100% 100%;
+    background-image: url('../img/popup_spot.png')
+}
 
-    .header-item {
-        width: 100px;
-        height: 50px;
-        align-items: center;
-        cursor: pointer;
-    }
+.object-panel {
+    width: 300px;
+    height: 300px;
+    /*border-radius: 1%;*/
+    position: fixed;
+    top: 100px;
+    left: 100px;
+    /*box-shadow: 0px 2px 5px #666;*/
+    z-index: 1;
+    background: rgba(0, 0, 0, 0);
+}
 
-    .header-span {
-        margin: auto;
-    }
+.panel-floating {
+    height: 60px;
+    margin-bottom: 10px;
+    margin-right: 0px;
+    z-index: 1;
+    cursor: pointer;
+    text-align: center;
+}
 
-    .navbar-header {
-        width: 48px;
-        height: 48px;
-        background-size: 100% 100%;
-        background-image: url('../img/editor_logo.png')
-    }
+.panel-floating-inside {
+    display: inline-flex;
+    align-items: center;
+    padding: 5px;
+    height: 100%;
+}
 
-    #floating-button {
-        width: 65px;
-        height: 65px;
-        border-radius: 50%;
-        position: fixed;
-        top: 150px;
-        left: 20px;
-        cursor: pointer;
-        z-index: 2;
-        background-size: 100% 100%;
-        background-image: url('../img/editor_icon_mouseout.png')
-    }
+.header-item {
+    width: 100px;
+    height: 50px;
+    align-items: center;
+    cursor: pointer;
+}
 
-    #floating-button:hover {
-        background-size: 100% 100%;
-        background-image: url('../img/editor_icon_mouseon.png')
-    }
+.header-span {
+    margin: auto;
+}
 
-    #floating-panel {
-        border-radius: 15px;
-        padding-top: 20px;
-        padding-bottom: 20px;
-        padding-left: 10px;
-        padding-right: 10px;
-        width: 220px;
-        height: auto;
-        position: fixed;
-        top: 145px;
-        left: 85px;
-        z-index: 1;
-        background-color: #3795f3;
-        box-shadow: 1px 1px 40px #000000;
-    }
+.navbar-header {
+    width: 48px;
+    height: 48px;
+    background-size: 100% 100%;
+    background-image: url('../img/editor_logo.png')
+}
 
-    .floating-panel-item+.floating-panel-item {
-        margin-top: 15px;
-    }
+#floating-button {
+    width: 65px;
+    height: 65px;
+    border-radius: 50%;
+    position: fixed;
+    top: 150px;
+    left: 20px;
+    cursor: pointer;
+    z-index: 2;
+    background-size: 100% 100%;
+    background-image: url('../img/editor_icon_mouseout.png')
+}
 
-    .floating-panel-item {
-        text-align: center;
-        color: white;
-        font-size: 25px;
-        /*font-style: bold;*/
-    }
+#floating-button:hover {
+    background-size: 100% 100%;
+    background-image: url('../img/editor_icon_mouseon.png')
+}
 
-    .floating-panel-item:hover {
-        text-align: center;
-        color: white;
-        font-size: 25px;
-        font-style: bold;
-        background-color: #000000;
-    }
+#floating-panel {
+    border-radius: 15px;
+    padding-top: 20px;
+    padding-bottom: 20px;
+    padding-left: 10px;
+    padding-right: 10px;
+    width: 220px;
+    height: auto;
+    position: fixed;
+    top: 145px;
+    left: 85px;
+    z-index: 1;
+    background-color: #3795f3;
+    box-shadow: 1px 1px 40px #000000;
+}
 
-    #container {
-        width: 100%;
-        height: 100%;
-        overflow: hidden;
-        margin: 0;
-        padding: 0;
-    }
+.floating-panel-item+.floating-panel-item {
+    margin-top: 15px;
+}
 
-    #main-canvas {
-        padding: 10px;
-        width: 100%;
-        height: 100%;
-    }
+.floating-panel-item {
+    text-align: center;
+    color: white;
+    font-size: 25px;
+    /*font-style: bold;*/
+}
 
-    #hidenseek-clock {
-        background-size: 100% 100%;
-        background-image: url(../img/template/icon_time_final.png);
-        z-index: 1;
-        position: fixed;
-        width: 200px;
-        height: 200px;
-        right: 10px;
-    }
+.floating-panel-item:hover {
+    text-align: center;
+    color: white;
+    font-size: 25px;
+    font-style: bold;
+    background-color: #000000;
+}
 
-    .thumbnail-controller form {
-        display: table;
-    }
+#container {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    margin: 0;
+    padding: 0;
+}
 
-    .thumbnail-controller p {
-        display: table-row;
-    }
+#main-canvas {
+    padding: 10px;
+    width: 100%;
+    height: 100%;
+}
 
-    .thumbnail-controller label {
-        display: table-cell;
-    }
+#hidenseek-clock {
+    background-size: 100% 100%;
+    background-image: url(../img/template/icon_time_final.png);
+    z-index: 1;
+    position: fixed;
+    width: 200px;
+    height: 200px;
+    right: 10px;
+}
 
-    .thumbnail-controller input {
-        display: table-cell;
-    }
+.thumbnail-controller form {
+    display: table;
+}
 
-    input[type="range"] {
-        position: relative;
-    }
+.thumbnail-controller p {
+    display: table-row;
+}
 
-    input[type="range"]:before {
-        position: absolute;
-        top: -17px;
-        left: 50%;
-        margin-left: -10px;
-        content: attr(value);
-        display: block;
-        text-align: center;
-        width: 20px;
-        height: 10px;
-    }
+.thumbnail-controller label {
+    display: table-cell;
+}
 
-    .image-upload>input {
-        display: none;
-    }
+.thumbnail-controller input {
+    display: table-cell;
+}
 
-    .image-upload img {
-        width: 70px;
-        height: 30px;
-        cursor: pointer;
-    }
-    /*
+input[type="range"] {
+    position: relative;
+}
+
+input[type="range"]:before {
+    position: absolute;
+    top: -17px;
+    left: 50%;
+    margin-left: -10px;
+    content: attr(value);
+    display: block;
+    text-align: center;
+    width: 20px;
+    height: 10px;
+}
+
+.image-upload>input {
+    display: none;
+}
+
+.image-upload img {
+    width: 70px;
+    height: 30px;
+    cursor: pointer;
+}
+
+
+
+
+
+/*
   .modal-content{
     background-size: 100% 100%;
     background-image:url('../img/editor_modal_bg.png')
