@@ -676,7 +676,7 @@ function openObjectPropertyPanel(event) {
                 if (el != projectObject.getCurrentScenery()) {
                     selectList.append($('<option>', {
                         value: i,
-                        text: el.name
+                        text: el.name + (i + 1)
                     }));
                 }
             });
