@@ -1,0 +1,24 @@
+<html>
+
+<head>
+  <script src="./static/js/aframe.min.js"></script>
+  <script src="https://rawgit.com/mayognaise/aframe-mouse-cursor-component/master/dist/aframe-mouse-cursor-component.min.js"></script>
+</head>
+
+<body onload="init(this)">
+  <div>
+    <a-scene embedded style="height: 100%;width: 100%">
+      <a-sky src="./static/img/cat02.png"></a-sky>
+      <a-entity camera mouse-cursor look-controls>
+        <a-text id="TextUI" width="10" value="x 0" color="black" position="0 3.5 -5">
+          <a-image src="./static/img/cat head.png" position="-0.5 0.1 0"></a-image>
+        </a-text>
+        <a-entity cursor="fuse: false" position="0 0 -1" geometry="primitive: ring; radius-inner: 0.01; radius-outer: 0.02" material="color: black; shader: flat"></a-entity>
+      </a-entity>
+    </a-scene>
+  </div>
+  <script src="./static/js/FindHidingCat.js"></script>
+
+  <body>
+
+</html>

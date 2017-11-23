@@ -1,0 +1,60 @@
+html {
+    height: 100%;
+}
+
+body {
+    padding-bottom: 0px;
+    padding-top: 60px;
+    height: 100%;
+}
+
+.container {
+    height: 100%;
+}
+
+#wrapper {
+    height: 100%;
+}
+
+#main-canvas {
+    height: 100%;
+    padding: 0;
+}
+
+.sidebar-nav-fixed {
+    border: 0;
+    margin: 0;
+    width: 14%;
+}
+
+table.object-list {
+    border-bottom: 1px solid #999;
+    display: inline-block;
+    width: 100%;
+    display: table;
+}
+
+table.object-list tbody {
+    /*width: 100%;*/
+}
+
+table.object-list thead {
+    max-width: 100%;
+}
+
+.table-display dt {
+    clear: left;
+    float: left;
+    padding: 5px;
+    border-top: 1px solid #999;
+}
+
+.table-display dd {
+    float: right;
+    padding: 5px;
+    border-top: 1px solid #999;
+}
+
+iframe {
+    border: 0;
+}
